@@ -230,6 +230,11 @@
     letter-spacing: -0.022em;
     text-wrap: balance;
   }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
   ::selection {
     background: var(--brand-soft);
     color: var(--ink);

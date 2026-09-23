@@ -22,7 +22,7 @@ export function About() {
       <PageHeader
         eyebrow="Company"
         title="We are building the GRC tool we wanted to use ourselves."
-        lead="A small company in Baku, founded by people who have run security and compliance programmes, faced auditors and built multi-tenant platforms."
+        lead="A small company in Baku, founded by people who have run security and compliance programmes, sat across the table from auditors and built platforms that hold other companies’ data."
       />
 
       <Section>
@@ -37,7 +37,7 @@ export function About() {
               need for it, with a separate control register for every framework.
             </p>
             <p className={BODY}>
-              We start from the model instead: controls written once and mapped to every standard, evidence read from systems and hashed on the way in,
+              We start from the model instead: controls written once and mapped across standards, evidence read from systems and hashed on the way in,
               and a log an auditor can read directly. It is slower to build, and the only version we would trust with our
               own programme.
             </p>
@@ -51,14 +51,22 @@ export function About() {
             <Eyebrow>Where</Eyebrow>
             <h2 className="t-h2 text-ink">Baku, building for Europe.</h2>
           </Reveal>
-          <Rows
-            className="mt-12"
-            items={[
-              { title: "Company", body: `${site.company.legalName}. ${site.company.jurisdiction}.` },
-              { title: "Working hours", body: "09:00–18:00 AZT (UTC+4), overlapping the full European working day." },
-              { title: "Email", body: site.company.email, href: MAILTO },
-            ]}
-          />
+          <Reveal className="mt-12">
+            <dl className="grid gap-x-8 gap-y-5 border-t border-line pt-8 md:grid-cols-[180px_1fr]">
+              <dt className="mono-label pt-1">Company</dt>
+              <dd className="text-[17px] leading-[1.6] text-ink">{`${site.company.legalName}. ${site.company.jurisdiction}.`}</dd>
+              <dt className="mono-label pt-1">Working hours</dt>
+              <dd className="text-[17px] leading-[1.6] text-ink">
+                09:00–18:00 AZT (UTC+4), covering the European morning and early afternoon.
+              </dd>
+              <dt className="mono-label pt-1">Email</dt>
+              <dd className="text-[17px] leading-[1.6] text-ink">
+                <a href={MAILTO} className={INLINE_LINK}>
+                  {site.company.email}
+                </a>
+              </dd>
+            </dl>
+          </Reveal>
           <Reveal className="mt-10">
             <TextLink to="/company/contact">Get in touch</TextLink>
           </Reveal>
@@ -77,7 +85,7 @@ export function Contact() {
         title="Talk to a person."
         lead="Product questions, partnerships, press, or a framework you need mapped. A named person replies within two working days."
       />
-      <Section>
+      <Section className="pt-0 md:pt-0">
         <Lane>
           <Reveal>
             <EarlyAccessForm kind="contact" />
@@ -90,18 +98,6 @@ export function Contact() {
                 </a>
               </li>
               <li>{site.company.address}</li>
-              <li>
-                Security reports:{" "}
-                <Link to="/trust" className={INLINE_LINK}>
-                  Trust
-                </Link>
-              </li>
-              <li>
-                Want in?{" "}
-                <Link to="/early-access" className={INLINE_LINK}>
-                  Early access
-                </Link>
-              </li>
             </ul>
           </Reveal>
         </Lane>
@@ -115,11 +111,11 @@ export function EarlyAccess() {
   return (
     <>
       <PageHeader
-        eyebrow={`Early access · ${site.status.detail}`}
+        eyebrow={site.status.detail}
         title="Shape the product before it ships."
         lead="Open to a small number of teams that run a compliance programme against a supported framework."
       />
-      <Section>
+      <Section className="pt-0 md:pt-0">
         <Lane>
           <Rows
             items={[
@@ -127,7 +123,7 @@ export function EarlyAccess() {
                 title: "Who it is for",
                 body: (
                   <>
-                    Security, compliance or platform leads audited against ISO 27001, SOC 2 or a framework on the{" "}
+                    Security, compliance or platform leads at organisations audited against ISO 27001, SOC 2 or a framework on the{" "}
                     <Link to="/coverage" className={INLINE_LINK}>
                       coverage list
                     </Link>
@@ -172,9 +168,9 @@ export function Trust() {
       <PageHeader
         eyebrow="Trust"
         title="How we handle data, before we have a badge to show for it."
-        lead="A GRC vendor should model the behaviour it sells: what is true now, what we are pursuing, and when."
+        lead="A GRC vendor should model the behaviour it sells. Here is what is true now, what we are pursuing, and when."
       />
-      <Section>
+      <Section className="pt-0 md:pt-0">
         <Lane>
           <Rows
             items={[

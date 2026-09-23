@@ -55,23 +55,23 @@ type Choreo = { hero: Pose; rest: Pose; end?: Pose };
 const CHOREO: Record<"home" | "page", { desktop: Choreo; mobile: Choreo }> = {
   home: {
     desktop: {
-      hero: { x: 0.28, y: 0.0, size: 0.46, op: 1 },
-      rest: { x: 0.27, y: -0.02, size: 0.42, op: 0.92 },
+      hero: { x: 0, y: 0.16, size: 0.44, op: 1 },
+      rest: { x: 0.27, y: -0.02, size: 0.4, op: 0.92 },
       end: { x: 0, y: 0.17, size: 0.34, op: 1 },
     },
     mobile: {
-      hero: { x: 0, y: 0.25, size: 0.24, op: 1 },
+      hero: { x: 0, y: 0.17, size: 0.3, op: 1 },
       rest: { x: 0.31, y: 0.37, size: 0.1, op: 0.9 },
       end: { x: 0, y: 0.24, size: 0.22, op: 1 },
     },
   },
   page: {
     desktop: {
-      hero: { x: 0.3, y: 0.02, size: 0.38, op: 0.95 },
+      hero: { x: 0.25, y: 0.03, size: 0.44, op: 0.95 },
       rest: { x: 0.31, y: 0.0, size: 0.32, op: 0.7 },
     },
     mobile: {
-      hero: { x: 0.26, y: 0.33, size: 0.14, op: 0.8 },
+      hero: { x: 0, y: 0.3, size: 0.17, op: 1 },
       rest: { x: 0.31, y: 0.37, size: 0.1, op: 0.8 },
     },
   },
@@ -120,12 +120,15 @@ const STUDIO = { env: 0.8, faceGlow: 0.86, faceLit: 0.5, key: 1.2, rim: 2.2, hem
 /** Baxış bucağı (radian). */
 const BASE_ROT_Y = -0.34;
 const BASE_ROT_X = 0.1;
-/** Scroll ilə fırlanma: hər ekran hündürlüyü scroll üçün neçə radian (≈ 5 ekranda tam dövr). */
-const SPIN_PER_SCREEN = 1.25;
+/** Açılışdan sonra scroll ilə yüngül yellənmə: amplituda (radian) və tezlik (hər ekran üçün). Loqo heç vaxt yan tərəfi ilə dayanmır. */
+const REST_SWAY = 0.42;
+const SWAY_PER_SCREEN = 0.9;
+/** Açılış (mərkəz) pozasından sağdakı pozaya keçid neçə ekran scroll-da tamamlanır. */
+const INTRO_SCREENS = 1.05;
 /** Siçan ilə əyilmə (radian). 0 = söndürülür. */
 const TILT = 0.14;
 /** Hərəkətin yumşaqlığı: böyük → daha sürətli izləyir. */
-const FOLLOW = 5.5;
+const FOLLOW = 4.2;
 /** Yavaş "nəfəs" hərəkəti (radian / ekran payı). */
 const SWAY = 0.05;
 const BOB = 0.006;
@@ -158,6 +161,8 @@ const FIELD_RESIZE = 0.03;
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const ease = (t: number) => t * t * (3 - 2 * t);
+/** Kinematoqrafik keçid: yavaş başlayır, ortada sürətlənir, yumşaq dayanır. */
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 const mixPose = (a: Pose, b: Pose, t: number): Pose => ({
   x: mix(a.x, b.x, t),
@@ -475,7 +480,7 @@ export function LogoScene() {
         const y = window.scrollY;
         const c = CHOREO[modeRef.current][narrowMq.matches ? "mobile" : "desktop"];
 
-        const tRest = ease(clamp01(y / (vh * 0.9)));
+        const tRest = easeInOut(clamp01(y / (vh * INTRO_SCREENS)));
         let pose = mixPose(c.hero, c.rest, tRest);
         let tEnd = 0;
         const stage = c.end ? document.querySelector("[data-logo-stage]") : null;
@@ -488,7 +493,10 @@ export function LogoScene() {
         }
 
         // Scroll ilə fırlanma; sonda üzü qabağa (ən yaxın tam dövrə) qayıdır.
-        const spinY = BASE_ROT_Y + (y / vh) * SPIN_PER_SCREEN;
+        // Ana səhifə: açılışda bir tam, yumşaq dövr (sağa üzü qabağa çatır); sonra yalnız yellənmə.
+        const home1 = modeRef.current === "home";
+        const after = home1 ? Math.max(0, y / vh - INTRO_SCREENS) : y / vh;
+        const spinY = BASE_ROT_Y + (home1 ? tRest * Math.PI * 2 : 0) + Math.sin(after * SWAY_PER_SCREEN) * REST_SWAY;
         const home = BASE_ROT_Y + Math.round((spinY - BASE_ROT_Y) / (Math.PI * 2)) * Math.PI * 2;
         const ry = mix(spinY, home, tEnd) + pointer.x * TILT;
         const rx = BASE_ROT_X - pointer.y * TILT * 0.6;

@@ -160,7 +160,7 @@ export function Btn({
     lg: "h-13 px-7 text-[15.5px]",
   };
   const variants = {
-    primary: "bg-brand text-white hover:bg-brand-ink",
+    primary: "bg-brand text-on-brand hover:bg-brand-ink",
     secondary: "border border-line-strong text-ink hover:border-ink-3",
     ghost: "text-ink-2 hover:text-ink hover:bg-surface-2",
     invert: "bg-[var(--ground)] text-[var(--ink)] hover:bg-[var(--surface-2)]",
@@ -250,7 +250,7 @@ export function PageHeader({
   children?: ReactNode;
 }) {
   return (
-    <header className="relative pb-12 pt-36 md:pb-16 md:pt-48">
+    <header className="relative pb-12 pt-[34svh] md:pb-16 md:pt-48">
       <Container>
         <Lane>
           <Eyebrow>{eyebrow}</Eyebrow>

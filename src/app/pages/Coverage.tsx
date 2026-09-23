@@ -14,33 +14,19 @@ const STATUS_NOTE: Record<FrameworkStatus, string> = {
 
 export function Coverage() {
   usePageMeta("Coverage", "Frameworks and regulations the Strativu GRC product maps to, with an honest status for each: supported, mapping, or planned.");
-  const counts: { label: string; n: number }[] = [
-    { label: "Supported", n: frameworks.filter((f) => f.status === "supported").length },
-    { label: "Mapping", n: frameworks.filter((f) => f.status === "in-progress").length },
-    { label: "Planned", n: frameworks.filter((f) => f.status === "planned").length },
-  ];
   return (
     <>
       <PageHeader
         eyebrow="Coverage"
         title="Frameworks and regulations we map to."
-        lead="Each standard is a view on one shared control set, with an honest status for each."
-      >
-        <dl className="flex flex-wrap gap-x-8 gap-y-3 text-[15px]">
-          {counts.map((c) => (
-            <div key={c.label} className="flex flex-row-reverse items-baseline justify-end gap-2">
-              <dt className="text-ink-3">{c.label}</dt>
-              <dd className="tabular font-semibold text-ink">{c.n}</dd>
-            </div>
-          ))}
-        </dl>
-      </PageHeader>
+        lead="Each standard is a view on one shared control set."
+      />
 
       <Section className="pt-0 md:pt-0">
         <Lane>
           <CoverageGrid />
           <Reveal className="mt-16">
-            <TextLink to="/early-access">Missing a framework? Tell us</TextLink>
+            <TextLink to="/company/contact">Missing a framework? Tell us</TextLink>
           </Reveal>
         </Lane>
       </Section>
@@ -60,7 +46,13 @@ export function FrameworkPage() {
     <>
       <PageHeader eyebrow={`Coverage · ${f.body}`} title={f.id} lead={f.name}>
         <p className="chapter">
-          <b>{statusLabel[f.status]}</b> · {f.controls}
+          <b className="whitespace-nowrap">{statusLabel[f.status]}</b>
+          {f.controls.split(" · ").map((seg) => (
+            <span key={seg}>
+              {" · "}
+              <span className="whitespace-nowrap">{seg}</span>
+            </span>
+          ))}
         </p>
       </PageHeader>
 
@@ -91,16 +83,13 @@ export function FrameworkPage() {
           <nav aria-label="Other frameworks" className="mt-20 flex justify-between gap-6 border-t border-line pt-6">
             <Link to={`/coverage/${prev.slug}`} className="group min-w-0 max-w-[48%]">
               <span className="mono-label block">← Previous</span>
-              <span className="mt-1.5 block text-[15px] text-ink transition-colors group-hover:text-brand">{prev.id}</span>
+              <span className="mt-1.5 block text-[15px] text-ink transition-colors group-hover:text-brand">{prev.id.split(" (")[0]}</span>
             </Link>
             <Link to={`/coverage/${next.slug}`} className="group min-w-0 max-w-[48%] text-right">
               <span className="mono-label block">Next →</span>
-              <span className="mt-1.5 block text-[15px] text-ink transition-colors group-hover:text-brand">{next.id}</span>
+              <span className="mt-1.5 block text-[15px] text-ink transition-colors group-hover:text-brand">{next.id.split(" (")[0]}</span>
             </Link>
           </nav>
-          <div className="mt-10">
-            <TextLink to="/coverage">All frameworks</TextLink>
-          </div>
         </Lane>
       </Section>
     </>

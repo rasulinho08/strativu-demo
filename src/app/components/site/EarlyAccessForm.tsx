@@ -77,12 +77,12 @@ export function EarlyAccessForm({ kind = "early-access" }: { kind?: "early-acces
       )}
       <div>
         <label htmlFor="message" className={label}>
-          {kind === "early-access" ? "Your compliance programme today" : "Message"}
-          {optional}
+          {kind === "early-access" ? <>Your compliance programme today{optional}</> : "Message"}
         </label>
         <textarea
           id="message"
           name="message"
+          required={kind === "contact"}
           rows={4}
           className={`${base} min-h-[120px] resize-y py-3 leading-[1.6]`}
           placeholder={kind === "early-access" ? "Team size, tooling, next audit window, what breaks." : "How can we help?"}

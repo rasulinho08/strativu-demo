@@ -12,8 +12,6 @@ export function NotFound() {
           <p className="t-lead mt-6 max-w-[44ch]">The address may have changed, or it never existed.</p>
           <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
             <Btn to="/">Back to the start</Btn>
-            <TextLink to="/platform">Platform</TextLink>
-            <TextLink to="/coverage">Coverage</TextLink>
             <TextLink to="/company/contact">Contact</TextLink>
           </div>
         </Lane>

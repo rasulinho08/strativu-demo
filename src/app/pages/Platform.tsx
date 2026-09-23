@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Btn, Container, Eyebrow, Lane, PageHeader, Rows, Section, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
 import { site } from "../data/site";
@@ -13,7 +14,7 @@ const BODY = "mt-5 max-w-[52ch] text-[17px] leading-[1.65] text-ink-2";
 
 const MODEL = [
   { n: "01", title: "Registers", body: "Risks, assets, vendors and processing activities." },
-  { n: "02", title: "Controls", body: "One shared control set, mapped to every framework, with owners and review cycles." },
+  { n: "02", title: "Controls", body: "One shared control set, mapped across frameworks, with owners and review cycles." },
   { n: "03", title: "Evidence", body: "Read by collectors or uploaded by hand, then hashed and timestamped." },
   { n: "04", title: "Workflow", body: "Tasks, reviews and exceptions." },
   { n: "05", title: "Reporting", body: "Audit packs, the Statement of Applicability and a board view." },
@@ -42,7 +43,7 @@ export function Platform() {
       <Section className="pt-0 md:pt-0">
         <Lane>
           <Reveal>
-            <Eyebrow>Products</Eyebrow>
+            <h2 className="eyebrow mb-4">Products</h2>
           </Reveal>
           <Rows
             className="mt-8"
@@ -52,11 +53,6 @@ export function Platform() {
                 body: "Control and risk registers, automated evidence, cross-framework mapping and audit-ready reporting.",
                 meta: site.status.label,
                 to: "/platform/grc",
-              },
-              {
-                title: "Next product line",
-                body: "It will slot into the same model. We will name it when it is real.",
-                meta: "Next",
               },
             ]}
           />
@@ -78,7 +74,7 @@ export function PlatformGRC() {
         title="The control register is the system of record."
         lead="One control set, evidence attached by collectors, and an audit trail your auditor can read directly."
       >
-        <Btn to="/early-access" arrow>
+        <Btn to="/early-access" size="lg">
           Request early access
         </Btn>
       </PageHeader>
@@ -115,7 +111,7 @@ export function PlatformGRC() {
             <Eyebrow>Controls</Eyebrow>
             <h2 className="t-h2 text-ink">Write a control once. Map it everywhere.</h2>
             <p className={BODY}>
-              Each control carries the ISO 27001:2022 attributes and maps to every framework you are audited against. Adding SOC 2 to
+              Each control carries the ISO/IEC 27002:2022 attributes and maps to every framework you are audited against. Adding SOC 2 to
               an ISO programme becomes a gap review, not a second register.
             </p>
             <div className="mt-8">
@@ -135,7 +131,7 @@ export function PlatformGRC() {
               it proves. Every artefact is hashed on ingest and re-verified on read.
             </p>
             <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">
-              Collectors today: AWS IAM, GitHub. In progress: Okta, Cloudflare, Google Workspace, Azure AD.
+              Collectors today: AWS IAM, GitHub. In progress: Okta, Cloudflare, Google Workspace, Microsoft Entra ID.
             </p>
           </Reveal>
         </Lane>
@@ -145,7 +141,10 @@ export function PlatformGRC() {
         <Lane>
           <Reveal>
             <Eyebrow>Audit trail</Eyebrow>
-            <h2 className="t-h2 text-ink">Append-only. Hash-chained. Readable by your auditor.</h2>
+            <h2 className="t-h2 text-ink">
+              <span className="whitespace-nowrap">Append-only.</span> <span className="whitespace-nowrap">Hash-chained.</span> Readable by
+              your auditor.
+            </h2>
             <p className={BODY}>
               Every write is appended to a chained log with actor, tenant, object and diff. Auditors get a scoped, read-only,
               time-boxed session that is itself logged.
@@ -160,18 +159,22 @@ export function PlatformGRC() {
   );
 }
 
-const ARCH = [
+const ARCH: { h: string; p: ReactNode[] }[] = [
   {
     h: "Tenancy",
     p: [
-      "Every row carries a tenant identifier, enforced by a row-level security policy that reads the tenant from the authenticated session, never from a request parameter. The database will not return another tenant's rows.",
+      "Every row carries a tenant identifier, enforced by a row-level security policy that reads the tenant from the authenticated session, never from a request parameter. The database will not return another tenant’s rows.",
       "Each tenant has its own data-encryption key, wrapped by a per-region key in a managed KMS. Deleting a tenant destroys the key first.",
     ],
   },
   {
     h: "Audit trail",
     p: [
-      "Every write goes through a single command path that emits an event before the transaction commits. Each entry carries the SHA-256 of the previous one, and the chain head is published daily to an external timestamping service, so the log can be verified without trusting Strativu.",
+      <>
+        Every write goes through a single command path that emits an event before the transaction commits. Each entry carries the{" "}
+        <span className="whitespace-nowrap">SHA-256</span> of the previous one, and the chain head is published daily to an external
+        timestamping service, so the log can be verified without trusting Strativu.
+      </>,
       "Reads by auditors and customers are logged too. No privileged read path bypasses the log.",
     ],
   },
@@ -211,7 +214,7 @@ export function Architecture() {
       <PageHeader
         eyebrow="Platform · Architecture"
         title="Multi-tenant model, audit trail, data residency."
-        lead="Written for the engineer doing the vendor review. It does the job of a SOC 2 report until we have one."
+        lead="Written for the engineer doing the vendor review. Until we have a SOC 2 report, this is what we can show."
       />
 
       <div className="pb-24 pt-4 md:pb-36 md:pt-8">
