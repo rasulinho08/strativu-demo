@@ -79,7 +79,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color] duration-300 ${
           scrolled || open
-            ? "border-b border-line bg-[color-mix(in_srgb,var(--ground)_80%,transparent)] backdrop-blur-xl"
+            ? "border-b border-line bg-[color-mix(in_srgb,var(--ground)_92%,transparent)] backdrop-blur-xl"
             : "border-b border-transparent"
         }`}
       >

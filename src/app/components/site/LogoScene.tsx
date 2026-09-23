@@ -113,9 +113,25 @@ const GROUND = {
 /**
  * Studiya işığı. env → yumşaq otaq əks-işığı (RoomEnvironment), faceGlow → ön üzün öz işığı
  * (rəngin loqoya sadiq qalması üçün), faceLit → ön üzə düşən studiya işığının payı,
- * key/rim → yuxarı-soldan əsas və arxa-sağdan kənar işığı, hemi → ümumi dolğu işığı.
+ * key/rim → yuxarı-soldan əsas və arxa-sağdan kənar işığı (siyan-ağ), hemi → ümumi dolğu işığı.
+ * sphere* → kürələr: geniş, yumşaq "softbox" parıltısı (sancaq kimi nöqtə yox), specular ≈ 28% az.
+ * side* → yan faskalar: metal kimi, əks-işıq brend mavisi ilə rənglənir.
+ * roomTint → otaq divarlarının rəngi (soyuq polad-siyan): ağ divar faskanı bənövşəyi-boz çalara ağardırdı.
  */
-const STUDIO = { env: 0.8, faceGlow: 0.86, faceLit: 0.5, key: 1.2, rim: 2.2, hemi: 0.6 };
+const STUDIO = {
+  env: 0.8,
+  faceGlow: 0.86,
+  faceLit: 0.5,
+  key: 1.2,
+  rim: 2.2,
+  rimColor: "#BFEFFF",
+  hemi: 0.6,
+  sphereRoughness: 0.42,
+  sphereSpecular: 0.72,
+  sideMetalness: 0.8,
+  sideRoughness: 0.4,
+  roomTint: "#5AB0DA",
+};
 
 /** Baxış bucağı (radian). */
 const BASE_ROT_Y = -0.34;
@@ -286,6 +302,10 @@ export function LogoScene() {
       // Yumşaq otaq əks-işığı (bir dəfə hazırlanır) + yuxarı-soldan softbox + arxa-sağdan kənar işığı.
       const pmrem = new THREE.PMREMGenerator(renderer);
       const room = new RoomEnvironment();
+      room.traverse((o) => {
+        const m = (o as import("three").Mesh).material as import("three").MeshStandardMaterial | undefined;
+        if (m && m.side === THREE.BackSide) m.color.set(STUDIO.roomTint);
+      });
       const envMap = pmrem.fromScene(room, 0.04, 0.1, 100, { size: 64 }).texture;
       room.dispose();
       pmrem.dispose();
@@ -295,7 +315,7 @@ export function LogoScene() {
       const key = new THREE.DirectionalLight(0xffffff, STUDIO.key);
       key.position.set(-3.2, 4.2, 5);
       scene.add(key);
-      const rim = new THREE.DirectionalLight(0xcfeeff, STUDIO.rim);
+      const rim = new THREE.DirectionalLight(new THREE.Color(STUDIO.rimColor), STUDIO.rim);
       rim.position.set(4.5, 2.2, -3.5);
       scene.add(rim);
 
@@ -323,7 +343,10 @@ export function LogoScene() {
         disposables.push(source);
         if (source.map) disposables.push(source.map);
         if (source.emissiveMap) disposables.push(source.emissiveMap);
-        let mat: import("three").MeshStandardMaterial | import("three").MeshLambertMaterial;
+        let mat:
+          | import("three").MeshStandardMaterial
+          | import("three").MeshPhysicalMaterial
+          | import("three").MeshLambertMaterial;
 
         if (source.map) {
           // Ön/arxa üz: rəng əsasən öz işığından (emissive) gəlir → loqo pikselinə sadiq qalır;
@@ -337,22 +360,23 @@ export function LogoScene() {
             emissiveIntensity: STUDIO.faceGlow,
           });
         } else if (source.name === "MarkSide") {
-          // Yan üzlər: tünd brend mavisi, yarı-parlaq — faskada nazik işıq xətti tutur
+          // Yan üzlər: tünd brend mavisi, metal kimi — əks-işıq mavi ilə rənglənir, faskada bənövşəyi çalmır
           mat = new THREE.MeshStandardMaterial({
             color: new THREE.Color(BRAND_DEEP),
-            roughness: 0.28,
-            metalness: 0.5,
+            roughness: STUDIO.sideRoughness,
+            metalness: STUDIO.sideMetalness,
             envMap,
             envMapIntensity: STUDIO.env * 1.25,
           });
         } else {
-          // Kürələr: parlaq, cilalı siyan
-          mat = new THREE.MeshStandardMaterial({
+          // Kürələr: siyan, yarı-mat lak — geniş, yumşaq softbox parıltısı (specularIntensity → ≈28% az)
+          mat = new THREE.MeshPhysicalMaterial({
             color: new THREE.Color(BRAND_CYAN),
             emissive: new THREE.Color(BRAND_CYAN),
             emissiveIntensity: 0.22,
-            roughness: 0.22,
+            roughness: STUDIO.sphereRoughness,
             metalness: 0,
+            specularIntensity: STUDIO.sphereSpecular,
             envMap,
             envMapIntensity: STUDIO.env * 1.2,
           });
@@ -695,7 +719,6 @@ export function LogoScene() {
           <span />
         </div>
         <span className="quiet-light__vignette" />
-        <span className="quiet-light__grain" />
       </div>
     </div>
   );

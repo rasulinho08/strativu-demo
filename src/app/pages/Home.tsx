@@ -242,6 +242,13 @@ export default function Home() {
       {/* ── 01 Intro: the 3D mark is centred above this; headline sits below it ── */}
       <section className="relative flex min-h-[100svh] flex-col items-center justify-end pb-[12svh] text-center md:pb-[9svh]">
         <Container>
+          {/* 3D səhnə "reduce motion" rejimində qurulmur — onda yerində sadə loqo göstərilir. */}
+          <img
+            src={site.logo.mark}
+            alt=""
+            aria-hidden
+            className="mx-auto mb-14 hidden h-auto w-[min(56vw,300px)] motion-reduce:block"
+          />
           <Stagger>
             <h1 className="mx-auto max-w-[16ch] text-[clamp(40px,6vw,84px)] font-semibold leading-[1] tracking-[-0.045em] text-ink">
               Compliance evidence, <span className="text-brand">engineered.</span>

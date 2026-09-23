@@ -517,7 +517,7 @@
 /*
   "Quiet light" — the backdrop behind LogoScene's canvas. Two very large, very soft
   light fields (Gaussian falloff) in low-saturation brand blues, a dark-mode vignette
-  and an extremely faint grain. LogoScene moves the fields with `transform` (compositor
+  (no grain). LogoScene moves the fields with `transform` (compositor
   only) and re-sizes them only when the logo size changes by >3%, so each gradient is
   drawn at its real size and never magnified (no banding). Drift: 70–90 s CSS animation.
 */
@@ -527,7 +527,6 @@
   --ql-floor: 221 231 247;
   --ql-floor-a: 0.85;
   --ql-vignette: 0;
-  --ql-grain: 0.028;
 }
 .dark {
   --ql-key: 16 46 104;
@@ -535,7 +534,6 @@
   --ql-floor: 11 31 66;
   --ql-floor-a: 0.8;
   --ql-vignette: 0.42;
-  --ql-grain: 0.05;
 }
 .quiet-light {
   position: absolute;
@@ -590,12 +588,7 @@
   background: radial-gradient(ellipse 90% 80% at 60% 42%, transparent 45%, rgb(0 0 0 / var(--ql-vignette)) 100%);
 }
 .dark .quiet-light__vignette { display: block; }
-.quiet-light__grain {
-  position: absolute;
-  inset: 0;
-  opacity: var(--ql-grain);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-}
+
 @media (prefers-reduced-motion: reduce) {
   .quiet-light__field > span { animation: none; }
 }

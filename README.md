@@ -19,12 +19,11 @@ npm run typecheck  # tsc --noEmit
 | Logo, status line, company details, social links (null = hidden), Formspree ID | `src/app/data/site.ts` |
 | Logo files | `public/brand/logo-full.png` (light), `public/brand/logo-mark.png` (dark: mark + CSS wordmark). Optional `logo.darkSrc` in `site.ts` |
 | Social preview image | `public/og.png` (1200×630) |
-| GRC development build screenshot | `public/projects/grc.webp` |
+| GRC development build screenshot (home "Our work" + /platform/grc) | `public/projects/grc.webp` |
 | Framework coverage və statuslar | `src/app/data/coverage.ts` |
 | Changelog girişləri | `src/app/data/changelog.ts` |
-| Ana səhifədəki 3 capability bloku | `src/app/data/capabilities.ts` |
 | Rəng / şrift / radius tokenləri | `src/styles/theme.css`, `src/styles/fonts.css` |
-| 3D loqonun hərəkəti (scroll xoreoqrafiyası) | `src/app/components/site/LogoScene.tsx` → `CHOREO` |
+| 3D loqonun hərəkəti (açılışda mərkəz → sağ; scroll xoreoqrafiyası), işıq, material | `src/app/components/site/LogoScene.tsx` → `CHOREO`, `INTRO_SCREENS`, `REST_SWAY`, `STUDIO` |
 
 ## Routes
 

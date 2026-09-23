@@ -101,31 +101,6 @@ export function Eyebrow({ children, className = "" }: { children: ReactNode; cla
 }
 
 /** Index marker used beside section headings: 01 / 02 / 03. */
-export function Index({ n, className = "" }: { n: string; className?: string }) {
-  return <span className={`font-mono text-[12px] text-ink-3 tabular ${className}`}>{n}</span>;
-}
-
-export function SectionHead({
-  eyebrow,
-  title,
-  lead,
-  align = "left",
-  className = "",
-}: {
-  eyebrow?: string;
-  title: ReactNode;
-  lead?: ReactNode;
-  align?: "left" | "center";
-  className?: string;
-}) {
-  return (
-    <div className={`${align === "center" ? "mx-auto text-center" : ""} mb-12 max-w-[820px] md:mb-16 ${className}`}>
-      {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-      <h2 className="t-h2 text-ink">{title}</h2>
-      {lead && <p className={`t-lead mt-4 ${align === "center" ? "mx-auto" : ""} measure`}>{lead}</p>}
-    </div>
-  );
-}
 
 type BtnProps = {
   to?: string;
@@ -224,20 +199,6 @@ export function TextLink({
   );
 }
 
-export function StatusChip({ status }: { status: "supported" | "in-progress" | "planned" }) {
-  const map = {
-    supported: "bg-ok-soft text-ok border-transparent",
-    "in-progress": "bg-brand-soft text-brand-ink border-transparent",
-    planned: "bg-transparent text-ink-3 border-line",
-  };
-  const label = { supported: "Supported", "in-progress": "Mapping", planned: "Planned" };
-  return (
-    <span className={`inline-flex h-[22px] items-center rounded-[6px] border px-2 text-[11.5px] font-medium ${map[status]}`}>
-      {label[status]}
-    </span>
-  );
-}
-
 export function PageHeader({
   eyebrow,
   title,
@@ -250,7 +211,7 @@ export function PageHeader({
   children?: ReactNode;
 }) {
   return (
-    <header className="relative pb-12 pt-[34svh] md:pb-16 md:pt-48">
+    <header className="relative pb-12 pt-[34svh] motion-reduce:pt-36 md:pb-16 md:pt-48">
       <Container>
         <Lane>
           <Eyebrow>{eyebrow}</Eyebrow>
