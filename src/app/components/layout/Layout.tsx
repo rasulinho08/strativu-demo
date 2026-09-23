@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { Logo } from "../site/Logo";
-import { Btn, Container } from "../site/primitives";
+import { Container } from "../site/primitives";
 import { LogoScene } from "../site/LogoScene";
 import { ThemeToggle } from "../theme-toggle";
 import { site } from "../../data/site";
@@ -95,8 +95,6 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="relative flex min-h-screen flex-col text-ink">
       <LogoScene />
-      {/* soft vignette over the 3D scene keeps body text readable */}
-      <div aria-hidden className="veil pointer-events-none fixed inset-0 z-[1]" />
 
       <a
         href="#main"
@@ -105,39 +103,42 @@ export default function Layout({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      {/* ─── Header: floating glass pill ─── */}
-      <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-5 md:pt-4">
-        <div
-          className={`mx-auto flex h-14 max-w-[1200px] items-center justify-between gap-6 rounded-full pl-5 pr-2 transition-[background-color,border-color,box-shadow] duration-300 ${
-            scrolled || open ? "glass-pill shadow-[var(--e2)]" : "border border-transparent"
-          }`}
-        >
-          <Logo />
+      {/* ─── Header: minimal, sticky. Logo + pages left, Contact + theme right ─── */}
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color] duration-300 ${
+          scrolled || open
+            ? "border-b border-line bg-[color-mix(in_srgb,var(--ground)_80%,transparent)] backdrop-blur-xl"
+            : "border-b border-transparent"
+        }`}
+      >
+        <Container className="flex h-16 items-center justify-between gap-6">
+          <div className="flex items-center gap-10">
+            <Logo />
+            <nav aria-label="Primary" className="hidden items-center gap-7 lg:flex">
+              {NAV.map((n) => (
+                <NavLink
+                  key={n.to}
+                  to={n.to}
+                  className={({ isActive }) =>
+                    `text-[14px] transition-colors duration-200 ${isActive ? "text-ink" : "text-ink-3 hover:text-ink"}`
+                  }
+                >
+                  {n.label}
+                </NavLink>
+              ))}
+            </nav>
+          </div>
 
-          <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
-            {NAV.map((n) => (
-              <NavLink
-                key={n.to}
-                to={n.to}
-                className={({ isActive }) =>
-                  `rounded-full px-3.5 py-1.5 text-[14px] transition-colors duration-150 ${
-                    isActive ? "bg-surface-2 font-medium text-ink" : "text-ink-2 hover:text-ink"
-                  }`
-                }
-              >
-                {n.label}
-              </NavLink>
-            ))}
-          </nav>
-
-          <div className="hidden items-center gap-1.5 lg:flex">
-            <Link to="/company/contact" className="px-3 text-[14px] text-ink-2 transition-colors duration-150 hover:text-ink">
+          <div className="hidden items-center gap-3 lg:flex">
+            <NavLink
+              to="/company/contact"
+              className={({ isActive }) =>
+                `text-[14px] transition-colors duration-200 ${isActive ? "text-ink" : "text-ink-3 hover:text-ink"}`
+              }
+            >
               Contact
-            </Link>
-            <ThemeToggle className="text-ink-2 hover:bg-surface-2 hover:text-ink" />
-            <Btn to="/early-access" size="sm" className="ml-1">
-              Early access
-            </Btn>
+            </NavLink>
+            <ThemeToggle className="text-ink-3 hover:bg-surface-2 hover:text-ink" />
           </div>
 
           <div className="flex items-center gap-1 lg:hidden">
@@ -152,7 +153,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               {open ? <X className="h-5 w-5" strokeWidth={1.75} /> : <Menu className="h-5 w-5" strokeWidth={1.75} />}
             </button>
           </div>
-        </div>
+        </Container>
 
         {/* ─── Mobile menu ─── */}
         <AnimatePresence>
@@ -164,7 +165,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="fixed inset-0 z-[-1] bg-ground/95 pt-20 backdrop-blur-xl lg:hidden"
+              className="fixed inset-0 top-16 z-[-1] bg-ground/97 backdrop-blur-xl lg:hidden"
             >
               <Container className="flex h-full flex-col pt-4">
                 <div className="flex flex-col">
@@ -181,10 +182,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                   ))}
                 </div>
                 <div className="mt-8">
-                  <Btn to="/early-access" size="lg" arrow className="w-full">
-                    Request early access
-                  </Btn>
-                  <p className="mt-5 text-[13px] text-ink-3">
+                  <p className="text-[13px] text-ink-3">
                     {site.status.label} · {site.status.detail}
                   </p>
                 </div>

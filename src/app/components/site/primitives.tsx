@@ -22,11 +22,11 @@ export function Section({
 }) {
   const tones = {
     ground: "",
-    surface: "bg-surface/45 backdrop-blur-2xl border-y border-line",
+    surface: "",
     contrast: "bg-[var(--ink)] text-[var(--ground)]",
   };
   return (
-    <section id={id} className={`relative isolate scroll-mt-24 py-20 md:py-32 ${tones[tone]} ${className}`}>
+    <section id={id} className={`relative scroll-mt-24 py-20 md:py-32 ${tones[tone]} ${className}`}>
       <Container>{children}</Container>
     </section>
   );
@@ -96,8 +96,8 @@ export function Btn({
     lg: "h-13 px-7 text-[15.5px]",
   };
   const variants = {
-    primary: "btn-grad",
-    secondary: "glass-pill text-ink hover:bg-surface-2",
+    primary: "bg-brand text-white hover:bg-brand-ink",
+    secondary: "border border-line-strong text-ink hover:border-ink-3",
     ghost: "text-ink-2 hover:text-ink hover:bg-surface-2",
     invert: "bg-[var(--ground)] text-[var(--ink)] hover:bg-[var(--surface-2)]",
   };

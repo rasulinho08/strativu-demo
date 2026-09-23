@@ -38,7 +38,22 @@ export function ClosingCTA({
   if (stage) {
     return (
       <section data-logo-stage className="relative flex min-h-[100svh] flex-col justify-end pb-20 pt-[48svh] md:pb-28">
-        <Container>{inner}</Container>
+        <Container>
+          <Reveal>
+            <div className="mx-auto max-w-[720px] text-center">
+              <h2 className="t-display text-ink">{title}</h2>
+              <p className="mx-auto mt-6 max-w-[48ch] text-[17px] leading-[1.65] text-ink-2">{body}</p>
+              <div className="mt-10 flex flex-col items-center justify-center gap-5 sm:flex-row sm:gap-8">
+                <Btn to="/company/contact" size="lg">
+                  Contact us
+                </Btn>
+                <a href={`mailto:${site.company.email}`} className="link-line text-[15px] text-ink-2 hover:text-ink">
+                  {site.company.email}
+                </a>
+              </div>
+            </div>
+          </Reveal>
+        </Container>
       </section>
     );
   }

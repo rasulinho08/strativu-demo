@@ -9,7 +9,7 @@ export function Reveal({
   delay = 0,
   className = "",
   as = "div",
-  y = 10,
+  y = 24,
 }: {
   children: ReactNode;
   delay?: number;
@@ -26,7 +26,7 @@ export function Reveal({
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "0px 0px -8% 0px" }}
-      transition={{ duration: 0.45, delay: Math.min(delay, 0.2), ease: EASE }}
+      transition={{ duration: 0.8, delay: Math.min(delay, 0.25), ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
     </Tag>
