@@ -1,17 +1,24 @@
 import { useParams } from "react-router";
 import { NotFound } from "./NotFound";
-import { PageHeader, Section, Prose } from "../components/site/primitives";
+import { PageHeader, Section, Lane, Prose } from "../components/site/primitives";
 import { ChangelogList } from "../components/site/ChangelogList";
 import { site } from "../data/site";
 import { usePageMeta } from "../components/site/Seo";
 import type { ReactNode } from "react";
 
+/* Body sits right under the page header, so the section drops its top padding. */
+const BODY = "pt-0 md:pt-0";
+
 export function Changelog() {
   usePageMeta("Changelog", "Public build log for the Strativu platform: what changed and why, with real dates.");
   return (
     <>
-      <PageHeader eyebrow="Changelog" title="Public build log." lead="What changed and why, in plain language, with real dates. Written as an engineering log, not a news feed." />
-      <Section><ChangelogList /></Section>
+      <PageHeader eyebrow="Changelog" title="Public build log." lead="What changed and why, with real dates." />
+      <Section className={BODY}>
+        <Lane>
+          <ChangelogList />
+        </Lane>
+      </Section>
     </>
   );
 }
@@ -74,7 +81,13 @@ export function Legal() {
   return (
     <>
       <PageHeader eyebrow={`Legal · Updated ${page.updated}`} title={page.title} />
-      <Section><Prose>{page.body}</Prose></Section>
+      <Section className={BODY}>
+        <Lane>
+          <Prose className="border-t border-line pt-10 [&>*:first-child]:mt-0 [&_a]:text-brand-ink [&_a]:underline [&_a]:decoration-line-strong [&_a]:underline-offset-4 [&_a:hover]:decoration-current">
+            {page.body}
+          </Prose>
+        </Lane>
+      </Section>
     </>
   );
 }

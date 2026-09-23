@@ -1,7 +1,6 @@
-import { useRef, type ReactNode } from "react";
-import { Link } from "react-router";
+import { useRef } from "react";
 import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from "motion/react";
-import { Btn, Container, TextLink } from "../components/site/primitives";
+import { Btn, Container, Lane, Rows, TextLink } from "../components/site/primitives";
 import { Reveal, Stagger } from "../components/site/Reveal";
 import { ClosingCTA } from "../components/site/ClosingCTA";
 import { usePageMeta } from "../components/site/Seo";
@@ -20,10 +19,6 @@ const WHAT_WE_DO = [
   { n: "02", title: "Evidence", line: "Collectors read your systems on a schedule and attach proof automatically.", to: "/platform/grc#evidence" },
   { n: "03", title: "Audit trail", line: "Every change is recorded in a tamper-evident log your auditor can follow.", to: "/platform/grc#audit" },
 ];
-
-const Lane = ({ children, className = "" }: { children: ReactNode; className?: string }) => (
-  <div className={`max-w-[640px] lg:max-w-[56%] ${className}`}>{children}</div>
-);
 
 /* Words light up one by one as the line scrolls through the viewport. */
 function Word({ word, range, progress }: { word: string; range: [number, number]; progress: MotionValue<number> }) {
@@ -127,22 +122,7 @@ export default function Home() {
             <Reveal>
               <p className="eyebrow">What we do</p>
             </Reveal>
-            <ul className="mt-10 border-t border-line">
-              {WHAT_WE_DO.map((w, i) => (
-                <Reveal as="li" key={w.n} delay={i * 0.08}>
-                  <Link
-                    to={w.to}
-                    className="group grid grid-cols-[48px_1fr] gap-x-4 border-b border-line py-8 md:grid-cols-[64px_1fr]"
-                  >
-                    <span className="pt-1 font-mono text-[13px] text-ink-3">{w.n}</span>
-                    <span>
-                      <span className="t-h3 block text-ink transition-colors duration-300 group-hover:text-brand">{w.title}</span>
-                      <span className="mt-2 block max-w-[46ch] text-[16px] leading-[1.6] text-ink-2">{w.line}</span>
-                    </span>
-                  </Link>
-                </Reveal>
-              ))}
-            </ul>
+            <Rows className="mt-10" items={WHAT_WE_DO.map((w) => ({ n: w.n, title: w.title, body: w.line, to: w.to }))} />
           </Lane>
         </Container>
       </section>

@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
-import { Ambience } from "./fx";
+import { Reveal } from "./Reveal";
 
 export function Container({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <div className={`mx-auto w-full max-w-[1200px] px-5 md:px-8 ${className}`}>{children}</div>;
@@ -29,6 +29,70 @@ export function Section({
     <section id={id} className={`relative scroll-mt-24 py-20 md:py-32 ${tones[tone]} ${className}`}>
       <Container>{children}</Container>
     </section>
+  );
+}
+
+/**
+ * Content lane. On desktop text stays in the left ~56% so the 3D logo on the right is never covered.
+ * Use it for every page body; only go wider when a layout genuinely needs it.
+ */
+export function Lane({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`max-w-[640px] lg:max-w-[56%] ${className}`}>{children}</div>;
+}
+
+export type RowItem = {
+  /** Small index shown on the left, e.g. "01". */
+  n?: string;
+  title: ReactNode;
+  body?: ReactNode;
+  /** Short right-aligned note, e.g. a status or date. */
+  meta?: ReactNode;
+  /** Internal route. */
+  to?: string;
+  /** External link. */
+  href?: string;
+};
+
+/** Hairline-separated list: the default way to show a set of items (instead of cards). */
+export function Rows({ items, className = "" }: { items: RowItem[]; className?: string }) {
+  return (
+    <ul className={`border-t border-line ${className}`}>
+      {items.map((it, i) => {
+        const cls = `group grid gap-x-4 border-b border-line py-7 ${
+          it.n ? "grid-cols-[48px_1fr] md:grid-cols-[64px_1fr]" : "grid-cols-1"
+        }`;
+        const linked = Boolean(it.to || it.href);
+        const inner = (
+          <>
+            {it.n && <span className="pt-1.5 font-mono text-[13px] text-ink-3">{it.n}</span>}
+            <span className="min-w-0">
+              <span className="flex items-baseline justify-between gap-4">
+                <span className={`t-h3 block text-ink transition-colors duration-300 ${linked ? "group-hover:text-brand" : ""}`}>
+                  {it.title}
+                </span>
+                {it.meta && <span className="shrink-0 text-[13px] text-ink-3">{it.meta}</span>}
+              </span>
+              {it.body && <span className="mt-2 block max-w-[52ch] text-[16px] leading-[1.6] text-ink-2">{it.body}</span>}
+            </span>
+          </>
+        );
+        return (
+          <Reveal as="li" key={i} delay={Math.min(i, 4) * 0.06}>
+            {it.to ? (
+              <Link to={it.to} className={cls}>
+                {inner}
+              </Link>
+            ) : it.href ? (
+              <a href={it.href} target={it.href.startsWith("http") ? "_blank" : undefined} rel="noreferrer" className={cls}>
+                {inner}
+              </a>
+            ) : (
+              <div className={cls}>{inner}</div>
+            )}
+          </Reveal>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -186,15 +250,14 @@ export function PageHeader({
   children?: ReactNode;
 }) {
   return (
-    <header className="relative isolate overflow-hidden border-b border-line pb-16 pt-32 md:pb-24 md:pt-44">
-      <Ambience className="-z-10" />
+    <header className="relative pb-12 pt-36 md:pb-16 md:pt-48">
       <Container>
-        <div className="max-w-[860px] md:max-w-[62%]">
+        <Lane>
           <Eyebrow>{eyebrow}</Eyebrow>
           <h1 className="t-h1 text-ink">{title}</h1>
-          {lead && <p className="t-lead mt-5 measure">{lead}</p>}
-          {children && <div className="mt-8">{children}</div>}
-        </div>
+          {lead && <p className="t-lead mt-6 max-w-[48ch]">{lead}</p>}
+          {children && <div className="mt-10">{children}</div>}
+        </Lane>
       </Container>
     </header>
   );

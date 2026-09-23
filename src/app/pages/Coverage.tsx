@@ -1,35 +1,48 @@
 import { Link, useParams } from "react-router";
 import { NotFound } from "./NotFound";
-import { PageHeader, Section, SectionHead, StatusChip, Btn, TextLink } from "../components/site/primitives";
+import { Btn, Lane, PageHeader, Section, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
 import { CoverageGrid } from "../components/site/CoverageGrid";
-import { frameworks } from "../data/coverage";
+import { frameworks, statusLabel, type FrameworkStatus } from "../data/coverage";
 import { usePageMeta } from "../components/site/Seo";
 
+const STATUS_NOTE: Record<FrameworkStatus, string> = {
+  supported: "Mapped to the shared control set and usable in the current build.",
+  "in-progress": "Being mapped now. Partial coverage is visible in the product, marked as draft.",
+  planned: "On the roadmap. Priority is set by early-access participants.",
+};
+
 export function Coverage() {
-  usePageMeta("Coverage", "Frameworks and regulations the Strativu GRC product maps to, with an honest status per framework: supported, mapping, or planned.");
-  const supported = frameworks.filter((f) => f.status === "supported").length;
-  const mapping = frameworks.filter((f) => f.status === "in-progress").length;
-  const planned = frameworks.filter((f) => f.status === "planned").length;
+  usePageMeta("Coverage", "Frameworks and regulations the Strativu GRC product maps to, with an honest status for each: supported, mapping, or planned.");
+  const counts: { label: string; n: number }[] = [
+    { label: "Supported", n: frameworks.filter((f) => f.status === "supported").length },
+    { label: "Mapping", n: frameworks.filter((f) => f.status === "in-progress").length },
+    { label: "Planned", n: frameworks.filter((f) => f.status === "planned").length },
+  ];
   return (
     <>
       <PageHeader
         eyebrow="Coverage"
-        title="Frameworks and regulations the GRC product maps to."
-        lead="Each standard is a view on the shared control set. Status is stated at tile level and kept honest: a small supported list beats a large aspirational one."
+        title="Frameworks and regulations we map to."
+        lead="Each standard is a view on one shared control set, with an honest status for each."
       >
-        <dl className="flex flex-wrap gap-6 text-[13.5px] text-ink-3">
-          <div><dt className="inline">Supported </dt><dd className="inline font-medium text-ink">{supported}</dd></div>
-          <div><dt className="inline">Mapping </dt><dd className="inline font-medium text-ink">{mapping}</dd></div>
-          <div><dt className="inline">Planned </dt><dd className="inline font-medium text-ink">{planned}</dd></div>
+        <dl className="flex flex-wrap gap-x-8 gap-y-3 text-[15px]">
+          {counts.map((c) => (
+            <div key={c.label} className="flex flex-row-reverse items-baseline justify-end gap-2">
+              <dt className="text-ink-3">{c.label}</dt>
+              <dd className="tabular font-semibold text-ink">{c.n}</dd>
+            </div>
+          ))}
         </dl>
       </PageHeader>
-      <Section>
-        <CoverageGrid />
-      </Section>
-      <Section tone="surface">
-        <SectionHead eyebrow="Missing one?" title="Tell us which standard your auditor asks about." lead="Framework mapping is prioritised by early-access participants. If your programme is audited against something not listed, it can move up the list." />
-        <Btn to="/early-access" arrow>Request early access</Btn>
+
+      <Section className="pt-0 md:pt-0">
+        <Lane>
+          <CoverageGrid />
+          <Reveal className="mt-16">
+            <TextLink to="/early-access">Missing a framework? Tell us</TextLink>
+          </Reveal>
+        </Lane>
       </Section>
     </>
   );
@@ -46,43 +59,49 @@ export function FrameworkPage() {
   return (
     <>
       <PageHeader eyebrow={`Coverage · ${f.body}`} title={f.id} lead={f.name}>
-        <div className="flex flex-wrap items-center gap-4">
-          <StatusChip status={f.status} />
-          <span className="text-[13.5px] text-ink-3">{f.controls}</span>
-        </div>
+        <p className="chapter">
+          <b>{statusLabel[f.status]}</b> · {f.controls}
+        </p>
       </PageHeader>
-      <Section>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          <div className="lg:col-span-7">
-            <Reveal>
-              <p className="text-[17px] text-ink-2 measure">{f.summary}</p>
-              <h2 className="mt-10 text-[22px] text-ink">What Strativu models</h2>
-              <ul className="mt-4 space-y-3">
-                {f.detail.map((d) => (
-                  <li key={d} className="flex gap-3 text-[15.5px] text-ink-2"><span className="mt-[11px] w-1.5 h-[1.5px] bg-brand shrink-0" aria-hidden />{d}</li>
-                ))}
-              </ul>
-            </Reveal>
+
+      <Section className="pt-0 md:pt-0">
+        <Lane>
+          <Reveal>
+            <p className="max-w-[58ch] text-[17px] leading-[1.65] text-ink-2">{f.summary}</p>
+          </Reveal>
+
+          <Reveal className="mt-16">
+            <h2 className="eyebrow">What Strativu models</h2>
+            <ul className="mt-6 border-t border-line">
+              {f.detail.map((d) => (
+                <li key={d} className="border-b border-line py-4 text-[16px] leading-[1.6] text-ink-2">
+                  {d}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+
+          <Reveal className="mt-16">
+            <p className="max-w-[48ch] text-[16px] leading-[1.6] text-ink-2">{STATUS_NOTE[f.status]}</p>
+            <div className="mt-6">
+              <Btn to="/early-access">Request early access</Btn>
+            </div>
+          </Reveal>
+
+          <nav aria-label="Other frameworks" className="mt-20 flex justify-between gap-6 border-t border-line pt-6">
+            <Link to={`/coverage/${prev.slug}`} className="group min-w-0 max-w-[48%]">
+              <span className="mono-label block">← Previous</span>
+              <span className="mt-1.5 block text-[15px] text-ink transition-colors group-hover:text-brand">{prev.id}</span>
+            </Link>
+            <Link to={`/coverage/${next.slug}`} className="group min-w-0 max-w-[48%] text-right">
+              <span className="mono-label block">Next →</span>
+              <span className="mt-1.5 block text-[15px] text-ink transition-colors group-hover:text-brand">{next.id}</span>
+            </Link>
+          </nav>
+          <div className="mt-10">
+            <TextLink to="/coverage">All frameworks</TextLink>
           </div>
-          <aside className="lg:col-span-4 lg:col-start-9">
-            <Reveal delay={0.08}>
-              <div className="rounded-[var(--radius)] border border-line bg-surface/85 backdrop-blur-md p-6">
-                <p className="mono-label">Status</p>
-                <p className="mt-2 text-[15px] text-ink-2">
-                  {f.status === "supported" && "Mapped to the shared control set and usable in the current build."}
-                  {f.status === "in-progress" && "Being mapped now. Partial coverage is visible in the product, marked as draft."}
-                  {f.status === "planned" && "On the roadmap. Priority is set by early-access participants."}
-                </p>
-                <div className="mt-5"><Btn to="/early-access" arrow className="w-full">Request early access</Btn></div>
-              </div>
-            </Reveal>
-          </aside>
-        </div>
-        <nav className="mt-12 pt-6 border-t border-line flex justify-between font-mono text-[12px]">
-          <Link to={`/coverage/${prev.slug}`} className="text-ink-3 hover:text-ink transition-colors">← {prev.id}</Link>
-          <Link to={`/coverage/${next.slug}`} className="text-ink-3 hover:text-ink transition-colors">{next.id} →</Link>
-        </nav>
-        <div className="mt-6"><TextLink to="/coverage">All frameworks</TextLink></div>
+        </Lane>
       </Section>
     </>
   );

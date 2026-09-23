@@ -7,7 +7,6 @@ import { Container } from "../site/primitives";
 import { LogoScene } from "../site/LogoScene";
 import { ThemeToggle } from "../theme-toggle";
 import { site } from "../../data/site";
-import { frameworks } from "../../data/coverage";
 
 const NAV = [
   { label: "Platform", to: "/platform" },
@@ -17,49 +16,22 @@ const NAV = [
   { label: "Changelog", to: "/changelog" },
 ];
 
-const FOOTER = [
-  {
-    title: "Platform",
-    links: [
-      { label: "Overview", to: "/platform" },
-      { label: "GRC", to: "/platform/grc" },
-      { label: "Architecture", to: "/platform/architecture" },
-      { label: "Early access", to: "/early-access" },
-    ],
-  },
-  {
-    title: "Coverage",
-    links: frameworks
-      .slice(0, 6)
-      .map((f) => ({ label: f.id.split(" (")[0], to: `/coverage/${f.slug}` }))
-      .concat([{ label: "All frameworks", to: "/coverage" }]),
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About", to: "/company/about" },
-      { label: "Contact", to: "/company/contact" },
-      { label: "Changelog", to: "/changelog" },
-      { label: "Trust", to: "/trust" },
-    ],
-  },
-  {
-    title: "Connect",
-    links: [
-      { label: "Email", href: `mailto:${site.company.email}` },
-      { label: "LinkedIn", href: site.company.linkedin },
-      { label: "GitHub", href: site.company.github },
-      { label: "Status", href: site.company.statusPage },
-    ].filter((l): l is { label: string; href: string } => Boolean(l.href)),
-  },
-  {
-    title: "Legal",
-    links: [
-      { label: "Privacy", to: "/legal/privacy" },
-      { label: "Terms", to: "/legal/terms" },
-      { label: "DPA", to: "/legal/dpa" },
-    ],
-  },
+const FOOTER: { label: string; to?: string; href?: string }[] = [
+  { label: "Platform", to: "/platform" },
+  { label: "Coverage", to: "/coverage" },
+  { label: "Trust", to: "/trust" },
+  { label: "About", to: "/company/about" },
+  { label: "Contact", to: "/company/contact" },
+  { label: "Changelog", to: "/changelog" },
+  ...(site.company.linkedin ? [{ label: "LinkedIn", href: site.company.linkedin }] : []),
+  ...(site.company.github ? [{ label: "GitHub", href: site.company.github }] : []),
+  ...(site.company.statusPage ? [{ label: "Status", href: site.company.statusPage }] : []),
+];
+
+const LEGAL = [
+  { label: "Privacy", to: "/legal/privacy" },
+  { label: "Terms", to: "/legal/terms" },
+  { label: "DPA", to: "/legal/dpa" },
 ];
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -196,52 +168,40 @@ export default function Layout({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      {/* ─── Footer ─── */}
-      <footer className="relative z-10 border-t border-line bg-ground/80 backdrop-blur-xl">
-        <Container className="py-14 md:py-16">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-[1.5fr_repeat(5,1fr)]">
-            <div className="col-span-2 md:col-span-3 lg:col-span-1">
-              <Logo />
-              <p className="mt-4 max-w-[30ch] text-[14px] leading-[1.6] text-ink-2">{site.tagline}</p>
-              <p className="mt-4 text-[13px] text-ink-3">
-                {site.status.label} · {site.status.detail}
-              </p>
-            </div>
-            {FOOTER.map((col) => (
-              <div key={col.title}>
-                <h4 className="mb-4 text-[13px] font-semibold text-ink">{col.title}</h4>
-                <ul className="space-y-2.5">
-                  {col.links.map((l) => (
-                    <li key={l.label}>
-                      {"to" in l && l.to ? (
-                        <Link to={l.to} className="text-[14px] text-ink-2 transition-colors duration-150 hover:text-ink">
-                          {l.label}
-                        </Link>
-                      ) : (
-                        <a
-                          href={(l as { href: string }).href}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-[14px] text-ink-2 transition-colors duration-150 hover:text-ink"
-                        >
-                          {l.label}
-                        </a>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+      {/* ─── Footer: minimal ─── */}
+      <footer className="relative z-10 border-t border-line bg-[color-mix(in_srgb,var(--ground)_85%,transparent)] backdrop-blur-xl">
+        <Container className="py-12 md:py-14">
+          <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+            <Logo />
+            <nav aria-label="Footer" className="flex flex-wrap gap-x-7 gap-y-3">
+              {FOOTER.map((l) =>
+                l.to ? (
+                  <Link key={l.label} to={l.to} className="text-[14px] text-ink-3 transition-colors hover:text-ink">
+                    {l.label}
+                  </Link>
+                ) : (
+                  <a key={l.label} href={l.href} target="_blank" rel="noreferrer" className="text-[14px] text-ink-3 transition-colors hover:text-ink">
+                    {l.label}
+                  </a>
+                )
+              )}
+            </nav>
           </div>
-
-          <div className="mt-12 flex flex-col justify-between gap-3 border-t border-line-soft pt-6 text-[13px] text-ink-3 md:flex-row md:items-center">
+          <div className="mt-10 flex flex-col gap-3 border-t border-line-soft pt-6 text-[13px] text-ink-3 md:flex-row md:items-center md:justify-between">
             <p>
               © {new Date().getFullYear()} {site.company.legalName} · {site.company.jurisdiction}
               {site.company.registrationNo && ` · ${site.company.registrationNo}`}
             </p>
-            <a href={`mailto:${site.company.email}`} className="transition-colors hover:text-ink">
-              {site.company.email}
-            </a>
+            <p className="flex flex-wrap gap-x-6 gap-y-2">
+              <a href={`mailto:${site.company.email}`} className="transition-colors hover:text-ink">
+                {site.company.email}
+              </a>
+              {LEGAL.map((l) => (
+                <Link key={l.label} to={l.to} className="transition-colors hover:text-ink">
+                  {l.label}
+                </Link>
+              ))}
+            </p>
           </div>
         </Container>
       </footer>

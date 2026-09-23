@@ -507,3 +507,90 @@
     background: radial-gradient(ellipse 70% 60% at 30% 50%, color-mix(in srgb, var(--ground) 70%, transparent), transparent 75%);
   }
 }
+
+/* ── background concept ── */
+/*
+  "Quiet light" — the backdrop behind LogoScene's canvas. Two very large, very soft
+  light fields (Gaussian falloff) in low-saturation brand blues, a dark-mode vignette
+  and an extremely faint grain. LogoScene moves the fields with `transform` (compositor
+  only) and re-sizes them only when the logo size changes by >3%, so each gradient is
+  drawn at its real size and never magnified (no banding). Drift: 70–90 s CSS animation.
+*/
+:root {
+  --ql-key: 206 226 252;
+  --ql-key-a: 0.88;
+  --ql-floor: 221 231 247;
+  --ql-floor-a: 0.85;
+  --ql-vignette: 0;
+  --ql-grain: 0.028;
+}
+.dark {
+  --ql-key: 16 46 104;
+  --ql-key-a: 0.76;
+  --ql-floor: 11 31 66;
+  --ql-floor-a: 0.8;
+  --ql-vignette: 0.42;
+  --ql-grain: 0.05;
+}
+.quiet-light {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+}
+[data-logo-scene][data-ready] > .quiet-light { opacity: 1; }
+.quiet-light__field {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  will-change: transform;
+}
+.quiet-light__field--key { --ql-c: var(--ql-key); --ql-a: var(--ql-key-a); }
+.quiet-light__field--floor { --ql-c: var(--ql-floor); --ql-a: var(--ql-floor-a); }
+.quiet-light__field > span {
+  position: absolute;
+  inset: 0;
+  /* Gaussian falloff (edge of the ellipse ≈ 3 sigma); drawn at its real size, never magnified */
+  background: radial-gradient(
+    closest-side,
+    rgb(var(--ql-c) / var(--ql-a)) 0%,
+    rgb(var(--ql-c) / calc(var(--ql-a) * 0.956)) 10%,
+    rgb(var(--ql-c) / calc(var(--ql-a) * 0.835)) 20%,
+    rgb(var(--ql-c) / calc(var(--ql-a) * 0.667)) 30%,
+    rgb(var(--ql-c) / calc(var(--ql-a) * 0.487)) 40%,
+    rgb(var(--ql-c) / calc(var(--ql-a) * 0.325)) 50%,
+    rgb(var(--ql-c) / calc(var(--ql-a) * 0.198)) 60%,
+    rgb(var(--ql-c) / calc(var(--ql-a) * 0.110)) 70%,
+    rgb(var(--ql-c) / calc(var(--ql-a) * 0.056)) 80%,
+    rgb(var(--ql-c) / calc(var(--ql-a) * 0.026)) 90%,
+    rgb(var(--ql-c) / 0) 100%
+  );
+}
+.quiet-light__field--key > span { animation: ql-drift-key 71s ease-in-out -23s infinite alternate; }
+.quiet-light__field--floor > span { animation: ql-drift-floor 89s ease-in-out -41s infinite alternate; }
+@keyframes ql-drift-key {
+  from { transform: translate3d(-1.4%, 1%, 0) scale(0.98); }
+  to { transform: translate3d(1.4%, -1%, 0) scale(1.03); }
+}
+@keyframes ql-drift-floor {
+  from { transform: translate3d(2.2%, 0, 0) scale(1.04, 1); }
+  to { transform: translate3d(-2.2%, 0, 0) scale(0.97, 1.02); }
+}
+.quiet-light__vignette {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 90% 80% at 60% 42%, transparent 45%, rgb(0 0 0 / var(--ql-vignette)) 100%);
+}
+.dark .quiet-light__vignette { display: block; }
+.quiet-light__grain {
+  position: absolute;
+  inset: 0;
+  opacity: var(--ql-grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (prefers-reduced-motion: reduce) {
+  .quiet-light__field > span { animation: none; }
+}

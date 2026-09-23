@@ -6,21 +6,30 @@ import { useLocation } from "react-router";
  *
  * Quruluş:
  *   <LogoScene/>        → position: fixed; inset: 0; z-index: 0   (bütün kontentin ARXASINDA)
+ *     .quiet-light      → iki çox yumşaq işıq sahəsi (CSS qatları, theme.css → "background concept")
+ *     <canvas/>         → loqo + onun kontakt kölgəsi (şəffaf WebGL)
  *   <main/>, <footer/>  → position: relative; z-index: 10         (səhnənin ÜSTÜNDƏ)
  *
  * Davranış (aşağıdakı CHOREO cədvəli ilə idarə olunur):
  *  - Ana səhifə açılanda loqo böyük və parlaqdır (hero).
  *  - Scroll etdikcə loqo fırlanır, amma həmişə görünür qalır (heç bir bölmənin arxasında itmir).
- *  - Arxada işıq zolaqları axır və toz hissəcikləri üzür; scroll etdikcə sürətlənirlər.
+ *  - Fon "sakit işıq"dır: xətt, hissəcik, şüa yoxdur. Loqonun arxasında bir böyük yumşaq işıq, altında
+ *    yastı "döşəmə" işığı. Hər ikisi loqonu yavaşca izləyir və demək olar ki hiss olunmadan sürüşür.
+ *  - Loqo məhsul fotosu kimi işıqlandırılır: yumşaq studiya işığı, altında kontakt kölgəsi (tündə yer işığı).
  *  - Səhifənin sonunda (closing CTA) mərkəzə qayıdır və üzü yenidən qabağa dönür.
  *  - Siçanı hərəkət etdirdikdə loqo yüngülcə ona tərəf əyilir.
  *  - Səhifə dəyişəndə loqo yeni pozaya yumşaq "uçur".
  *
  * Model: `public/models/strativu-mark.glb` (bax: tools/logo3d/README.md). Ön/arxa üz orijinal
- * artwork teksturasıdır və işıqsız render olunur ki, rənglər loqo ilə eyni qalsın.
+ * artwork teksturasıdır; rənglər loqo ilə eyni qalsın deyə əsasən öz işığı (emissive) ilə görünür.
+ * Kürələr və yan faskalar studiya əks-işığı (RoomEnvironment) ilə parlaq, cilalı görünür.
  *
  * Performans: three.js yalnız səhifə yüklənib boşalandan sonra dinamik import olunur;
  * `prefers-reduced-motion` və ya WebGL yoxdursa qurulmur; mobildə 30 fps; tab gizli olanda render yoxdur.
+ * İşıq sahələri yalnız `transform` ilə hərəkət edir (kompozitor, yenidən rəsm yoxdur). WebGL yalnız
+ * loqonu və kölgəni çəkir və canvas bütün ekran deyil, yalnız loqonun ətrafındakı kəsikdir (CROP):
+ * kamera `setViewOffset` ilə tam ekran kadrının həmin hissəsini çəkir, canvas `transform` ilə loqonu izləyir.
+ * Bloom default olaraq söndürülüb → post-processing keçidi yoxdur.
  */
 
 const MODEL_URL = "/models/strativu-mark.glb";
@@ -69,11 +78,44 @@ const CHOREO: Record<"home" | "page", { desktop: Choreo; mobile: Choreo }> = {
 };
 
 /**
- * İşıq xətləri (azcon-dakı kimi axan işıq zolaqları) və toz hissəcikləri.
- * count: say (mobil/masaüstü), speed: sakit axın sürəti, scrollBoost: scroll edəndə əlavə sürət.
+ * Fon işıq sahələrinin forması (rənglər theme.css-də: --ql-*). Ölçülər loqonun eninə görə:
+ * spread → yayılma (Gauss sigma), lift → əsas işığın loqodan yuxarı sürüşməsi,
+ * drop → döşəmə işığının loqonun mərkəzindən aşağı düşməsi, follow → döşəmə loqonun x-ini nə qədər izləyir.
+ * minSize → kiçik loqoda da fon işığı çox kiçilməsin (ekran hündürlüyünün payı).
  */
-const STREAKS = { desktop: 64, mobile: 28, speed: 0.35, scrollBoost: 2.4, angle: 0.34 };
-const PARTICLES = { desktop: 160, mobile: 70 };
+const FIELD = {
+  keySpreadX: 0.74,
+  keySpreadY: 0.66,
+  keyLift: 0.08,
+  floorSpreadX: 1.2,
+  floorSpreadY: 0.24,
+  floorDrop: 0.46,
+  floorFollow: 0.85,
+  minSize: 0.3,
+};
+/** İşıq sahələri loqonu bundan yavaş izləyir (FOLLOW-dan kiçik → işıq bir az gecikir, üzvi görünür). */
+const LIGHT_FOLLOW = 2.2;
+/** Scroll ilə döşəmə işığının yana sürüşməsi (ekran hündürlüyünün payı). */
+const SCROLL_SHIFT = 0.05;
+
+/**
+ * Kontakt kölgəsi (açıq tema) / yer işığı (tünd tema), loqonun ayaqlarının altında.
+ * shadow → kölgənin gücü (0–1), glow → altdan yumşaq işıq gölü. width/height → loqonun eninə görə ölçü.
+ */
+const GROUND = {
+  light: { shadow: 0.34, glow: 0, shadowColor: "#0A1A33", glowColor: "#2F8FEA" },
+  dark: { shadow: 0.6, glow: 0.3, shadowColor: "#000000", glowColor: "#1466D6" },
+  width: 1.16,
+  height: 0.2,
+  drop: 0.012,
+};
+
+/**
+ * Studiya işığı. env → yumşaq otaq əks-işığı (RoomEnvironment), faceGlow → ön üzün öz işığı
+ * (rəngin loqoya sadiq qalması üçün), faceLit → ön üzə düşən studiya işığının payı,
+ * key/rim → yuxarı-soldan əsas və arxa-sağdan kənar işığı, hemi → ümumi dolğu işığı.
+ */
+const STUDIO = { env: 0.8, faceGlow: 0.86, faceLit: 0.5, key: 1.2, rim: 2.2, hemi: 0.6 };
 
 /** Baxış bucağı (radian). */
 const BASE_ROT_Y = -0.34;
@@ -87,9 +129,32 @@ const FOLLOW = 5.5;
 /** Yavaş "nəfəs" hərəkəti (radian / ekran payı). */
 const SWAY = 0.05;
 const BOB = 0.006;
-/** Bloom. strength: parıltının gücü, radius: yayılma, threshold: hansı parlaqlıqdan yuxarı parıldasın (0-1). */
-const BLOOM = { strength: 0.5, radius: 0.65, threshold: 0.5 };
-const BLOOM_MOBILE = { strength: 0.35, radius: 0.5, threshold: 0.56 };
+/**
+ * Canvas kəsiyi, loqonun maksimal eninə görə: w/h → kəsiyin eni/hündürlüyü, top → loqo mərkəzinin
+ * kəsiyin yuxarısından məsafəsi (hündürlüyün payı; aşağıda kölgəyə yer qalsın).
+ */
+const CROP = { w: 1.34, h: 1.02, top: 0.47 };
+/** Sakit vəziyyətdə (scroll/siçan/keçid yoxdur) kadr tezliyi — yavaş nəfəs üçün kifayətdir, enerjiyə qənaət. */
+const IDLE_FPS = 20;
+/**
+ * Bloom. strength: parıltının gücü (0 = söndürülür, post-processing ümumiyyətlə qurulmur),
+ * radius: yayılma, threshold: hansı parlaqlıqdan yuxarı parıldasın (0-1).
+ * "Sakit işıq" üçün hər iki temada söndürülüb: loqo məhsul fotosu kimi təmiz görünür, siyan halə yoxdur.
+ */
+const BLOOM = {
+  light: { strength: 0, radius: 0.4, threshold: 0.9 },
+  dark: { strength: 0, radius: 0.45, threshold: 0.8 },
+};
+const BLOOM_MOBILE = {
+  light: { strength: 0, radius: 0.4, threshold: 0.9 },
+  dark: { strength: 0, radius: 0.4, threshold: 0.8 },
+};
+
+/**
+ * İşıq sahəsi elementi öz real ölçüsündə rəsm olunur (böyüdülmüş gradient 8-bit zolaqlar verir).
+ * Ölçü bu paydan çox dəyişəndə yenidən rəsm olunur; arada fərqi yüngül `scale` örtür.
+ */
+const FIELD_RESIZE = 0.03;
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const ease = (t: number) => t * t * (3 - 2 * t);
@@ -101,15 +166,49 @@ const mixPose = (a: Pose, b: Pose, t: number): Pose => ({
   op: mix(a.op, b.op, t),
 });
 
+/** Kontakt kölgəsi + yer işığı. Premultiplied çıxış: rgb = işıq (əlavə olunur), alpha = kölgə (arxanı qaraldır). */
+const GROUND_VERT = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+const GROUND_FRAG = /* glsl */ `
+  varying vec2 vUv;
+  uniform float uShadow;
+  uniform float uGlow;
+  uniform float uFeet;
+  uniform vec3 uShadowColor;
+  uniform vec3 uGlowColor;
+  void main() {
+    vec2 d = (vUv - 0.5) * 2.0;
+    float edge = 1.0 - smoothstep(0.5, 1.0, dot(d, d));
+    // geniş yumşaq kölgə + ayaqların altında daha tünd iki təmas nöqtəsi
+    float soft = exp(-(d.x * d.x * 2.4 + d.y * d.y * 9.0));
+    float fx = abs(d.x) - uFeet;
+    float feet = exp(-(fx * fx * 40.0 + d.y * d.y * 34.0));
+    float a = clamp(soft * 0.62 + feet * 0.5, 0.0, 1.0) * edge * uShadow;
+    float g = exp(-(d.x * d.x * 1.6 + d.y * d.y * 5.0)) * edge * uGlow;
+    vec3 sc = linearToOutputTexel(vec4(uShadowColor, 1.0)).rgb;
+    vec3 gc = linearToOutputTexel(vec4(uGlowColor, 1.0)).rgb;
+    gl_FragColor = vec4(sc * a + gc * g, a);
+  }
+`;
+
 export function LogoScene() {
   const hostRef = useRef<HTMLDivElement>(null);
+  const keyRef = useRef<HTMLDivElement>(null);
+  const floorRef = useRef<HTMLDivElement>(null);
   const { pathname } = useLocation();
   const modeRef = useRef<"home" | "page">(pathname === "/" ? "home" : "page");
   modeRef.current = pathname === "/" ? "home" : "page";
 
   useEffect(() => {
     const host = hostRef.current;
-    if (!host) return;
+    const keyEl = keyRef.current;
+    const floorEl = floorRef.current;
+    if (!host || !keyEl || !floorEl) return;
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return;
@@ -141,15 +240,14 @@ export function LogoScene() {
       await whenIdle();
       if (disposed) return;
       const THREE = await import("three");
-      const [{ GLTFLoader }, { EffectComposer }, { RenderPass }, { UnrealBloomPass }, { OutputPass }] =
-        await Promise.all([
-          import("three/examples/jsm/loaders/GLTFLoader.js"),
-          import("three/examples/jsm/postprocessing/EffectComposer.js"),
-          import("three/examples/jsm/postprocessing/RenderPass.js"),
-          import("three/examples/jsm/postprocessing/UnrealBloomPass.js"),
-          import("three/examples/jsm/postprocessing/OutputPass.js"),
-        ]);
+      const [{ GLTFLoader }, { RoomEnvironment }] = await Promise.all([
+        import("three/examples/jsm/loaders/GLTFLoader.js"),
+        import("three/examples/jsm/environments/RoomEnvironment.js"),
+      ]);
       if (disposed || !hostRef.current) return;
+
+      // Model paralel yüklənir (renderer və studiya işığı hazırlanarkən).
+      const gltfPromise = new GLTFLoader().loadAsync(MODEL_URL).catch(() => null);
 
       // ── renderer ──────────────────────────────────────────────────────────
       let renderer: import("three").WebGLRenderer;
@@ -159,11 +257,12 @@ export function LogoScene() {
         return; // WebGL yoxdur — səssizcə heç nə göstərmirik
       }
       const pixelRatio = Math.min(window.devicePixelRatio, narrowMq.matches ? 1.25 : 1.5);
-      renderer.setPixelRatio(pixelRatio);
+      renderer.setPixelRatio(1); // bufer ölçüsünü özümüz (cihaz pikseli ilə) veririk, bax: resize
       renderer.setClearColor(0x000000, 0);
       renderer.toneMapping = THREE.NoToneMapping; // brend rəngləri olduğu kimi qalsın
-      host.appendChild(renderer.domElement);
-      Object.assign(renderer.domElement.style, { width: "100%", height: "100%", display: "block" });
+      const canvas = renderer.domElement;
+      host.appendChild(canvas);
+      Object.assign(canvas.style, { position: "absolute", left: "0", top: "0", display: "block", willChange: "transform" });
       host.style.opacity = "0";
       host.style.transition = "opacity 900ms ease";
 
@@ -171,11 +270,29 @@ export function LogoScene() {
       const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
       camera.position.set(0, 0, 9);
 
-      // İşıqlar yalnız yan üzlərə və kürələrə təsir edir.
-      scene.add(new THREE.AmbientLight(0xffffff, 2.6));
-      const key = new THREE.DirectionalLight(0xffffff, 0.9);
-      key.position.set(2.6, 3.4, 4.2);
+      const disposables: Array<{ dispose: () => void }> = [];
+      const bail = () => {
+        disposables.forEach((d) => d.dispose());
+        renderer.dispose();
+        renderer.domElement.remove();
+      };
+
+      // ── studiya işığı ─────────────────────────────────────────────────────
+      // Yumşaq otaq əks-işığı (bir dəfə hazırlanır) + yuxarı-soldan softbox + arxa-sağdan kənar işığı.
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      const room = new RoomEnvironment();
+      const envMap = pmrem.fromScene(room, 0.04, 0.1, 100, { size: 64 }).texture;
+      room.dispose();
+      pmrem.dispose();
+      disposables.push(envMap);
+
+      scene.add(new THREE.HemisphereLight(0xf2f7ff, 0x0b2a5c, STUDIO.hemi));
+      const key = new THREE.DirectionalLight(0xffffff, STUDIO.key);
+      key.position.set(-3.2, 4.2, 5);
       scene.add(key);
+      const rim = new THREE.DirectionalLight(0xcfeeff, STUDIO.rim);
+      rim.position.set(4.5, 2.2, -3.5);
+      scene.add(rim);
 
       // ── model ─────────────────────────────────────────────────────────────
       const spin = new THREE.Group(); // bucaq
@@ -183,13 +300,11 @@ export function LogoScene() {
       rig.add(spin);
       scene.add(rig);
 
-      const disposables: Array<{ dispose: () => void }> = [];
       const logoMats: import("three").Material[] = [];
 
-      const gltf = await new GLTFLoader().loadAsync(MODEL_URL).catch(() => null);
+      const gltf = await gltfPromise;
       if (disposed || !gltf) {
-        renderer.dispose();
-        renderer.domElement.remove();
+        bail();
         return;
       }
 
@@ -200,45 +315,83 @@ export function LogoScene() {
         if (mesh.geometry) disposables.push(mesh.geometry);
 
         const source = mesh.material as import("three").MeshStandardMaterial;
+        disposables.push(source);
+        if (source.map) disposables.push(source.map);
+        if (source.emissiveMap) disposables.push(source.emissiveMap);
+        let mat: import("three").MeshStandardMaterial | import("three").MeshLambertMaterial;
 
         if (source.map) {
-          // Ön/arxa üz: işıqsız → ekrandakı piksel = orijinal loqo pikseli
-          const flat = new THREE.MeshBasicMaterial({ map: source.map, side: source.side, toneMapped: false, transparent: true });
-          logoMats.push(flat);
-          flat.map!.anisotropy = 8;
-          mesh.material = flat;
-          disposables.push(flat);
-          return;
+          // Ön/arxa üz: rəng əsasən öz işığından (emissive) gəlir → loqo pikselinə sadiq qalır;
+          // studiya işığı üstünə yumşaq işıq-kölgə verir (loqo fırlananda üz bir az tündləşir).
+          source.map.anisotropy = 8;
+          mat = new THREE.MeshLambertMaterial({
+            map: source.map,
+            color: new THREE.Color(STUDIO.faceLit, STUDIO.faceLit, STUDIO.faceLit),
+            emissiveMap: source.map,
+            emissive: 0xffffff,
+            emissiveIntensity: STUDIO.faceGlow,
+          });
+        } else if (source.name === "MarkSide") {
+          // Yan üzlər: tünd brend mavisi, yarı-parlaq — faskada nazik işıq xətti tutur
+          mat = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(BRAND_DEEP),
+            roughness: 0.28,
+            metalness: 0.5,
+            envMap,
+            envMapIntensity: STUDIO.env * 1.25,
+          });
+        } else {
+          // Kürələr: parlaq, cilalı siyan
+          mat = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(BRAND_CYAN),
+            emissive: new THREE.Color(BRAND_CYAN),
+            emissiveIntensity: 0.22,
+            roughness: 0.22,
+            metalness: 0,
+            envMap,
+            envMapIntensity: STUDIO.env * 1.2,
+          });
         }
-
-        // Yan üzlər və kürələr: tutqun (mat) material, loqodan ölçülmüş rənglərlə
-        const isSide = source.name === "MarkSide";
-        const matte = new THREE.MeshLambertMaterial({
-          color: new THREE.Color(isSide ? BRAND_DEEP : BRAND_CYAN),
-          side: source.side,
-          transparent: true,
-        });
-        logoMats.push(matte);
-        mesh.material = matte;
-        disposables.push(matte);
+        mat.side = source.side;
+        mat.transparent = true; // CHOREO-dakı `op` üçün
+        mat.forceSinglePass = true; // iki tərəfli şəffaf material bir keçiddə çəkilsin (2x ucuz)
+        logoMats.push(mat);
+        mesh.material = mat;
+        disposables.push(mat);
       });
 
-      // ── post-processing: bloom ────────────────────────────────────────────
-      const composer = new EffectComposer(renderer);
-      composer.setPixelRatio(pixelRatio);
-      composer.addPass(new RenderPass(scene, camera));
-      const bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), BLOOM.strength, BLOOM.radius, BLOOM.threshold);
-      composer.addPass(bloomPass);
-      composer.addPass(new OutputPass());
-      disposables.push(composer, bloomPass);
+      // ── post-processing: bloom (yalnız BLOOM-da gücü 0-dan böyük preset varsa qurulur) ──
+      const presets = [BLOOM.light, BLOOM.dark, BLOOM_MOBILE.light, BLOOM_MOBILE.dark];
+      let composer: import("three/examples/jsm/postprocessing/EffectComposer.js").EffectComposer | null = null;
+      let bloomPass: import("three/examples/jsm/postprocessing/UnrealBloomPass.js").UnrealBloomPass | null = null;
+      if (presets.some((b) => b.strength > 0)) {
+        const [{ EffectComposer }, { RenderPass }, { UnrealBloomPass }, { OutputPass }] = await Promise.all([
+          import("three/examples/jsm/postprocessing/EffectComposer.js"),
+          import("three/examples/jsm/postprocessing/RenderPass.js"),
+          import("three/examples/jsm/postprocessing/UnrealBloomPass.js"),
+          import("three/examples/jsm/postprocessing/OutputPass.js"),
+        ]);
+        if (disposed) {
+          bail();
+          return;
+        }
+        composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 0, 0.4, 0.9);
+        composer.addPass(bloomPass);
+        composer.addPass(new OutputPass());
+        disposables.push(composer, bloomPass);
+      }
 
+      let themeDark = false;
       const applyBloomPreset = () => {
-        const b = narrowMq.matches ? BLOOM_MOBILE : BLOOM;
+        if (!bloomPass) return;
+        const b = (narrowMq.matches ? BLOOM_MOBILE : BLOOM)[themeDark ? "dark" : "light"];
         bloomPass.strength = b.strength;
         bloomPass.radius = b.radius;
         bloomPass.threshold = b.threshold;
+        bloomPass.enabled = b.strength > 0;
       };
-      applyBloomPreset();
 
       const box = new THREE.Box3().setFromObject(model);
       const size = box.getSize(new THREE.Vector3());
@@ -246,136 +399,75 @@ export function LogoScene() {
       spin.add(model);
       const unit = 1 / Math.max(size.x, size.y); // modelin ən böyük ölçüsü = 1 vahid
 
-      // ── işıq zolaqları + hissəciklər ─────────────────────────────────────
-      const narrow = narrowMq.matches;
-      const glowTexture = (draw: (g: CanvasRenderingContext2D, c: HTMLCanvasElement) => void, w: number, h: number) => {
-        const c = document.createElement("canvas");
-        c.width = w;
-        c.height = h;
-        draw(c.getContext("2d")!, c);
-        const tex = new THREE.CanvasTexture(c);
-        disposables.push(tex);
-        return tex;
+      // ── kontakt kölgəsi / yer işığı ───────────────────────────────────────
+      const groundW = size.x * GROUND.width;
+      const groundUniforms = {
+        uShadow: { value: 0 },
+        uGlow: { value: 0 },
+        uFeet: { value: (size.x * 0.9) / groundW }, // ayaqların yeri (kölgənin -1..1 enində)
+        uShadowColor: { value: new THREE.Color() },
+        uGlowColor: { value: new THREE.Color() },
       };
-      // Uzunluq boyunca: quyruq → parlaq baş → sönmə
-      const streakAlpha = glowTexture((g) => {
-        const gr = g.createLinearGradient(0, 0, 256, 0);
-        gr.addColorStop(0, "#000");
-        gr.addColorStop(0.82, "#fff");
-        gr.addColorStop(1, "#000");
-        g.fillStyle = gr;
-        g.fillRect(0, 0, 256, 4);
-      }, 256, 4);
-      const dot = glowTexture((g) => {
-        const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-        gr.addColorStop(0, "rgba(255,255,255,1)");
-        gr.addColorStop(0.35, "rgba(255,255,255,0.55)");
-        gr.addColorStop(1, "rgba(255,255,255,0)");
-        g.fillStyle = gr;
-        g.fillRect(0, 0, 64, 64);
-      }, 64, 64);
-
-      const streakCount = narrow ? STREAKS.mobile : STREAKS.desktop;
-      const streakGeo = new THREE.PlaneGeometry(1, 1);
-      const streakMat = new THREE.MeshBasicMaterial({
-        alphaMap: streakAlpha,
+      const groundGeo = new THREE.PlaneGeometry(1, 1);
+      const groundMat = new THREE.ShaderMaterial({
+        uniforms: groundUniforms,
+        vertexShader: GROUND_VERT,
+        fragmentShader: GROUND_FRAG,
         transparent: true,
+        premultipliedAlpha: true,
+        depthTest: false,
         depthWrite: false,
-        toneMapped: false,
       });
-      const streaks = new THREE.InstancedMesh(streakGeo, streakMat, streakCount);
-      streaks.frustumCulled = false;
-      disposables.push(streakGeo, streakMat);
-      const RANGE = 24;
-      const dir = new THREE.Vector3(Math.cos(STREAKS.angle), Math.sin(STREAKS.angle), 0);
-      const nrm = new THREE.Vector3(-dir.y, dir.x, 0);
-      const quat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), STREAKS.angle);
-      const streakData = Array.from({ length: streakCount }, () => ({
-        s: Math.random() * RANGE,
-        lat: (Math.random() - 0.5) * 12,
-        z: -8 + Math.random() * 7.5,
-        len: 1.2 + Math.random() * 3.4,
-        w: 0.008 + Math.random() * 0.03,
-        speed: 0.6 + Math.random() * 1.1,
-      }));
-      const tint = new THREE.Color();
-      streakData.forEach((d, i) => {
-        tint.setHSL(0.55 + Math.random() * 0.06, 0.9, 0.55 + Math.random() * 0.35);
-        streaks.setColorAt(i, tint);
-      });
-      scene.add(streaks);
+      const ground = new THREE.Mesh(groundGeo, groundMat);
+      ground.renderOrder = -1;
+      ground.position.set(0, -size.y / 2 - size.x * GROUND.drop, -size.z);
+      rig.add(ground); // spin-ə yox, rig-ə bağlıdır: loqo fırlananda kölgə yerində qalır
+      disposables.push(groundGeo, groundMat);
+      const edgeOn = Math.min(1, size.z / size.x) + 0.1; // yandan baxanda kölgənin minimal eni
 
-      const particleCount = narrow ? PARTICLES.mobile : PARTICLES.desktop;
-      const pBase = new Float32Array(particleCount * 3);
-      for (let i = 0; i < particleCount; i++) {
-        pBase[i * 3] = (Math.random() - 0.5) * 16;
-        pBase[i * 3 + 1] = (Math.random() - 0.5) * 9;
-        pBase[i * 3 + 2] = -6 + Math.random() * 7;
-      }
-      const pPos = new Float32Array(pBase);
-      const pGeo = new THREE.BufferGeometry();
-      pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
-      const pMat = new THREE.PointsMaterial({ map: dot, size: 0.09, transparent: true, depthWrite: false, toneMapped: false });
-      const particles = new THREE.Points(pGeo, pMat);
-      particles.frustumCulled = false;
-      disposables.push(pGeo, pMat);
-      scene.add(particles);
-
-      /** Tema: açıqda mavi, normal qarışdırma; tündə açıq-mavi, işıq kimi (additive). */
-      let themeDark: boolean | null = null;
+      /** Tema: kölgə/yer işığı rəngləri. Fon sahələrinin rəngləri CSS-dədir (--ql-*), özü dəyişir. */
+      let themeKnown = false;
       const syncTheme = () => {
         const dark = document.documentElement.classList.contains("dark");
-        if (dark === themeDark) return;
+        if (themeKnown && dark === themeDark) return;
+        themeKnown = true;
         themeDark = dark;
-        streakMat.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending;
-        streakMat.color.set(dark ? "#7fdcff" : "#1f7ae0");
-        streakMat.opacity = dark ? 0.75 : 0.42;
-        pMat.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending;
-        pMat.color.set(dark ? "#cdf3ff" : "#2d86e6");
-        pMat.opacity = dark ? 0.8 : 0.45;
-        streakMat.needsUpdate = true;
-        pMat.needsUpdate = true;
+        const g = dark ? GROUND.dark : GROUND.light;
+        groundUniforms.uShadowColor.value.set(g.shadowColor);
+        groundUniforms.uGlowColor.value.set(g.glowColor);
+        applyBloomPreset();
       };
       syncTheme();
-
-      let flow = 0;
-      let lastScroll = window.scrollY;
-      const m4 = new THREE.Matrix4();
-      const pos = new THREE.Vector3();
-      const scl = new THREE.Vector3();
-      const updateAmbient = (dt: number, t: number) => {
-        const vh = window.innerHeight || 1;
-        const dy = window.scrollY - lastScroll;
-        lastScroll = window.scrollY;
-        flow += dt * STREAKS.speed + (Math.abs(dy) / vh) * STREAKS.scrollBoost;
-        streakData.forEach((d, i) => {
-          const along = ((((d.s + flow * d.speed) % RANGE) + RANGE) % RANGE) - RANGE / 2;
-          pos.copy(dir).multiplyScalar(along).addScaledVector(nrm, d.lat);
-          pos.z = d.z;
-          scl.set(d.len, d.w, 1);
-          m4.compose(pos, quat, scl);
-          streaks.setMatrixAt(i, m4);
-        });
-        streaks.instanceMatrix.needsUpdate = true;
-
-        // Hissəciklər: yavaş üzür, scroll ilə paralaks (yuxarı qalxır), kənardan çıxanda o biri tərəfdən qayıdır.
-        const lift = (window.scrollY / vh) * 0.9 + t * 0.04;
-        for (let i = 0; i < particleCount; i++) {
-          const depth = 1 + (pBase[i * 3 + 2] + 6) / 7; // yaxın olan daha sürətli
-          const y = pBase[i * 3 + 1] + lift * depth;
-          pPos[i * 3 + 1] = ((((y + 4.5) % 9) + 9) % 9) - 4.5;
-          pPos[i * 3] = pBase[i * 3] + Math.sin(t * 0.2 + i) * 0.08;
-        }
-        pGeo.attributes.position.needsUpdate = true;
-      };
 
       // ── vəziyyət ──────────────────────────────────────────────────────────
       let visible = document.visibilityState === "visible";
       let viewW = 1; // z=0 müstəvisində görünən en (vahid)
       let viewH = 1;
+      let hostW = 1; // CSS px
+      let hostH = 1;
+      let cropW = 1; // canvas kəsiyi, CSS px
+      let cropH = 1;
+      let cropX = NaN;
+      let cropY = NaN;
+      /** Loqonun bütün pozalarda ən böyük ölçüsü (ekran hündürlüyünün payı) — kəsik bununla ölçülür. */
+      const maxSize = (kind: "desktop" | "mobile") =>
+        Math.max(
+          ...(["home", "page"] as const).flatMap((m) => {
+            const c = CHOREO[m][kind];
+            return [c.hero.size, c.rest.size, c.end?.size ?? 0];
+          }),
+        );
       const pointer = { x: 0, y: 0 };
       /** Hazırkı (yumşaldılmış) vəziyyət. İlk kadrda birbaşa hədəfə qoyulur. */
       let cur: (Pose & { ry: number; rx: number }) | null = null;
+      /** İşıq sahələrinin (daha yavaş) izlədiyi mövqe. */
+      const light = { x: 0, y: 0, size: 0 };
+      /** Son yazılan transform-lar (dəyişməyibsə DOM-a toxunmuruq). */
+      // [x, y, scaleX, scaleY, rasterW, rasterH]
+      const lastKey = [NaN, NaN, NaN, NaN, 0, 0];
+      const lastFloor = [NaN, NaN, NaN, NaN, 0, 0];
+      let lastActive = performance.now();
+      let lastScrollY = window.scrollY;
 
       /** Scroll mövqeyindən hədəf pozanı hesablayır. */
       const target = () => {
@@ -407,13 +499,23 @@ export function LogoScene() {
         const w = host.clientWidth;
         const h = host.clientHeight;
         if (!w || !h) return;
-        renderer.setSize(w, h, false);
-        composer.setSize(w, h);
+        hostW = w;
+        hostH = h;
+        const px = Math.min(maxSize(narrowMq.matches ? "mobile" : "desktop") * h, w * 0.85);
+        const bufW = Math.ceil(px * CROP.w * pixelRatio);
+        const bufH = Math.ceil(px * CROP.h * pixelRatio);
+        cropW = bufW / pixelRatio;
+        cropH = bufH / pixelRatio;
+        renderer.setSize(bufW, bufH, false);
+        composer?.setSize(bufW, bufH);
+        canvas.style.width = `${cropW}px`;
+        canvas.style.height = `${cropH}px`;
         camera.aspect = w / h;
-        camera.updateProjectionMatrix();
+        cropX = NaN; // növbəti kadrda view offset yenilənsin
         viewH = 2 * camera.position.z * Math.tan((camera.fov * Math.PI) / 360);
         viewW = viewH * camera.aspect;
         applyBloomPreset();
+        lastActive = performance.now();
       };
 
       const onVisibility = () => {
@@ -423,6 +525,7 @@ export function LogoScene() {
         if (e.pointerType !== "mouse") return;
         pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
         pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
+        lastActive = performance.now();
       };
 
       window.addEventListener("resize", resize);
@@ -434,13 +537,81 @@ export function LogoScene() {
 
       resize();
 
+      /** Bir işıq sahəsini yerləşdirir: mərkəz və Gauss sigma (CSS px). Yalnız dəyişəndə DOM-a yazır. */
+      const placeField = (el: HTMLElement, last: number[], cx: number, cy: number, sx: number, sy: number) => {
+        // Gradientin kənarı ≈ 3 sigma → elementin ölçüsü 6·sigma
+        const w = 6 * sx;
+        const h = 6 * sy;
+        if (Math.abs(w / last[4] - 1) > FIELD_RESIZE || Math.abs(h / last[5] - 1) > FIELD_RESIZE) {
+          last[4] = Math.round(w);
+          last[5] = Math.round(h);
+          el.style.width = `${last[4]}px`;
+          el.style.height = `${last[5]}px`;
+          el.style.marginLeft = `${-last[4] / 2}px`;
+          el.style.marginTop = `${-last[5] / 2}px`;
+          last[0] = NaN;
+        }
+        const kx = w / last[4];
+        const ky = h / last[5];
+        if (
+          Math.abs(cx - last[0]) < 0.25 &&
+          Math.abs(cy - last[1]) < 0.25 &&
+          Math.abs(kx - last[2]) < 0.001 &&
+          Math.abs(ky - last[3]) < 0.001
+        )
+          return;
+        last[0] = cx;
+        last[1] = cy;
+        last[2] = kx;
+        last[3] = ky;
+        el.style.transform = `translate3d(${cx.toFixed(1)}px, ${cy.toFixed(1)}px, 0) scale(${kx.toFixed(4)}, ${ky.toFixed(4)})`;
+      };
+
+      /** Fon sahələri və kölgə: loqonun yavaş izlənən mövqeyindən. */
+      const updateLight = (dt: number) => {
+        if (!cur) return;
+        const kl = 1 - Math.exp(-dt * LIGHT_FOLLOW);
+        light.x = mix(light.x, cur.x, kl);
+        light.y = mix(light.y, cur.y, kl);
+        light.size = mix(light.size, cur.size, kl);
+
+        const aspect = camera.aspect;
+        const s = Math.max(Math.min(light.size, aspect * 0.85), FIELD.minSize) * hostH; // loqonun eni, px
+        const cx = hostW / 2 + light.x * hostW;
+        const cy = hostH / 2 - light.y * hostH;
+        const screens = window.scrollY / (window.innerHeight || 1);
+
+        placeField(keyEl, lastKey, cx, cy - s * FIELD.keyLift, s * FIELD.keySpreadX, s * FIELD.keySpreadY);
+        placeField(
+          floorEl,
+          lastFloor,
+          hostW / 2 + light.x * hostW * FIELD.floorFollow + Math.sin(screens * 0.42) * SCROLL_SHIFT * hostH,
+          cy + s * FIELD.floorDrop,
+          s * FIELD.floorSpreadX,
+          s * FIELD.floorSpreadY,
+        );
+
+        // Kölgə loqonun görünən eninə uyğun daralır (yandan baxanda nazik olur).
+        const g = themeDark ? GROUND.dark : GROUND.light;
+        const facing = Math.abs(Math.cos(spin.rotation.y));
+        ground.scale.set(groundW * mix(edgeOn, 1, facing), size.x * GROUND.height, 1);
+        groundUniforms.uShadow.value = g.shadow * cur.op * mix(0.55, 1, facing);
+        groundUniforms.uGlow.value = g.glow * cur.op;
+      };
+
       // ── kadr döngəsi ──────────────────────────────────────────────────────
       const t0 = performance.now();
       let last = t0;
       const frame = () => {
         if (!visible) return;
         const now = performance.now();
-        if (narrowMq.matches && now - last < 1000 / 30) return; // mobil: 30 fps limiti
+        if (window.scrollY !== lastScrollY) {
+          lastScrollY = window.scrollY;
+          lastActive = now;
+        }
+        const settled = now - lastActive > 700;
+        const minGap = narrowMq.matches ? 1000 / 30 : settled ? 1000 / IDLE_FPS : 0; // mobil: 30 fps limiti
+        if (now - last < minGap - 1) return;
         const dt = Math.min(0.1, (now - last) / 1000);
         last = now;
         const t = (now - t0) / 1000;
@@ -448,9 +619,14 @@ export function LogoScene() {
         const goal = target();
         if (!cur) {
           cur = { ...goal };
+          light.x = goal.x;
+          light.y = goal.y;
+          light.size = goal.size;
           host.style.opacity = "1";
+          host.dataset.ready = "";
         }
         const k = 1 - Math.exp(-dt * FOLLOW);
+        if (Math.abs(goal.x - cur.x) + Math.abs(goal.y - cur.y) + Math.abs(goal.ry - cur.ry) > 0.002) lastActive = now;
         cur.x = mix(cur.x, goal.x, k);
         cur.y = mix(cur.y, goal.y, k);
         cur.size = mix(cur.size, goal.size, k);
@@ -465,17 +641,27 @@ export function LogoScene() {
         spin.rotation.y = cur.ry + Math.sin(t * 0.35) * SWAY;
         spin.rotation.x = cur.rx + Math.sin(t * 0.22) * SWAY * 0.3;
         for (const m of logoMats) m.opacity = cur.op;
+
+        // Kəsik loqonun ekran mövqeyini izləyir (cihaz pikselinə yuvarlaqlaşdırılır → bulanıqlıq yoxdur).
+        const ox = Math.round((hostW * (0.5 + cur.x) - cropW * 0.5) * pixelRatio) / pixelRatio;
+        const oy = Math.round((hostH * (0.5 - cur.y) - cropH * CROP.top) * pixelRatio) / pixelRatio;
+        if (ox !== cropX || oy !== cropY) {
+          cropX = ox;
+          cropY = oy;
+          camera.setViewOffset(hostW, hostH, ox, oy, cropW, cropH);
+          canvas.style.transform = `translate3d(${ox}px, ${oy}px, 0)`;
+        }
         syncTheme();
-        updateAmbient(dt, t);
-        composer.render();
+        updateLight(dt);
+        if (composer && bloomPass?.enabled) composer.render();
+        else renderer.render(scene, camera);
       };
       renderer.setAnimationLoop(frame);
 
       cleanups.push(() => {
         renderer.setAnimationLoop(null);
-        disposables.forEach((d) => d.dispose());
-        renderer.dispose();
-        renderer.domElement.remove();
+        delete host.dataset.ready;
+        bail();
       });
     })();
 
@@ -490,8 +676,20 @@ export function LogoScene() {
       ref={hostRef}
       aria-hidden
       data-logo-scene
-      className="pointer-events-none fixed inset-0 z-0"
-    />
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+    >
+      {/* Sakit işıq: iki yumşaq sahə + vinyet + dənə (stil: theme.css → "background concept") */}
+      <div className="quiet-light">
+        <div ref={floorRef} className="quiet-light__field quiet-light__field--floor">
+          <span />
+        </div>
+        <div ref={keyRef} className="quiet-light__field quiet-light__field--key">
+          <span />
+        </div>
+        <span className="quiet-light__vignette" />
+        <span className="quiet-light__grain" />
+      </div>
+    </div>
   );
 }
 
