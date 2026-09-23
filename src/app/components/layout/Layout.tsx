@@ -44,12 +44,13 @@ const FOOTER = [
     ],
   },
   {
-    title: "Resources",
+    title: "Connect",
     links: [
-      { label: "Status", href: site.company.statusPage },
+      { label: "Email", href: `mailto:${site.company.email}` },
       { label: "LinkedIn", href: site.company.linkedin },
       { label: "GitHub", href: site.company.github },
-    ],
+      { label: "Status", href: site.company.statusPage },
+    ].filter((l): l is { label: string; href: string } => Boolean(l.href)),
   },
   {
     title: "Legal",
@@ -94,6 +95,8 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="relative flex min-h-screen flex-col text-ink">
       <LogoScene />
+      {/* soft vignette over the 3D scene keeps body text readable */}
+      <div aria-hidden className="veil pointer-events-none fixed inset-0 z-[1]" />
 
       <a
         href="#main"
@@ -102,24 +105,24 @@ export default function Layout({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      {/* ─── Header ─── */}
-      <header
-        className={`fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color] duration-200 ${
-          scrolled || open
-            ? "border-line bg-[color-mix(in_srgb,var(--ground)_82%,transparent)] backdrop-blur-xl"
-            : "border-transparent bg-transparent"
-        }`}
-      >
-        <Container className="flex h-16 items-center justify-between gap-6">
+      {/* ─── Header: floating glass pill ─── */}
+      <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-5 md:pt-4">
+        <div
+          className={`mx-auto flex h-14 max-w-[1200px] items-center justify-between gap-6 rounded-full pl-5 pr-2 transition-[background-color,border-color,box-shadow] duration-300 ${
+            scrolled || open ? "glass-pill shadow-[var(--e2)]" : "border border-transparent"
+          }`}
+        >
           <Logo />
 
-          <nav aria-label="Primary" className="hidden items-center gap-7 lg:flex">
+          <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
             {NAV.map((n) => (
               <NavLink
                 key={n.to}
                 to={n.to}
                 className={({ isActive }) =>
-                  `text-[14px] transition-colors duration-150 ${isActive ? "font-medium text-ink" : "text-ink-2 hover:text-ink"}`
+                  `rounded-full px-3.5 py-1.5 text-[14px] transition-colors duration-150 ${
+                    isActive ? "bg-surface-2 font-medium text-ink" : "text-ink-2 hover:text-ink"
+                  }`
                 }
               >
                 {n.label}
@@ -127,8 +130,8 @@ export default function Layout({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
-          <div className="hidden items-center gap-2 lg:flex">
-            <Link to="/company/contact" className="px-2 text-[14px] text-ink-2 transition-colors duration-150 hover:text-ink">
+          <div className="hidden items-center gap-1.5 lg:flex">
+            <Link to="/company/contact" className="px-3 text-[14px] text-ink-2 transition-colors duration-150 hover:text-ink">
               Contact
             </Link>
             <ThemeToggle className="text-ink-2 hover:bg-surface-2 hover:text-ink" />
@@ -140,7 +143,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-1 lg:hidden">
             <ThemeToggle className="text-ink-2 hover:bg-surface-2 hover:text-ink" />
             <button
-              className="rounded-[8px] p-2 text-ink transition-colors hover:bg-surface-2"
+              className="rounded-full p-2.5 text-ink transition-colors hover:bg-surface-2"
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
               aria-controls="mobile-nav"
@@ -149,7 +152,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               {open ? <X className="h-5 w-5" strokeWidth={1.75} /> : <Menu className="h-5 w-5" strokeWidth={1.75} />}
             </button>
           </div>
-        </Container>
+        </div>
 
         {/* ─── Mobile menu ─── */}
         <AnimatePresence>
@@ -161,7 +164,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="fixed inset-0 top-16 z-[-1] bg-ground/97 backdrop-blur-xl lg:hidden"
+              className="fixed inset-0 z-[-1] bg-ground/95 pt-20 backdrop-blur-xl lg:hidden"
             >
               <Container className="flex h-full flex-col pt-4">
                 <div className="flex flex-col">
@@ -196,7 +199,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       </main>
 
       {/* ─── Footer ─── */}
-      <footer className="relative z-10 border-t border-line bg-surface/60 backdrop-blur-xl">
+      <footer className="relative z-10 border-t border-line bg-ground/80 backdrop-blur-xl">
         <Container className="py-14 md:py-16">
           <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-[1.5fr_repeat(5,1fr)]">
             <div className="col-span-2 md:col-span-3 lg:col-span-1">
@@ -235,21 +238,12 @@ export default function Layout({ children }: { children: ReactNode }) {
 
           <div className="mt-12 flex flex-col justify-between gap-3 border-t border-line-soft pt-6 text-[13px] text-ink-3 md:flex-row md:items-center">
             <p>
-              © {new Date().getFullYear()} {site.company.legalName} · {site.company.jurisdiction} · {site.company.registrationNo}
+              © {new Date().getFullYear()} {site.company.legalName} · {site.company.jurisdiction}
+              {site.company.registrationNo && ` · ${site.company.registrationNo}`}
             </p>
-            <p className="flex items-center gap-5">
-              <a href={`mailto:${site.company.email}`} className="transition-colors hover:text-ink">
-                {site.company.email}
-              </a>
-              <a
-                href={site.company.statusPage}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 transition-colors hover:text-ink"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden /> All systems normal
-              </a>
-            </p>
+            <a href={`mailto:${site.company.email}`} className="transition-colors hover:text-ink">
+              {site.company.email}
+            </a>
           </div>
         </Container>
       </footer>

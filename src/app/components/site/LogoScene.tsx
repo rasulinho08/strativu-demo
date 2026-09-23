@@ -1,29 +1,25 @@
 import { useEffect, useRef } from "react";
+import { useLocation } from "react-router";
 
 /**
- * 3D Strativu mark — TAM EKRAN SABİT FON SƏHNƏSİ (azcon.gov.az-dakı `#scene` kimi).
+ * 3D Strativu mark — tam ekran, sabit fon səhnəsi (azcon.gov.az-dakı `#scene` kimi).
  *
  * Quruluş:
  *   <LogoScene/>        → position: fixed; inset: 0; z-index: 0   (bütün kontentin ARXASINDA)
  *   <main/>, <footer/>  → position: relative; z-index: 10         (səhnənin ÜSTÜNDƏ)
- * Kontent bölmələri yarımşəffaf (glass) olduğu üçün loqo bütün sayt boyu arxada görünür.
  *
- * Davranış:
- *  - Loqo ekranın sağ tərəfində SABİT dayanır. Scroll ilə dönmür, kiçilmir, solğunlaşmır.
- *  - Yalnız çox yavaş "nəfəs" hərəkəti var (bax: SWAY / BOB). 0 qoysanız tam hərəkətsiz olur.
+ * Davranış (aşağıdakı CHOREO cədvəli ilə idarə olunur):
+ *  - Ana səhifə açılanda loqo böyük və parlaqdır (hero).
+ *  - Scroll etdikcə loqo fırlanır və kənara, məzmunun arxasına keçir (solğunlaşır).
+ *  - Səhifənin sonunda (closing CTA) mərkəzə qayıdır və üzü yenidən qabağa dönür.
+ *  - Siçanı hərəkət etdirdikdə loqo yüngülcə ona tərəf əyilir.
+ *  - Səhifə dəyişəndə loqo yeni pozaya yumşaq "uçur".
  *
- * Model: `public/models/strativu-mark.glb` — Blender-də orijinal loqodan qurulub
- * (bax: tools/logo3d/README.md). Ön/arxa üz orijinal artwork teksturasıdır və İŞIQSIZ
- * render olunur ki, rənglər piksel-piksel loqo ilə eyni qalsın.
+ * Model: `public/models/strativu-mark.glb` (bax: tools/logo3d/README.md). Ön/arxa üz orijinal
+ * artwork teksturasıdır və işıqsız render olunur ki, rənglər loqo ilə eyni qalsın.
  *
- * Performans:
- *  - three.js və model yalnız burada, dinamik import ilə, səhifə yüklənib boşalandan sonra yüklənir.
- *  - `prefers-reduced-motion` və ya WebGL yoxdursa qurulmur.
- *  - Mobil (768px-dən dar) ekranda kiçik ölçü, aşağı şəffaflıq, 30 fps və yüngül bloom.
- *  - Tab görünməyəndə kadr render olunmur. Unmount-da bütün resurslar dispose edilir.
- *
- * Bloom (parıltı): three.js UnrealBloomPass. Yalnız parlaq hissələr (cyan kürələr, açıq üzlər)
- * parıldayır; qara konturlar BLOOM.threshold-dan aşağıda qalır.
+ * Performans: three.js yalnız səhifə yüklənib boşalandan sonra dinamik import olunur;
+ * `prefers-reduced-motion` və ya WebGL yoxdursa qurulmur; mobildə 30 fps; tab gizli olanda render yoxdur.
  */
 
 const MODEL_URL = "/models/strativu-mark.glb";
@@ -33,22 +29,75 @@ const BRAND_CYAN = "#03C1FD"; // dairələr və yuxarı qanadlar
 const BRAND_DEEP = "#0159C5"; // içəri dağ / aşağı mavi
 
 /* ── Tənzimləmə ── */
-/** Masaüstü: loqonun yeri (x → sağa, y → yuxarı; ekran ölçüsünün payı) və eni (ekran eninin payı, hündürlük limiti ilə). */
-const DESKTOP = { x: 0.3, y: 0.08, w: 0.25, hMax: 0.64, opacity: 0.62 };
-/** Mobil (<768px): daha kiçik, yuxarı-sağda, mətnin arxasında daha solğun. */
-const MOBILE = { x: 0.3, y: 0.31, w: 0.5, hMax: 0.3, opacity: 0.55 };
-/** Baxış bucağı (radian). Y: sola-sağa çevrilmə, X: yuxarıdan baxış. */
+/**
+ * Scroll xoreoqrafiyası (azcon.gov.az üslubu): loqo səhifə boyu "səyahət" edir.
+ * Hər poza: x/y → mərkəzdən sürüşmə (ekran eni/hündürlüyünün payı, x sağa, y yuxarı),
+ * size → loqonun ölçüsü (ekran hündürlüyünün payı), op → şəffaflıq (0–1).
+ *
+ *   hero  → səhifə açılanda (scroll = 0)
+ *   rest  → bir ekran aşağı scroll edəndən sonra, məzmunun arxasında (solğun)
+ *   end   → `data-logo-stage` elementi ekrana gələndə (ana səhifədə closing CTA): mərkəzə qayıdır
+ *           və həmin bölmə ilə birlikdə yuxarı qalxır, footer-in üstünə düşmür.
+ */
+type Pose = { x: number; y: number; size: number; op: number };
+type Choreo = { hero: Pose; rest: Pose; end?: Pose };
+
+const CHOREO: Record<"home" | "page", { desktop: Choreo; mobile: Choreo }> = {
+  home: {
+    desktop: {
+      hero: { x: 0.28, y: 0.0, size: 0.46, op: 1 },
+      rest: { x: -0.33, y: 0.04, size: 0.34, op: 0.28 },
+      end: { x: 0, y: 0.17, size: 0.34, op: 0.95 },
+    },
+    mobile: {
+      hero: { x: 0, y: 0.27, size: 0.26, op: 1 },
+      rest: { x: 0.2, y: 0.12, size: 0.3, op: 0.14 },
+      end: { x: 0, y: 0.24, size: 0.24, op: 0.85 },
+    },
+  },
+  page: {
+    desktop: {
+      hero: { x: 0.31, y: 0.04, size: 0.36, op: 0.8 },
+      rest: { x: 0.34, y: 0.0, size: 0.3, op: 0.18 },
+    },
+    mobile: {
+      hero: { x: 0.26, y: 0.32, size: 0.15, op: 0.55 },
+      rest: { x: 0.26, y: 0.2, size: 0.2, op: 0.1 },
+    },
+  },
+};
+
+/** Baxış bucağı (radian). */
 const BASE_ROT_Y = -0.34;
 const BASE_ROT_X = 0.1;
-/** Yavaş nəfəs hərəkəti. SWAY: sağa-sola bucaq (radian), BOB: yuxarı-aşağı (ekran hündürlüyünün payı). 0 = hərəkətsiz. */
-const SWAY: number = 0.09;
-const BOB: number = 0.008;
+/** Scroll ilə fırlanma: hər ekran hündürlüyü scroll üçün neçə radian (≈ 5 ekranda tam dövr). */
+const SPIN_PER_SCREEN = 1.25;
+/** Siçan ilə əyilmə (radian). 0 = söndürülür. */
+const TILT = 0.14;
+/** Hərəkətin yumşaqlığı: böyük → daha sürətli izləyir. */
+const FOLLOW = 5.5;
+/** Yavaş "nəfəs" hərəkəti (radian / ekran payı). */
+const SWAY = 0.05;
+const BOB = 0.006;
 /** Bloom. strength: parıltının gücü, radius: yayılma, threshold: hansı parlaqlıqdan yuxarı parıldasın (0-1). */
-const BLOOM = { strength: 0.38, radius: 0.6, threshold: 0.55 };
-const BLOOM_MOBILE = { strength: 0.3, radius: 0.5, threshold: 0.58 };
+const BLOOM = { strength: 0.5, radius: 0.65, threshold: 0.5 };
+const BLOOM_MOBILE = { strength: 0.35, radius: 0.5, threshold: 0.56 };
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+const ease = (t: number) => t * t * (3 - 2 * t);
+const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+const mixPose = (a: Pose, b: Pose, t: number): Pose => ({
+  x: mix(a.x, b.x, t),
+  y: mix(a.y, b.y, t),
+  size: mix(a.size, b.size, t),
+  op: mix(a.op, b.op, t),
+});
 
 export function LogoScene() {
   const hostRef = useRef<HTMLDivElement>(null);
+  const { pathname } = useLocation();
+  const modeRef = useRef<"home" | "page">(pathname === "/" ? "home" : "page");
+  modeRef.current = pathname === "/" ? "home" : "page";
 
   useEffect(() => {
     const host = hostRef.current;
@@ -57,7 +106,6 @@ export function LogoScene() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return;
     const narrowMq = window.matchMedia("(max-width: 767px)");
-    const layout = () => (narrowMq.matches ? MOBILE : DESKTOP);
 
     let disposed = false;
     const cleanups: Array<() => void> = [];
@@ -67,10 +115,10 @@ export function LogoScene() {
       new Promise<void>((resolve) => {
         const idle = () => {
           if (typeof window.requestIdleCallback === "function") {
-            const id = window.requestIdleCallback(() => resolve(), { timeout: 2500 });
+            const id = window.requestIdleCallback(() => resolve(), { timeout: 2000 });
             cleanups.push(() => window.cancelIdleCallback(id));
           } else {
-            const t = window.setTimeout(resolve, 600);
+            const t = window.setTimeout(resolve, 400);
             cleanups.push(() => window.clearTimeout(t));
           }
         };
@@ -108,7 +156,7 @@ export function LogoScene() {
       renderer.toneMapping = THREE.NoToneMapping; // brend rəngləri olduğu kimi qalsın
       host.appendChild(renderer.domElement);
       Object.assign(renderer.domElement.style, { width: "100%", height: "100%", display: "block" });
-      host.style.opacity = String(layout().opacity);
+      host.style.opacity = "0";
 
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
@@ -121,7 +169,7 @@ export function LogoScene() {
       scene.add(key);
 
       // ── model ─────────────────────────────────────────────────────────────
-      const spin = new THREE.Group(); // baxış bucağı + nəfəs
+      const spin = new THREE.Group(); // bucaq
       const rig = new THREE.Group(); // mövqe / ölçü
       rig.add(spin);
       scene.add(rig);
@@ -183,23 +231,40 @@ export function LogoScene() {
       const size = box.getSize(new THREE.Vector3());
       model.position.sub(box.getCenter(new THREE.Vector3()));
       spin.add(model);
-      const unit = 1 / Math.max(size.x, size.y); // model eni = 1 vahid
+      const unit = 1 / Math.max(size.x, size.y); // modelin ən böyük ölçüsü = 1 vahid
 
       // ── vəziyyət ──────────────────────────────────────────────────────────
-      let visible = true;
+      let visible = document.visibilityState === "visible";
       let viewW = 1; // z=0 müstəvisində görünən en (vahid)
       let viewH = 1;
-      let baseY = 0;
+      const pointer = { x: 0, y: 0 };
+      /** Hazırkı (yumşaldılmış) vəziyyət. İlk kadrda birbaşa hədəfə qoyulur. */
+      let cur: (Pose & { ry: number; rx: number }) | null = null;
 
-      const place = () => {
-        const L = layout();
-        const width = Math.min(viewW * L.w, viewH * L.hMax);
-        rig.scale.setScalar(width * unit);
-        rig.position.x = viewW * L.x;
-        baseY = viewH * L.y;
-        rig.position.y = baseY;
-        host.style.opacity = String(L.opacity);
-        applyBloomPreset();
+      /** Scroll mövqeyindən hədəf pozanı hesablayır. */
+      const target = () => {
+        const vh = window.innerHeight || 1;
+        const y = window.scrollY;
+        const c = CHOREO[modeRef.current][narrowMq.matches ? "mobile" : "desktop"];
+
+        const tRest = ease(clamp01(y / (vh * 0.9)));
+        let pose = mixPose(c.hero, c.rest, tRest);
+        let tEnd = 0;
+        const stage = c.end ? document.querySelector("[data-logo-stage]") : null;
+        if (c.end && stage) {
+          const top = stage.getBoundingClientRect().top;
+          tEnd = ease(clamp01(1 - top / (vh * 0.9)));
+          pose = mixPose(pose, c.end, tEnd);
+          // Bölmə yuxarı keçəndə loqo onunla birlikdə qalxır.
+          if (top < 0) pose.y += -top / vh;
+        }
+
+        // Scroll ilə fırlanma; sonda üzü qabağa (ən yaxın tam dövrə) qayıdır.
+        const spinY = BASE_ROT_Y + (y / vh) * SPIN_PER_SCREEN;
+        const home = BASE_ROT_Y + Math.round((spinY - BASE_ROT_Y) / (Math.PI * 2)) * Math.PI * 2;
+        const ry = mix(spinY, home, tEnd) + pointer.x * TILT;
+        const rx = BASE_ROT_X - pointer.y * TILT * 0.6;
+        return { ...pose, ry, rx };
       };
 
       const resize = () => {
@@ -212,45 +277,58 @@ export function LogoScene() {
         camera.updateProjectionMatrix();
         viewH = 2 * camera.position.z * Math.tan((camera.fov * Math.PI) / 360);
         viewW = viewH * camera.aspect;
-        place();
+        applyBloomPreset();
       };
 
       const onVisibility = () => {
         visible = document.visibilityState === "visible";
       };
+      const onPointer = (e: PointerEvent) => {
+        if (e.pointerType !== "mouse") return;
+        pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+        pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
+      };
 
       window.addEventListener("resize", resize);
       document.addEventListener("visibilitychange", onVisibility);
+      window.addEventListener("pointermove", onPointer, { passive: true });
       cleanups.push(() => window.removeEventListener("resize", resize));
       cleanups.push(() => document.removeEventListener("visibilitychange", onVisibility));
+      cleanups.push(() => window.removeEventListener("pointermove", onPointer));
 
       resize();
 
       // ── kadr döngəsi ──────────────────────────────────────────────────────
-      const still = SWAY === 0 && BOB === 0;
       const t0 = performance.now();
-      let last = 0;
+      let last = t0;
       const frame = () => {
         if (!visible) return;
-        const nowMs = performance.now();
-        if (narrowMq.matches && nowMs - last < 1000 / 30) return; // mobil: 30 fps limiti
-        last = nowMs;
-        const t = (nowMs - t0) / 1000;
-        spin.rotation.y = BASE_ROT_Y + Math.sin(t * 0.35) * SWAY;
-        spin.rotation.x = BASE_ROT_X + Math.sin(t * 0.22) * SWAY * 0.3;
-        rig.position.y = baseY + Math.sin(t * 0.5) * viewH * BOB;
+        const now = performance.now();
+        if (narrowMq.matches && now - last < 1000 / 30) return; // mobil: 30 fps limiti
+        const dt = Math.min(0.1, (now - last) / 1000);
+        last = now;
+        const t = (now - t0) / 1000;
+
+        const goal = target();
+        if (!cur) cur = { ...goal, op: 0 };
+        const k = 1 - Math.exp(-dt * FOLLOW);
+        cur.x = mix(cur.x, goal.x, k);
+        cur.y = mix(cur.y, goal.y, k);
+        cur.size = mix(cur.size, goal.size, k);
+        cur.op = mix(cur.op, goal.op, k);
+        cur.ry = mix(cur.ry, goal.ry, k);
+        cur.rx = mix(cur.rx, goal.rx, k);
+
+        const px = Math.min(viewH * cur.size, viewW * 0.85);
+        rig.scale.setScalar(px * unit);
+        rig.position.x = viewW * cur.x;
+        rig.position.y = viewH * cur.y + Math.sin(t * 0.5) * viewH * BOB;
+        spin.rotation.y = cur.ry + Math.sin(t * 0.35) * SWAY;
+        spin.rotation.x = cur.rx + Math.sin(t * 0.22) * SWAY * 0.3;
+        host.style.opacity = cur.op.toFixed(3);
         composer.render();
       };
-
-      if (still) {
-        spin.rotation.set(BASE_ROT_X, BASE_ROT_Y, 0);
-        composer.render();
-        const rerender = () => composer.render();
-        window.addEventListener("resize", rerender);
-        cleanups.push(() => window.removeEventListener("resize", rerender));
-      } else {
-        renderer.setAnimationLoop(frame);
-      }
+      renderer.setAnimationLoop(frame);
 
       cleanups.push(() => {
         renderer.setAnimationLoop(null);

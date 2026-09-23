@@ -16,16 +16,15 @@ npm run typecheck  # tsc --noEmit
 
 | What | File |
 | --- | --- |
-| Logo, status line, company details, Formspree ID, mock-proof toggles | `src/app/data/site.ts` |
+| Logo, status line, company details, social links (null = hidden), Formspree ID | `src/app/data/site.ts` |
 | Logo files | `public/brand/logo-full.png` (light), `public/brand/logo-mark.png` (dark: mark + CSS wordmark). Optional `logo.darkSrc` in `site.ts` |
 | Social preview image | `public/og.png` (1200×630) |
-| Logo divarı, statistika, testimonial-lar (MOCK) | `src/app/data/proof.ts` |
-| Komanda (ad, rol, şəkil, linklər) | `src/app/data/team.ts` + `public/team/*.webp` (640×640) |
 | GRC development build screenshot | `public/projects/grc.webp` |
 | Framework coverage və statuslar | `src/app/data/coverage.ts` |
 | Changelog girişləri | `src/app/data/changelog.ts` |
 | Ana səhifədəki 3 capability bloku | `src/app/data/capabilities.ts` |
 | Rəng / şrift / radius tokenləri | `src/styles/theme.css`, `src/styles/fonts.css` |
+| 3D loqonun hərəkəti (scroll xoreoqrafiyası) | `src/app/components/site/LogoScene.tsx` → `CHOREO` |
 
 ## Routes
 
@@ -35,3 +34,9 @@ anything else → 404 page
 
 Per-route `<title>` / description / Open Graph tags are set with `usePageMeta()` in `src/app/components/site/Seo.tsx`.
 `public/sitemap.xml` lists every route; regenerate it when frameworks are added.
+
+## Deploy (Vercel)
+
+`vercel.json` rewrites every path to `index.html`, so deep links such as `/coverage/iso-27001` work on refresh.
+Keep `package-lock.json` generated on Linux or macOS (`npm install`), or Vercel's Linux build cannot find
+the native rollup/esbuild binaries.

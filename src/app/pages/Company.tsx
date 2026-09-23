@@ -1,6 +1,5 @@
 import { PageHeader, Section, SectionHead, Eyebrow, Btn } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
-import { TeamGrid } from "../components/site/TeamGrid";
 import { ClosingCTA } from "../components/site/ClosingCTA";
 import { EarlyAccessForm } from "../components/site/EarlyAccessForm";
 import { site } from "../data/site";
@@ -40,11 +39,6 @@ export function About() {
       </Section>
 
       <Section tone="surface">
-        <SectionHead eyebrow="Team" title="Who is building this." lead="Four people from security, compliance and platform engineering. Roles and focus areas below; profiles are linked as they are published." />
-        <TeamGrid />
-      </Section>
-
-      <Section>
         <SectionHead eyebrow="Where" title="Baku, building for Europe." />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
@@ -83,7 +77,7 @@ export function Contact() {
               <div className="rounded-[var(--radius)] border border-line bg-surface/85 backdrop-blur-md p-6 space-y-5 text-[15px]">
                 <div><p className="mono-label">Email</p><a href={`mailto:${site.company.email}`} className="mt-1 block text-ink link-line">{site.company.email}</a></div>
                 <div><p className="mono-label">Address</p><p className="mt-1 text-ink">{site.company.address}</p></div>
-                <div><p className="mono-label">Security disclosures</p><p className="mt-1 text-ink-2">See the <Link to="/trust" className="text-brand-ink link-line">Trust page</Link> for the disclosure policy and PGP key.</p></div>
+                <div><p className="mono-label">Security disclosures</p><p className="mt-1 text-ink-2">See the <Link to="/trust" className="text-brand-ink link-line">Trust page</Link> for the disclosure policy.</p></div>
                 <div><p className="mono-label">Early access</p><p className="mt-1 text-ink-2">Use the <Link to="/early-access" className="text-brand-ink link-line">early access form</Link> if you run a compliance programme and want in.</p></div>
               </div>
             </Reveal>
@@ -137,14 +131,13 @@ export function EarlyAccess() {
 
 export function Trust() {
   usePageMeta("Trust", "How Strativu handles data before it has a certification: architecture, hosting, subprocessors, disclosure policy.");
-  const rows = [
+  const rows: { k: string; v: string; link?: string }[] = [
     { k: "Architecture", v: "Row-level tenant isolation, per-tenant encryption keys, append-only hash-chained audit trail. Full notes on the architecture page." , link: "/platform/architecture" },
     { k: "Hosting", v: "EU (Frankfurt), managed cloud. Region fixed per tenant at creation." },
     { k: "Subprocessors", v: "Cloud hosting provider (EU), transactional email provider, error monitoring. The named list is published to early-access tenants and will be public at launch." },
     { k: "Certifications", v: "None yet. Pursuing ISO/IEC 27001:2022 certification and a SOC 2 Type II report, targeted for the twelve months following general availability. We use our own product to run the programme." },
     { k: "Vulnerability disclosure", v: `Report to ${site.company.email} with “security” in the subject. Acknowledgement within two working days, status update within ten. No legal action against good-faith research.` },
     { k: "Data handling pre-launch", v: "Early-access tenants run on the development build. We do not use tenant data for anything other than operating the service, and we will delete it on request within 30 days." },
-    { k: "Status", v: "A public status page reports the marketing site and API.", href: site.company.statusPage },
   ];
   return (
     <>
@@ -158,7 +151,6 @@ export function Trust() {
                 <dd className="text-[15.5px] text-ink-2 measure">
                   {r.v}
                   {r.link && <> <Link to={r.link} className="text-brand-ink link-line">Read more</Link>.</>}
-                  {r.href && <> <a href={r.href} target="_blank" rel="noreferrer" className="text-brand-ink link-line">Open status page</a>.</>}
                 </dd>
               </div>
             </Reveal>

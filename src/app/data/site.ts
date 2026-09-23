@@ -15,10 +15,6 @@ export const site = {
     detail: "Early access opening Q1 2027",
   },
 
-  /**
-   * Logo. Default: koddakı SVG mark + wordmark (Logo.tsx, göndərdiyiniz loqonun yenidən çəkilişi).
-   * Orijinal vektor faylınız varsa public/logo.svg atın və src: "/logo.svg" yazın.
-   */
   logo: {
     /** Tam loqo (işarə + yazı). Açıq temada göstərilir. */
     src: "/brand/logo-full.png",
@@ -35,21 +31,16 @@ export const site = {
   company: {
     legalName: "Strativu LLC",
     jurisdiction: "Registered in Baku, Azerbaijan",
-    registrationNo: "Company No. 0000000000",
+    /** Qeydiyyat nömrəsi. Real nömrə gələnə qədər null — null olanda saytda göstərilmir. */
+    registrationNo: null as string | null,
     email: "hello@strativu.com",
     address: "Baku, Azerbaijan",
-    statusPage: "https://status.strativu.com",
-    linkedin: "https://www.linkedin.com/company/strativu",
-    github: "https://github.com/strativu",
-  },
-
-  /**
-   * Mock sübut bölmələri. Real data gələnə qədər true/false ilə idarə edin.
-   * Məzmun: src/app/data/proof.ts
-   */
-  proof: {
-    logoWall: true,
-    stats: true,
-    testimonials: true,
+    /**
+     * Sosial linklər. Hesab hələ yoxdursa null yazın — null olan link saytda göstərilmir.
+     * Status səhifəsi yalnız həqiqətən işləyən status.strativu.com olanda doldurulmalıdır.
+     */
+    statusPage: null as string | null,
+    linkedin: "https://www.linkedin.com/company/strativu" as string | null,
+    github: null as string | null,
   },
 };

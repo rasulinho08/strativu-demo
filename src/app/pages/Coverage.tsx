@@ -1,4 +1,5 @@
-import { Link, useParams, Navigate } from "react-router";
+import { Link, useParams } from "react-router";
+import { NotFound } from "./NotFound";
 import { PageHeader, Section, SectionHead, StatusChip, Btn, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
 import { CoverageGrid } from "../components/site/CoverageGrid";
@@ -37,8 +38,8 @@ export function Coverage() {
 export function FrameworkPage() {
   const { slug } = useParams();
   const f = frameworks.find((x) => x.slug === slug);
-  usePageMeta(f ? f.id : "Coverage", f ? `${f.name}. ${f.summary}` : "Framework coverage.");
-  if (!f) return <Navigate to="/coverage" replace />;
+  usePageMeta(f ? f.id : "Page not found", f ? `${f.name}. ${f.summary}` : "The page you asked for does not exist.");
+  if (!f) return <NotFound />;
   const i = frameworks.indexOf(f);
   const prev = frameworks[(i - 1 + frameworks.length) % frameworks.length];
   const next = frameworks[(i + 1) % frameworks.length];

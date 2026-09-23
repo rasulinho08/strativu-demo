@@ -1,4 +1,5 @@
-import { useParams, Navigate } from "react-router";
+import { useParams } from "react-router";
+import { NotFound } from "./NotFound";
 import { PageHeader, Section, Prose } from "../components/site/primitives";
 import { ChangelogList } from "../components/site/ChangelogList";
 import { site } from "../data/site";
@@ -68,8 +69,8 @@ const LEGAL: Record<string, { title: string; updated: string; body: ReactNode }>
 export function Legal() {
   const { doc } = useParams();
   const page = doc ? LEGAL[doc] : undefined;
-  usePageMeta(page?.title ?? "Legal", page ? `${page.title}, updated ${page.updated}.` : "Legal documents.");
-  if (!page) return <Navigate to="/" replace />;
+  usePageMeta(page?.title ?? "Page not found", page ? `${page.title}, updated ${page.updated}.` : "The page you asked for does not exist.");
+  if (!page) return <NotFound />;
   return (
     <>
       <PageHeader eyebrow={`Legal · Updated ${page.updated}`} title={page.title} />

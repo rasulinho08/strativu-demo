@@ -22,11 +22,11 @@ export function Section({
 }) {
   const tones = {
     ground: "",
-    surface: "bg-surface/60 backdrop-blur-xl border-y border-line",
+    surface: "bg-surface/45 backdrop-blur-2xl border-y border-line",
     contrast: "bg-[var(--ink)] text-[var(--ground)]",
   };
   return (
-    <section id={id} className={`relative isolate scroll-mt-20 py-16 md:py-24 ${tones[tone]} ${className}`}>
+    <section id={id} className={`relative isolate scroll-mt-24 py-20 md:py-32 ${tones[tone]} ${className}`}>
       <Container>{children}</Container>
     </section>
   );
@@ -55,7 +55,7 @@ export function SectionHead({
   className?: string;
 }) {
   return (
-    <div className={`${align === "center" ? "mx-auto text-center" : ""} mb-10 max-w-[720px] md:mb-12 ${className}`}>
+    <div className={`${align === "center" ? "mx-auto text-center" : ""} mb-12 max-w-[820px] md:mb-16 ${className}`}>
       {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
       <h2 className="t-h2 text-ink">{title}</h2>
       {lead && <p className={`t-lead mt-4 ${align === "center" ? "mx-auto" : ""} measure`}>{lead}</p>}
@@ -89,15 +89,15 @@ export function Btn({
   onClick,
 }: BtnProps) {
   const base =
-    "group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[8px] font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60 disabled:pointer-events-none";
+    "group inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60 disabled:pointer-events-none";
   const sizes = {
-    sm: "h-9 px-3.5 text-[13.5px]",
-    md: "h-10 px-4 text-[14px]",
-    lg: "h-11 px-5 text-[15px]",
+    sm: "h-10 px-4.5 text-[13.5px]",
+    md: "h-11 px-5 text-[14.5px]",
+    lg: "h-13 px-7 text-[15.5px]",
   };
   const variants = {
-    primary: "bg-brand text-on-brand hover:bg-brand-ink",
-    secondary: "border border-line-strong bg-surface text-ink hover:bg-surface-2",
+    primary: "btn-grad",
+    secondary: "glass-pill text-ink hover:bg-surface-2",
     ghost: "text-ink-2 hover:text-ink hover:bg-surface-2",
     invert: "bg-[var(--ground)] text-[var(--ink)] hover:bg-[var(--surface-2)]",
   };
@@ -186,10 +186,10 @@ export function PageHeader({
   children?: ReactNode;
 }) {
   return (
-    <header className="relative isolate overflow-hidden border-b border-line pb-12 pt-28 md:pb-16 md:pt-36">
+    <header className="relative isolate overflow-hidden border-b border-line pb-16 pt-32 md:pb-24 md:pt-44">
       <Ambience className="-z-10" />
       <Container>
-        <div className="max-w-[800px]">
+        <div className="max-w-[860px] md:max-w-[62%]">
           <Eyebrow>{eyebrow}</Eyebrow>
           <h1 className="t-h1 text-ink">{title}</h1>
           {lead && <p className="t-lead mt-5 measure">{lead}</p>}

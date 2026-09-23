@@ -37,7 +37,7 @@ export const changelog: ChangelogEntry[] = [
   {
     date: "2026-07-17",
     title: "Tenant isolation model finalised",
-    body: "Row-level isolation with a per-tenant encryption key, enforced at the data layer rather than in application code. Design note published on the Trust page.",
+    body: "Row-level isolation with a per-tenant encryption key, enforced at the data layer rather than in application code. Design notes are on the Architecture page.",
     tag: "platform",
   },
   {
