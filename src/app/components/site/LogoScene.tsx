@@ -56,12 +56,12 @@ const CHOREO: Record<"home" | "page", { desktop: Choreo; mobile: Choreo }> = {
   home: {
     desktop: {
       hero: { x: 0, y: 0.16, size: 0.44, op: 1 },
-      rest: { x: 0.27, y: -0.02, size: 0.4, op: 0.92 },
+      rest: { x: 0, y: 0.02, size: 0.36, op: 0.34 },
       end: { x: 0, y: 0.17, size: 0.34, op: 1 },
     },
     mobile: {
       hero: { x: 0, y: 0.17, size: 0.3, op: 1 },
-      rest: { x: 0.31, y: 0.37, size: 0.1, op: 0.9 },
+      rest: { x: 0, y: 0.04, size: 0.26, op: 0.3 },
       end: { x: 0, y: 0.24, size: 0.22, op: 1 },
     },
   },
@@ -139,6 +139,11 @@ const BASE_ROT_X = 0.1;
 /** Açılışdan sonra scroll ilə yüngül yellənmə: amplituda (radian) və tezlik (hər ekran üçün). Loqo heç vaxt yan tərəfi ilə dayanmır. */
 const REST_SWAY = 0.42;
 const SWAY_PER_SCREEN = 0.9;
+/**
+ * Ana səhifə "turntable": loqo mərkəzdə qalır və scroll ilə tam 360° fırlanır (soldan sağa).
+ * Bu qədər ekran scroll-da bir tam dövr edir. Kiçik → daha sürətli fırlanır.
+ */
+const SCREENS_PER_TURN = 1.6;
 /** Açılış (mərkəz) pozasından sağdakı pozaya keçid neçə ekran scroll-da tamamlanır. */
 const INTRO_SCREENS = 1.05;
 /** Siçan ilə əyilmə (radian). 0 = söndürülür. */
@@ -520,7 +525,9 @@ export function LogoScene() {
         // Ana səhifə: açılışda bir tam, yumşaq dövr (sağa üzü qabağa çatır); sonra yalnız yellənmə.
         const home1 = modeRef.current === "home";
         const after = home1 ? Math.max(0, y / vh - INTRO_SCREENS) : y / vh;
-        const spinY = BASE_ROT_Y + (home1 ? tRest * Math.PI * 2 : 0) + Math.sin(after * SWAY_PER_SCREEN) * REST_SWAY;
+        const spinY = home1
+          ? BASE_ROT_Y + (y / vh / SCREENS_PER_TURN) * Math.PI * 2
+          : BASE_ROT_Y + Math.sin(after * SWAY_PER_SCREEN) * REST_SWAY;
         const home = BASE_ROT_Y + Math.round((spinY - BASE_ROT_Y) / (Math.PI * 2)) * Math.PI * 2;
         const ry = mix(spinY, home, tEnd) + pointer.x * TILT;
         const rx = BASE_ROT_X - pointer.y * TILT * 0.6;

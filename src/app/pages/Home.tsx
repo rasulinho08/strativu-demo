@@ -20,7 +20,8 @@ import { site } from "../data/site";
 
 /**
  * Ana səhifə.
- * Açılışda 3D loqo ekranın mərkəzindədir (əsas vizual); scroll etdikcə kiçilib sağa keçir (LogoScene → CHOREO.home).
+ * Açılışda 3D loqo ekranın mərkəzindədir (əsas vizual); scroll etdikcə mərkəzdə qalıb 360° fırlanır və yumşalır,
+ * sonda "Let's talk" üstündə yenidən parlaq və üzü qabağa dayanır (LogoScene → CHOREO.home, SCREENS_PER_TURN).
  * Masaüstündə mətn solda (~56%) qalır ki, sağdakı loqo heç vaxt örtülməsin.
  * Bütün rəqəmlər saytın öz datasından gəlir — uydurma statistika yoxdur.
  */

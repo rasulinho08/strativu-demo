@@ -28,6 +28,9 @@ const FOOTER: { label: string; to?: string; href?: string }[] = [
   ...(site.company.statusPage ? [{ label: "Status", href: site.company.statusPage }] : []),
 ];
 
+/** Footer-dəki nəhəng sürüşən sözlər. */
+const FOOTER_WORDS = ["Controls", "Evidence", "Audit trail", "Strativu"];
+
 const LEGAL = [
   { label: "Privacy", to: "/legal/privacy" },
   { label: "Terms", to: "/legal/terms" },
@@ -204,6 +207,20 @@ export default function Layout({ children }: { children: ReactNode }) {
             </p>
           </div>
         </Container>
+
+        {/* Nəhəng, yavaş sürüşən söz lenti (heyo.is footer-i kimi). Sözləri FOOTER_WORDS-dən dəyişin. */}
+        <div aria-hidden className="marquee-mask -mb-[0.18em] select-none overflow-hidden pb-2">
+          <div className="marquee-track" style={{ ["--marquee-duration" as string]: "70s" }}>
+            {[0, 1].map((k) => (
+              <span
+                key={k}
+                className="shrink-0 whitespace-nowrap pr-[0.4em] text-[clamp(72px,13vw,210px)] font-semibold leading-[1] tracking-[-0.05em] text-ink-4/60"
+              >
+                {FOOTER_WORDS.join(".")}.
+              </span>
+            ))}
+          </div>
+        </div>
       </footer>
     </div>
   );
