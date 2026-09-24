@@ -131,41 +131,43 @@ export default function Layout({ children }: { children: ReactNode }) {
         </Container>
 
         {/* ─── Mobile menu ─── */}
-        <AnimatePresence>
-          {open && (
-            <motion.nav
-              id="mobile-nav"
-              aria-label="Mobile"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="fixed inset-0 top-16 z-[-1] bg-ground/97 backdrop-blur-xl lg:hidden"
-            >
-              <Container className="flex h-full flex-col pt-4">
-                <div className="flex flex-col">
-                  {NAV.concat([{ label: "Contact", to: "/company/contact" }]).map((n) => (
-                    <NavLink
-                      key={n.to}
-                      to={n.to}
-                      className={({ isActive }) =>
-                        `border-b border-line-soft py-4 text-[20px] ${isActive ? "font-medium text-ink" : "text-ink-2"}`
-                      }
-                    >
-                      {n.label}
-                    </NavLink>
-                  ))}
-                </div>
-                <div className="mt-8">
-                  <p className="text-[13px] text-ink-3">
-                    {site.status.label} · {site.status.detail}
-                  </p>
-                </div>
-              </Container>
-            </motion.nav>
-          )}
-        </AnimatePresence>
       </header>
+
+      {/* ─── Mobile menu: own full-screen layer, fully opaque ─── */}
+      <AnimatePresence>
+        {open && (
+          <motion.nav
+            id="mobile-nav"
+            aria-label="Mobile"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-y-auto bg-ground lg:hidden"
+          >
+            <Container className="flex h-full flex-col pt-4">
+              <div className="flex flex-col">
+                {NAV.concat([{ label: "Contact", to: "/company/contact" }]).map((n) => (
+                  <NavLink
+                    key={n.to}
+                    to={n.to}
+                    className={({ isActive }) =>
+                      `border-b border-line-soft py-4 text-[20px] ${isActive ? "font-medium text-ink" : "text-ink-2"}`
+                    }
+                  >
+                    {n.label}
+                  </NavLink>
+                ))}
+              </div>
+              <div className="mt-8">
+                <p className="text-[13px] text-ink-3">
+                  {site.status.label} · {site.status.detail}
+                </p>
+              </div>
+            </Container>
+          </motion.nav>
+        )}
+      </AnimatePresence>
 
       <main id="main" className="relative z-10 flex-1">
         {children}

@@ -61,18 +61,18 @@ const CHOREO: Record<"home" | "page", { desktop: Choreo; mobile: Choreo }> = {
     },
     mobile: {
       hero: { x: 0, y: 0.17, size: 0.3, op: 1 },
-      rest: { x: 0, y: 0.04, size: 0.26, op: 0.3 },
+      rest: { x: 0, y: 0.04, size: 0.26, op: 0.24 },
       end: { x: 0, y: 0.24, size: 0.22, op: 1 },
     },
   },
   page: {
     desktop: {
-      hero: { x: 0.25, y: 0.03, size: 0.44, op: 0.95 },
-      rest: { x: 0.31, y: 0.0, size: 0.32, op: 0.7 },
+      hero: { x: 0, y: 0.04, size: 0.4, op: 0.34 },
+      rest: { x: 0, y: 0.02, size: 0.36, op: 0.3 },
     },
     mobile: {
       hero: { x: 0, y: 0.3, size: 0.17, op: 1 },
-      rest: { x: 0.31, y: 0.37, size: 0.1, op: 0.8 },
+      rest: { x: 0, y: 0.04, size: 0.26, op: 0.24 },
     },
   },
 };
@@ -136,9 +136,6 @@ const STUDIO = {
 /** Baxış bucağı (radian). */
 const BASE_ROT_Y = -0.34;
 const BASE_ROT_X = 0.1;
-/** Açılışdan sonra scroll ilə yüngül yellənmə: amplituda (radian) və tezlik (hər ekran üçün). Loqo heç vaxt yan tərəfi ilə dayanmır. */
-const REST_SWAY = 0.42;
-const SWAY_PER_SCREEN = 0.9;
 /**
  * Ana səhifə "turntable": loqo mərkəzdə qalır və scroll ilə tam 360° fırlanır (soldan sağa).
  * Bu qədər ekran scroll-da bir tam dövr edir. Kiçik → daha sürətli fırlanır.
@@ -523,11 +520,8 @@ export function LogoScene() {
 
         // Scroll ilə fırlanma; sonda üzü qabağa (ən yaxın tam dövrə) qayıdır.
         // Ana səhifə: açılışda bir tam, yumşaq dövr (sağa üzü qabağa çatır); sonra yalnız yellənmə.
-        const home1 = modeRef.current === "home";
-        const after = home1 ? Math.max(0, y / vh - INTRO_SCREENS) : y / vh;
-        const spinY = home1
-          ? BASE_ROT_Y + (y / vh / SCREENS_PER_TURN) * Math.PI * 2
-          : BASE_ROT_Y + Math.sin(after * SWAY_PER_SCREEN) * REST_SWAY;
+        // Bütün səhifələrdə "turntable": mərkəzdə, scroll ilə tam 360° dövr.
+        const spinY = BASE_ROT_Y + (y / vh / SCREENS_PER_TURN) * Math.PI * 2;
         const home = BASE_ROT_Y + Math.round((spinY - BASE_ROT_Y) / (Math.PI * 2)) * Math.PI * 2;
         const ry = mix(spinY, home, tEnd) + pointer.x * TILT;
         const rx = BASE_ROT_X - pointer.y * TILT * 0.6;
