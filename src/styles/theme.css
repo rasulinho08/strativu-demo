@@ -592,3 +592,9 @@
 @media (prefers-reduced-motion: reduce) {
   .quiet-light__field > span { animation: none; }
 }
+
+/* Footer "Strativu": işıq xəttinin parıltısı */
+.light-wordmark text {
+  font-family: var(--font-sans);
+  filter: drop-shadow(0 0 6px rgb(3 193 253 / 0.55)) drop-shadow(0 0 18px rgb(3 193 253 / 0.25));
+}

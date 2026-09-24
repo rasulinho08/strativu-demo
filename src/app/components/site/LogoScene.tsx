@@ -157,6 +157,29 @@ const BOB = 0.006;
 const CROP = { w: 1.34, h: 1.02, top: 0.47 };
 /** Sakit vəziyyətdə (scroll/siçan/keçid yoxdur) kadr tezliyi — yavaş nəfəs üçün kifayətdir, enerjiyə qənaət. */
 const IDLE_FPS = 20;
+
+/**
+ * Hər tərəfə fırlanma (scroll ilə): Y → soldan sağa tam dövr (SCREENS_PER_TURN),
+ * X → qabağa/arxaya aşma, Z → künclərdən yana əyilmə. Amplituda radianla, tezlik "hər ekran" üçün.
+ * Sonda ("Let's talk") hamısı sıfıra qayıdır və loqo üzü qabağa dayanır.
+ */
+const TUMBLE = { x: 0.85, xFreq: 1.25, z: 0.5, zFreq: 0.8 };
+
+/**
+ * İşıq izləri (GTA/Tron motosikleti kimi): üç kürə hərəkət edəndə arxasında parlaq xətt qoyur.
+ * life → izin ömrü (san.), width → başda qalınlıq (px), glow → parıltı enliyi (qalınlığa vurulur),
+ * opacity → ümumi güc, colorLight/colorDark → rəng. İzlər səhifə ilə birlikdə sürüşür, yəni scroll
+ * edəndə loqonun arxasında uzanan işıq yolu kimi görünür.
+ */
+const TRAILS = {
+  life: 1.6,
+  maxPoints: 110,
+  width: 3.2,
+  glow: 4.5,
+  opacity: 0.9,
+  colorLight: "#0A8BEB",
+  colorDark: "#3FD8FF",
+};
 /**
  * Bloom. strength: parıltının gücü (0 = söndürülür, post-processing ümumiyyətlə qurulmur),
  * radius: yayılma, threshold: hansı parlaqlıqdan yuxarı parıldasın (0-1).
@@ -284,6 +307,12 @@ export function LogoScene() {
       renderer.setClearColor(0x000000, 0);
       renderer.toneMapping = THREE.NoToneMapping; // brend rəngləri olduğu kimi qalsın
       const canvas = renderer.domElement;
+      // İşıq izləri üçün ayrıca tam-ekran 2D qat (loqo kəsiyinin altında, kəsiklə kəsilmir).
+      const trailCanvas = document.createElement("canvas");
+      Object.assign(trailCanvas.style, { position: "absolute", inset: "0", width: "100%", height: "100%", display: "block" });
+      host.appendChild(trailCanvas);
+      const tctx = trailCanvas.getContext("2d");
+      cleanups.push(() => trailCanvas.remove());
       host.appendChild(canvas);
       Object.assign(canvas.style, { position: "absolute", left: "0", top: "0", display: "block", willChange: "transform" });
       host.style.opacity = "0";
@@ -336,6 +365,7 @@ export function LogoScene() {
       }
 
       const model = gltf.scene;
+      let sphereMesh: import("three").Mesh | null = null;
       model.traverse((child) => {
         const mesh = child as import("three").Mesh;
         if (!mesh.isMesh) return;
@@ -371,6 +401,7 @@ export function LogoScene() {
             envMapIntensity: STUDIO.env * 1.25,
           });
         } else {
+          sphereMesh = mesh;
           // Kürələr: siyan, yarı-mat lak — geniş, yumşaq softbox parıltısı (specularIntensity → ≈28% az)
           mat = new THREE.MeshPhysicalMaterial({
             color: new THREE.Color(BRAND_CYAN),
@@ -429,6 +460,93 @@ export function LogoScene() {
       model.position.sub(box.getCenter(new THREE.Vector3()));
       spin.add(model);
       const unit = 1 / Math.max(size.x, size.y); // modelin ən böyük ölçüsü = 1 vahid
+
+      // ── işıq izləri: üç kürənin mərkəzi (kürə torunun təpələri x-ə görə üç qrupa bölünür) ──
+      const tips: import("three").Vector3[] = [];
+      if (sphereMesh) {
+        const sm = sphereMesh as import("three").Mesh;
+        const pos = sm.geometry.getAttribute("position");
+        sm.geometry.computeBoundingBox();
+        const bb = sm.geometry.boundingBox!;
+        const third = (bb.max.x - bb.min.x) / 3;
+        const acc = [0, 1, 2].map(() => ({ v: new THREE.Vector3(), n: 0 }));
+        for (let i = 0; i < pos.count; i++) {
+          const x = pos.getX(i);
+          const g = x < bb.min.x + third ? 0 : x > bb.max.x - third ? 2 : 1;
+          acc[g].v.add(new THREE.Vector3(x, pos.getY(i), pos.getZ(i)));
+          acc[g].n++;
+        }
+        for (const a of acc) if (a.n) tips.push(a.v.divideScalar(a.n));
+      }
+      type TrailPt = { x: number; py: number; t: number };
+      const trails: TrailPt[][] = tips.map(() => []);
+      const tipWorld = new THREE.Vector3();
+      let trailW = 0;
+      let trailH = 0;
+      let trailDpr = 1;
+      let trailDirty = false;
+      const sizeTrails = () => {
+        trailDpr = Math.min(window.devicePixelRatio, narrowMq.matches ? 1.5 : 1.25);
+        trailW = host.clientWidth;
+        trailH = host.clientHeight;
+        trailCanvas.width = Math.round(trailW * trailDpr);
+        trailCanvas.height = Math.round(trailH * trailDpr);
+      };
+      sizeTrails();
+      window.addEventListener("resize", sizeTrails);
+      cleanups.push(() => window.removeEventListener("resize", sizeTrails));
+
+      /** Kürələrin ekran mövqeyini qeydə alır və izləri çəkir. */
+      const updateTrails = (nowS: number, op: number) => {
+        if (!tctx || !tips.length) return;
+        model.updateWorldMatrix(true, false);
+        const sy = window.scrollY;
+        tips.forEach((tip, i) => {
+          tipWorld.copy(tip).applyMatrix4(model.matrixWorld).project(camera);
+          const x = cropX + ((tipWorld.x + 1) / 2) * cropW;
+          const yScreen = cropY + ((1 - tipWorld.y) / 2) * cropH;
+          const list = trails[i];
+          const lastPt = list[list.length - 1];
+          const py = yScreen + sy;
+          if (!lastPt || Math.hypot(lastPt.x - x, lastPt.py - py) > 1.5) list.push({ x, py, t: nowS });
+          else lastPt.t = nowS; // yerində duranda baş "canlı" qalır, amma yeni iz yaranmır
+          while (list.length && (nowS - list[0].t > TRAILS.life || list.length > TRAILS.maxPoints)) list.shift();
+        });
+        const any = trails.some((l) => l.length > 1);
+        if (!any && !trailDirty) return;
+        tctx.setTransform(trailDpr, 0, 0, trailDpr, 0, 0);
+        tctx.clearRect(0, 0, trailW, trailH);
+        trailDirty = any;
+        if (!any) return;
+        const dark = document.documentElement.classList.contains("dark");
+        tctx.globalCompositeOperation = dark ? "lighter" : "source-over";
+        tctx.strokeStyle = dark ? TRAILS.colorDark : TRAILS.colorLight;
+        tctx.lineCap = "butt"; // yuvarlaq uclar üst-üstə düşüb "muncuq" effekti yaradırdı
+        tctx.lineJoin = "round";
+        const strength = TRAILS.opacity * (0.55 + 0.45 * op);
+        for (const list of trails) {
+          for (let j = 1; j < list.length; j++) {
+            const a = list[j - 1];
+            const b = list[j];
+            const age = clamp01((nowS - b.t) / TRAILS.life);
+            const along = j / list.length; // quyruq → baş
+            const fade = (1 - age) * (1 - age) * along;
+            if (fade < 0.01) continue;
+            const w = TRAILS.width * (0.25 + 0.75 * along);
+            // parıltı (geniş, zəif) + nüvə (nazik, parlaq)
+            tctx.globalAlpha = fade * strength * 0.16;
+            tctx.lineWidth = w * TRAILS.glow;
+            tctx.beginPath();
+            tctx.moveTo(a.x, a.py - sy);
+            tctx.lineTo(b.x, b.py - sy);
+            tctx.stroke();
+            tctx.globalAlpha = fade * strength;
+            tctx.lineWidth = w;
+            tctx.stroke();
+          }
+        }
+        tctx.globalAlpha = 1;
+      };
 
       // ── kontakt kölgəsi / yer işığı ───────────────────────────────────────
       const groundW = size.x * GROUND.width;
@@ -490,7 +608,7 @@ export function LogoScene() {
         );
       const pointer = { x: 0, y: 0 };
       /** Hazırkı (yumşaldılmış) vəziyyət. İlk kadrda birbaşa hədəfə qoyulur. */
-      let cur: (Pose & { ry: number; rx: number }) | null = null;
+      let cur: (Pose & { ry: number; rx: number; rz: number }) | null = null;
       /** İşıq sahələrinin (daha yavaş) izlədiyi mövqe. */
       const light = { x: 0, y: 0, size: 0 };
       /** Son yazılan transform-lar (dəyişməyibsə DOM-a toxunmuruq). */
@@ -524,8 +642,12 @@ export function LogoScene() {
         const spinY = BASE_ROT_Y + (y / vh / SCREENS_PER_TURN) * Math.PI * 2;
         const home = BASE_ROT_Y + Math.round((spinY - BASE_ROT_Y) / (Math.PI * 2)) * Math.PI * 2;
         const ry = mix(spinY, home, tEnd) + pointer.x * TILT;
-        const rx = BASE_ROT_X - pointer.y * TILT * 0.6;
-        return { ...pose, ry, rx };
+        const s = y / vh;
+        const tumbleX = Math.sin(s * TUMBLE.xFreq) * TUMBLE.x;
+        const tumbleZ = Math.sin(s * TUMBLE.zFreq + 1.1) * TUMBLE.z;
+        const rx = BASE_ROT_X + mix(tumbleX, 0, tEnd) - pointer.y * TILT * 0.6;
+        const rz = mix(tumbleZ, 0, tEnd);
+        return { ...pose, ry, rx, rz };
       };
 
       const resize = () => {
@@ -666,6 +788,7 @@ export function LogoScene() {
         cur.op = mix(cur.op, goal.op, k);
         cur.ry = mix(cur.ry, goal.ry, k);
         cur.rx = mix(cur.rx, goal.rx, k);
+        cur.rz = mix(cur.rz, goal.rz, k);
 
         const px = Math.min(viewH * cur.size, viewW * 0.85);
         rig.scale.setScalar(px * unit);
@@ -673,6 +796,7 @@ export function LogoScene() {
         rig.position.y = viewH * cur.y + Math.sin(t * 0.5) * viewH * BOB;
         spin.rotation.y = cur.ry + Math.sin(t * 0.35) * SWAY;
         spin.rotation.x = cur.rx + Math.sin(t * 0.22) * SWAY * 0.3;
+        spin.rotation.z = cur.rz;
         for (const m of logoMats) m.opacity = cur.op;
 
         // Kəsik loqonun ekran mövqeyini izləyir (cihaz pikselinə yuvarlaqlaşdırılır → bulanıqlıq yoxdur).
@@ -686,6 +810,7 @@ export function LogoScene() {
         }
         syncTheme();
         updateLight(dt);
+        updateTrails(now / 1000, cur.op);
         if (composer && bloomPass?.enabled) composer.render();
         else renderer.render(scene, camera);
       };

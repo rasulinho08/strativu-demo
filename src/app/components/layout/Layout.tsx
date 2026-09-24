@@ -1,6 +1,6 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { Logo } from "../site/Logo";
 import { Container } from "../site/primitives";
@@ -28,14 +28,51 @@ const FOOTER: { label: string; to?: string; href?: string }[] = [
   ...(site.company.statusPage ? [{ label: "Status", href: site.company.statusPage }] : []),
 ];
 
-/** Footer-dəki nəhəng sürüşən sözlər. */
-const FOOTER_WORDS = ["Controls", "Evidence", "Audit trail", "Strativu"];
-
 const LEGAL = [
   { label: "Privacy", to: "/legal/privacy" },
   { label: "Terms", to: "/legal/terms" },
   { label: "DPA", to: "/legal/dpa" },
 ];
+
+/**
+ * Footer-in sonunda nəhəng "Strativu": səhifənin sonuna çatdıqca parlaq xətt hərflərin konturunu çəkir
+ * (loqonun işıq izlərinin "yazdığı" söz kimi), sonda hərflər yumşaq dolur.
+ */
+function LightWordmark() {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end end"] });
+  const dash = useTransform(scrollYProgress, [0.05, 0.85], [1600, 0]);
+  const fillOpacity = useTransform(scrollYProgress, [0.7, 1], [0, 0.14]);
+  return (
+    <div ref={ref} className="overflow-hidden px-3 pb-6 pt-4 md:px-6">
+      <svg viewBox="0 0 1000 215" className="light-wordmark mx-auto block h-auto w-full max-w-[1500px]" aria-hidden>
+        <defs>
+          <linearGradient id="lw-stroke" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stopColor="#6BE3FF" />
+            <stop offset="0.5" stopColor="#03C1FD" />
+            <stop offset="1" stopColor="#0A6FE0" />
+          </linearGradient>
+        </defs>
+        <motion.text
+          x="500"
+          y="180"
+          textAnchor="middle"
+          fontSize="215"
+          fontWeight="600"
+          letterSpacing="-9"
+          fill="url(#lw-stroke)"
+          stroke="url(#lw-stroke)"
+          strokeWidth="2.4"
+          strokeDasharray="1600"
+          style={reduce ? { fillOpacity: 0.14 } : { strokeDashoffset: dash, fillOpacity }}
+        >
+          Strativu
+        </motion.text>
+      </svg>
+    </div>
+  );
+}
 
 export default function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -210,19 +247,8 @@ export default function Layout({ children }: { children: ReactNode }) {
           </div>
         </Container>
 
-        {/* Nəhəng, yavaş sürüşən söz lenti (heyo.is footer-i kimi). Sözləri FOOTER_WORDS-dən dəyişin. */}
-        <div aria-hidden className="marquee-mask -mb-[0.18em] select-none overflow-hidden pb-2">
-          <div className="marquee-track" style={{ ["--marquee-duration" as string]: "70s" }}>
-            {[0, 1].map((k) => (
-              <span
-                key={k}
-                className="shrink-0 whitespace-nowrap pr-[0.4em] text-[clamp(72px,13vw,210px)] font-semibold leading-[1] tracking-[-0.05em] text-ink-4/60"
-              >
-                {FOOTER_WORDS.join(".")}.
-              </span>
-            ))}
-          </div>
-        </div>
+        {/* Son: işıq xətti "Strativu" sözünü yazır (loqonun izləri kimi), sonra yumşaq dolur. */}
+        <LightWordmark />
       </footer>
     </div>
   );
