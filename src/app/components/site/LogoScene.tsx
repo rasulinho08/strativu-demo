@@ -163,7 +163,7 @@ const IDLE_FPS = 20;
  * X → qabağa/arxaya aşma, Z → künclərdən yana əyilmə. Amplituda radianla, tezlik "hər ekran" üçün.
  * Sonda ("Let's talk") hamısı sıfıra qayıdır və loqo üzü qabağa dayanır.
  */
-const TUMBLE = { x: 0.85, xFreq: 1.25, z: 0.5, zFreq: 0.8 };
+const TUMBLE = { x: 0.85, xFreq: 1.25, z: 0.5, zFreq: 0.8, easeIn: 0.6 };
 
 /**
  * İşıq izləri (GTA/Tron motosikleti kimi): üç kürə hərəkət edəndə arxasında parlaq xətt qoyur.
@@ -177,6 +177,8 @@ const TRAILS = {
   width: 3.2,
   glow: 4.5,
   opacity: 0.9,
+  /** İz yalnız kürə ekranda bundan sürətli hərəkət edəndə yaranır (px/san) — boş dayananda iz yoxdur. */
+  minSpeed: 40,
   colorLight: "#0A8BEB",
   colorDark: "#3FD8FF",
 };
@@ -481,6 +483,9 @@ export function LogoScene() {
       type TrailPt = { x: number; py: number; t: number };
       const trails: TrailPt[][] = tips.map(() => []);
       const tipWorld = new THREE.Vector3();
+      const prevTip: ({ x: number; py: number } | null)[] = tips.map(() => null);
+      let trailPath = window.location.pathname;
+      let lastTrailT = 0;
       let trailW = 0;
       let trailH = 0;
       let trailDpr = 1;
@@ -499,6 +504,14 @@ export function LogoScene() {
       /** Kürələrin ekran mövqeyini qeydə alır və izləri çəkir. */
       const updateTrails = (nowS: number, op: number) => {
         if (!tctx || !tips.length) return;
+        // Səhifə dəyişəndə köhnə izlər silinir (onlar əvvəlki səhifənin koordinatlarındadır).
+        if (window.location.pathname !== trailPath) {
+          trailPath = window.location.pathname;
+          trails.forEach((l) => (l.length = 0));
+          prevTip.fill(null);
+        }
+        const dtS = lastTrailT ? Math.max(1e-3, nowS - lastTrailT) : 0;
+        lastTrailT = nowS;
         model.updateWorldMatrix(true, false);
         const sy = window.scrollY;
         tips.forEach((tip, i) => {
@@ -508,8 +521,13 @@ export function LogoScene() {
           const list = trails[i];
           const lastPt = list[list.length - 1];
           const py = yScreen + sy;
-          if (!lastPt || Math.hypot(lastPt.x - x, lastPt.py - py) > 1.5) list.push({ x, py, t: nowS });
-          else lastPt.t = nowS; // yerində duranda baş "canlı" qalır, amma yeni iz yaranmır
+          // İz yalnız kürə həqiqətən hərəkət edəndə (scroll, fırlanma) yaranır; yerində duranda köhnə iz sönür.
+          const prev = prevTip[i];
+          const speed = prev && dtS ? Math.hypot(prev.x - x, prev.py - py) / dtS : 0;
+          prevTip[i] = { x, py };
+          if (speed > TRAILS.minSpeed && (!lastPt || Math.hypot(lastPt.x - x, lastPt.py - py) > 1.5)) {
+            list.push({ x, py, t: nowS });
+          }
           while (list.length && (nowS - list[0].t > TRAILS.life || list.length > TRAILS.maxPoints)) list.shift();
         });
         const any = trails.some((l) => l.length > 1);
@@ -643,8 +661,11 @@ export function LogoScene() {
         const home = BASE_ROT_Y + Math.round((spinY - BASE_ROT_Y) / (Math.PI * 2)) * Math.PI * 2;
         const ry = mix(spinY, home, tEnd) + pointer.x * TILT;
         const s = y / vh;
-        const tumbleX = Math.sin(s * TUMBLE.xFreq) * TUMBLE.x;
-        const tumbleZ = Math.sin(s * TUMBLE.zFreq + 1.1) * TUMBLE.z;
+        // Açılışda (scroll = 0) hər iki əyilmə sıfırdır → loqo əvvəlki kimi düz dayanır;
+        // aşma/yana əyilmə ilk ~yarım ekran scroll-da yumşaq başlayır.
+        const tumbleIn = ease(clamp01(s / TUMBLE.easeIn));
+        const tumbleX = Math.sin(s * TUMBLE.xFreq) * TUMBLE.x * tumbleIn;
+        const tumbleZ = Math.sin(s * TUMBLE.zFreq) * TUMBLE.z * tumbleIn;
         const rx = BASE_ROT_X + mix(tumbleX, 0, tEnd) - pointer.y * TILT * 0.6;
         const rz = mix(tumbleZ, 0, tEnd);
         return { ...pose, ry, rx, rz };

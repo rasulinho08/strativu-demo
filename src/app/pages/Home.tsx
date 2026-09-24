@@ -12,6 +12,7 @@ import {
 import { Btn, Container, Lane, Rows, TextLink } from "../components/site/primitives";
 import { Reveal, Stagger } from "../components/site/Reveal";
 import { ClosingCTA } from "../components/site/ClosingCTA";
+import { LightWordmark } from "../components/site/LightWordmark";
 import { formatLogDate } from "../components/site/ChangelogList";
 import { usePageMeta } from "../components/site/Seo";
 import { changelog } from "../data/changelog";
@@ -382,6 +383,9 @@ export default function Home() {
 
       {/* ── 09 Closing: the 3D mark returns to centre above this ── */}
       <ClosingCTA stage title="Let’s talk." body="Tell us about your compliance programme. A person replies within two working days." />
+
+      {/* ── 10 Final: the logo's light writes the name (just above the footer; the footer itself is unchanged) ── */}
+      <LightWordmark />
     </>
   );
 }
