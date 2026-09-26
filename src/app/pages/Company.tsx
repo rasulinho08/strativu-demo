@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { Eyebrow, Lane, PageHeader, Rows, Section, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
+import { InstagramFeed } from "../components/site/InstagramFeed";
 import { EarlyAccessForm } from "../components/site/EarlyAccessForm";
 import { site } from "../data/site";
 import { usePageMeta } from "../components/site/Seo";
@@ -44,6 +45,9 @@ export function About() {
           </Reveal>
         </Lane>
       </Section>
+
+      {/* Instagram postları — token yoxdursa bu bölmə görünmür (bax: api/instagram.ts) */}
+      <InstagramFeed />
 
       <Section className="pt-0 md:pt-0">
         <Lane>

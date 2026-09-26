@@ -42,5 +42,6 @@ export const site = {
     statusPage: null as string | null,
     linkedin: "https://www.linkedin.com/company/strativu" as string | null,
     github: null as string | null,
+    instagram: "https://www.instagram.com/strativu/" as string | null,
   },
 };

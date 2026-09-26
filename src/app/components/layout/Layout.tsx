@@ -24,6 +24,7 @@ const FOOTER: { label: string; to?: string; href?: string }[] = [
   { label: "Contact", to: "/company/contact" },
   { label: "Changelog", to: "/changelog" },
   ...(site.company.linkedin ? [{ label: "LinkedIn", href: site.company.linkedin }] : []),
+  ...(site.company.instagram ? [{ label: "Instagram", href: site.company.instagram }] : []),
   ...(site.company.github ? [{ label: "GitHub", href: site.company.github }] : []),
   ...(site.company.statusPage ? [{ label: "Status", href: site.company.statusPage }] : []),
 ];
