@@ -216,7 +216,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             {[0, 1].map((k) => (
               <span
                 key={k}
-                className="shrink-0 whitespace-nowrap pr-[0.4em] text-[clamp(72px,13vw,210px)] font-semibold leading-[1] tracking-[-0.05em] text-ink-4/60"
+                className="shrink-0 whitespace-nowrap pr-[0.4em] text-[clamp(72px,13vw,210px)] font-semibold leading-[1] tracking-[-0.035em] text-ink-4/60"
               >
                 {FOOTER_WORDS.join(".")}.
               </span>

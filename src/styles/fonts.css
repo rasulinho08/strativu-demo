@@ -1,6 +1,9 @@
 /*
-  Strativu type system.
-  Geist        — UI + display (tight, technical, neutral)
+  Strativu type system — self-hosted (no Google Fonts request; faster and better for privacy).
+  Manrope      — UI + display (geometric, modern, professional)
   JetBrains    — data, IDs, labels, timestamps
+  Şrifti dəyişmək üçün: burada paketi, theme.css-də isə --font-sans dəyişin.
 */
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import '@fontsource-variable/manrope';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';

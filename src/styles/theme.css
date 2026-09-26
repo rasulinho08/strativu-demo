@@ -90,7 +90,7 @@
   --ring: rgba(21, 87, 240, 0.40);
   --shadow: var(--e2);
 
-  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: "Manrope Variable", "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--font-sans);
   --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -220,7 +220,7 @@
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
     line-height: 1.6;
-    font-feature-settings: "ss01", "cv11";
+    font-weight: 450;
     overflow-x: hidden;
   }
   h1, h2, h3, h4, h5, h6 {
@@ -253,20 +253,20 @@
   /* ─────────── fluid type scale ─────────── */
   .t-display {
     font-size: clamp(46px, 8.2vw, 116px);
-    line-height: 0.98;
-    letter-spacing: -0.045em;
+    line-height: 1;
+    letter-spacing: -0.032em;
     font-weight: 600;
   }
   .t-h1 {
     font-size: clamp(36px, 5.4vw, 72px);
-    line-height: 1.02;
-    letter-spacing: -0.038em;
+    line-height: 1.04;
+    letter-spacing: -0.028em;
     font-weight: 600;
   }
   .t-h2 {
     font-size: clamp(30px, 3.8vw, 52px);
-    line-height: 1.06;
-    letter-spacing: -0.034em;
+    line-height: 1.08;
+    letter-spacing: -0.024em;
     font-weight: 600;
   }
   .t-h3 {

@@ -111,8 +111,7 @@ function Beliefs() {
             <div className="mt-10 space-y-16">
               {BELIEFS.map((b, i) => (
                 <div key={i}>
-                  <span className="font-mono text-[13px] text-ink-3">0{i + 1}</span>
-                  <h3 className="t-h2 mt-4 text-ink">{b.title}</h3>
+                  <h3 className="t-h2 text-ink">{b.title}</h3>
                   <p className="mt-5 max-w-[48ch] text-[17px] leading-[1.65] text-ink-2">{b.body}</p>
                 </div>
               ))}
@@ -139,10 +138,7 @@ function Beliefs() {
                   exit={{ opacity: 0, y: -28, filter: "blur(6px)" }}
                   transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <span className="font-mono text-[13px] text-ink-3">
-                    0{active + 1} / 0{BELIEFS.length}
-                  </span>
-                  <h3 className="t-h1 mt-5 text-ink">{b.title}</h3>
+                  <h3 className="t-h1 text-ink">{b.title}</h3>
                   <p className="mt-6 max-w-[48ch] text-[17px] leading-[1.65] text-ink-2">{b.body}</p>
                 </motion.div>
               </AnimatePresence>
@@ -183,6 +179,43 @@ function WorkShot() {
   );
 }
 
+/* ── One figure: a brand line draws across the top, the number counts up, a short label below ── */
+function Fact({ value, label, i }: { value: number; label: string; i: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "0px 0px -15% 0px" });
+  const reduce = useReducedMotion();
+  return (
+    <div
+      ref={ref}
+      className={[
+        "relative pb-10 pt-8 md:pb-2 md:pr-6",
+        // mobil 2×2: sağ sütunda sol xətt; masaüstü 4 sütun: birincidən başqa hamısında sol xətt
+        i % 2 === 1 ? "border-l border-line pl-6" : "pr-6",
+        i > 0 ? "md:border-l md:border-line md:pl-8" : "",
+      ].join(" ")}
+    >
+      {/* üst xətt: boz fon + görünəndə soldan sağa çəkilən brend xətti */}
+      <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-line" />
+      <motion.span
+        aria-hidden
+        className="absolute left-0 top-0 h-[2px] w-full origin-left bg-brand"
+        initial={reduce ? false : { scaleX: 0 }}
+        animate={inView || reduce ? { scaleX: 1 } : { scaleX: 0 }}
+        transition={{ duration: 1.1, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
+      />
+      <dt className="sr-only">{label}</dt>
+      <dd>
+        <span className="block text-[clamp(56px,7vw,104px)] font-semibold leading-[0.9] tracking-[-0.04em] text-ink">
+          <CountUp to={value} />
+        </span>
+        <span className="mt-5 block max-w-[20ch] font-mono text-[12px] uppercase leading-[1.6] tracking-[0.12em] text-ink-3">
+          {label}
+        </span>
+      </dd>
+    </div>
+  );
+}
+
 /* ── A number that counts up once when it scrolls into view ── */
 function CountUp({ to }: { to: number }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -215,7 +248,7 @@ function FrameworkMarquee() {
   const row = (hidden?: boolean) => (
     <ul className="flex shrink-0 items-center" aria-hidden={hidden || undefined}>
       {names.map((n) => (
-        <li key={n} className="flex items-center gap-10 whitespace-nowrap pr-10 text-[clamp(20px,2.4vw,32px)] tracking-[-0.02em] text-ink-2">
+        <li key={n} className="flex items-center gap-10 whitespace-nowrap pr-10 text-[clamp(20px,2.4vw,32px)] tracking-[-0.015em] text-ink-2">
           <span className="h-1.5 w-1.5 rounded-full bg-brand/60" aria-hidden />
           {n}
         </li>
@@ -251,7 +284,7 @@ export default function Home() {
             className="mx-auto mb-14 hidden h-auto w-[min(56vw,300px)] motion-reduce:block"
           />
           <Stagger>
-            <h1 className="mx-auto max-w-[16ch] text-[clamp(40px,6vw,84px)] font-semibold leading-[1] tracking-[-0.045em] text-ink">
+            <h1 className="mx-auto max-w-[16ch] text-[clamp(40px,6vw,84px)] font-semibold leading-[1.02] tracking-[-0.032em] text-ink">
               Compliance evidence, <span className="text-brand">engineered.</span>
             </h1>
             <p className="chapter mt-7">
@@ -323,24 +356,15 @@ export default function Home() {
       {/* ── 06 In numbers (all from the site's own data) ── */}
       <section className="py-24 md:py-36">
         <Container>
-          <Lane>
-            <Reveal>
-              <p className="eyebrow">In numbers</p>
-            </Reveal>
-            <dl className="mt-10 grid grid-cols-2 gap-x-8 gap-y-12 border-t border-line pt-10">
-              {FACTS.map((f, i) => (
-                <Reveal key={f.label} delay={i * 0.06}>
-                  <dt className="sr-only">{f.label}</dt>
-                  <dd>
-                    <span className="block text-[clamp(48px,6vw,84px)] font-semibold leading-none tracking-[-0.045em] text-ink">
-                      <CountUp to={f.value} />
-                    </span>
-                    <span className="mt-3 block max-w-[22ch] text-[15px] leading-[1.5] text-ink-2">{f.label}</span>
-                  </dd>
-                </Reveal>
-              ))}
-            </dl>
-          </Lane>
+          <Reveal>
+            <p className="eyebrow">In numbers</p>
+            <h2 className="t-h2 mt-5 max-w-[18ch] text-ink">The platform in figures.</h2>
+          </Reveal>
+          <dl className="mt-14 grid grid-cols-2 md:grid-cols-4">
+            {FACTS.map((f, i) => (
+              <Fact key={f.label} value={f.value} label={f.label} i={i} />
+            ))}
+          </dl>
         </Container>
       </section>
 
