@@ -11,8 +11,7 @@ import { site } from "../../data/site";
 export function Wordmark({ className = "" }: { className?: string }) {
   return (
     <span
-      className={`font-semibold text-[19px] leading-none tracking-[-0.02em] bg-clip-text text-transparent ${className}`}
-      style={{ backgroundImage: "linear-gradient(90deg, #5FDBFF 0%, #4C93FF 100%)" }}
+      className={`font-semibold text-[19px] leading-none tracking-[-0.02em] text-ink ${className}`}
     >
       Strativu
     </span>

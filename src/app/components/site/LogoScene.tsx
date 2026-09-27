@@ -104,7 +104,7 @@ const SCROLL_SHIFT = 0.05;
  */
 const GROUND = {
   light: { shadow: 0.34, glow: 0, shadowColor: "#0A1A33", glowColor: "#2F8FEA" },
-  dark: { shadow: 0.6, glow: 0.3, shadowColor: "#000000", glowColor: "#1466D6" },
+  dark: { shadow: 0.6, glow: 0.1, shadowColor: "#000000", glowColor: "#2A4677" },
   width: 1.16,
   height: 0.2,
   drop: 0.012,
@@ -175,12 +175,12 @@ const TRAILS = {
   life: 1.6,
   maxPoints: 110,
   width: 3.2,
-  glow: 4.5,
-  opacity: 0.9,
+  glow: 2.2,
+  opacity: 0.5,
   /** İz yalnız kürə ekranda bundan sürətli hərəkət edəndə yaranır (px/san) — boş dayananda iz yoxdur. */
   minSpeed: 40,
-  colorLight: "#0A8BEB",
-  colorDark: "#3FD8FF",
+  colorLight: "#6F8BB8",
+  colorDark: "#8FA6CF",
 };
 /**
  * Bloom. strength: parıltının gücü (0 = söndürülür, post-processing ümumiyyətlə qurulmur),
@@ -537,7 +537,7 @@ export function LogoScene() {
         trailDirty = any;
         if (!any) return;
         const dark = document.documentElement.classList.contains("dark");
-        tctx.globalCompositeOperation = dark ? "lighter" : "source-over";
+        tctx.globalCompositeOperation = "source-over"; // neon kimi parlamasın
         tctx.strokeStyle = dark ? TRAILS.colorDark : TRAILS.colorLight;
         tctx.lineCap = "butt"; // yuvarlaq uclar üst-üstə düşüb "muncuq" effekti yaradırdı
         tctx.lineJoin = "round";

@@ -45,8 +45,8 @@
   --info: #6B5BD2;
 
   /* ── ambience ── */
-  --glow-1: rgba(63, 210, 255, 0.30);
-  --glow-2: rgba(21, 87, 240, 0.20);
+  --glow-1: rgba(10, 111, 224, 0.10);
+  --glow-2: rgba(10, 111, 224, 0.08);
   --glow-3: rgba(107, 91, 210, 0.14);
   --grain-opacity: 0.030;
   --grid-line: rgba(10, 14, 22, 0.045);
@@ -114,14 +114,14 @@
   --ink-3: #6F7B8D;
   --ink-4: #566171;
 
-  --brand: #22B8FF;
-  --brand-ink: #7FD6FF;
-  --brand-lift: #5FDBFF;
+  --brand: #6E97EA;
+  --brand-ink: #A9C1F2;
+  --brand-lift: #8FAEEE;
   --brand-soft: #0E1F37;
   --brand-line: #1E3A63;
-  --on-brand: #02101C;
-  --brand-grad: linear-gradient(120deg, #6BE3FF 0%, #03C1FD 35%, #0A7BE6 70%, #0159C5 100%);
-  --brand-grad-soft: linear-gradient(135deg, rgba(95, 219, 255, 0.14) 0%, rgba(42, 92, 240, 0.12) 100%);
+  --on-brand: #04070D;
+  --brand-grad: linear-gradient(120deg, #8FAEEE 0%, #6E97EA 100%);
+  --brand-grad-soft: linear-gradient(135deg, rgba(110, 151, 234, 0.08) 0%, rgba(110, 151, 234, 0.06) 100%);
 
   --ok: #4FBF8E;
   --ok-soft: #0D2219;
@@ -129,8 +129,8 @@
   --warn-soft: #2A1512;
   --info: #A99BFF;
 
-  --glow-1: rgba(3, 193, 253, 0.22);
-  --glow-2: rgba(42, 92, 240, 0.22);
+  --glow-1: rgba(110, 151, 234, 0.10);
+  --glow-2: rgba(110, 151, 234, 0.08);
   --glow-3: rgba(140, 110, 255, 0.16);
   --grain-opacity: 0.045;
   --grid-line: rgba(255, 255, 255, 0.045);
@@ -139,7 +139,7 @@
   --e1: 0 1px 2px rgba(0, 0, 0, 0.5);
   --e2: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 24px -14px rgba(0, 0, 0, 0.9);
   --e3: 0 1px 3px rgba(0, 0, 0, 0.6), 0 32px 70px -36px rgba(0, 0, 0, 1), 0 2px 10px -4px rgba(63, 178, 255, 0.14);
-  --e-brand: 0 1px 2px rgba(0, 0, 0, 0.6), 0 14px 32px -16px rgba(76, 147, 255, 0.55);
+  --e-brand: 0 1px 2px rgba(0, 0, 0, 0.6), 0 10px 24px -16px rgba(0, 0, 0, 0.8);
 
   --ring: rgba(91, 156, 255, 0.45);
 }
@@ -456,18 +456,6 @@
 
 /* ─────────── v3 "cinematic" additions ─────────── */
 @layer components {
-  .text-grad {
-    background: var(--brand-grad);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .btn-grad {
-    background: var(--brand-grad);
-    color: #fff;
-    box-shadow: 0 10px 30px -12px rgba(3, 193, 253, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  }
-  .btn-grad:hover { filter: brightness(1.08); }
   .glass-pill {
     background: color-mix(in srgb, var(--surface) 62%, transparent);
     backdrop-filter: blur(18px) saturate(160%);
@@ -529,10 +517,10 @@
   --ql-vignette: 0;
 }
 .dark {
-  --ql-key: 16 46 104;
-  --ql-key-a: 0.76;
-  --ql-floor: 11 31 66;
-  --ql-floor-a: 0.8;
+  --ql-key: 20 34 60;
+  --ql-key-a: 0.6;
+  --ql-floor: 14 24 42;
+  --ql-floor-a: 0.6;
   --ql-vignette: 0.42;
 }
 .quiet-light {
