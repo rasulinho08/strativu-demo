@@ -27,7 +27,7 @@ export function Platform() {
       <PageHeader
         eyebrow="Platform"
         title="One model for governance, risk and compliance."
-        lead="One object graph under an append-only audit trail, shared by every product we build. GRC is the first."
+        lead="One object graph under an append-only audit trail, shared by every product we build. GRC 360 is the first."
       />
 
       <Section>
@@ -49,7 +49,7 @@ export function Platform() {
             className="mt-8"
             items={[
               {
-                title: "GRC",
+                title: "GRC 360",
                 body: "Control and risk registers, automated evidence, cross-framework mapping and audit-ready reporting.",
                 meta: site.status.label,
                 to: "/platform/grc",
@@ -66,11 +66,11 @@ export function Platform() {
 }
 
 export function PlatformGRC() {
-  usePageMeta("GRC product", "A GRC product where the control register is the system of record: one control set, collector-attached evidence, a hash-chained audit trail.");
+  usePageMeta("GRC 360", "GRC 360, a GRC product where the control register is the system of record: one control set, collector-attached evidence, a hash-chained audit trail.");
   return (
     <>
       <PageHeader
-        eyebrow={`Platform · GRC · ${site.status.label}`}
+        eyebrow={`Platform · GRC 360 · ${site.status.label}`}
         title="The control register is the system of record."
         lead="One control set, evidence attached by collectors, and an audit trail your auditor can read directly."
       >
@@ -90,7 +90,7 @@ export function PlatformGRC() {
                     src="/projects/grc.webp"
                     width={1800}
                     height={811}
-                    alt="Strativu GRC development build: command centre with expired, today and future task lists and an asset-risk heat map."
+                    alt="GRC 360 development build: command centre with expired, today and future task lists and an asset-risk heat map."
                     className="block h-auto w-full"
                     loading="lazy"
                     decoding="async"

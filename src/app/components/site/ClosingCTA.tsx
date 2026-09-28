@@ -8,7 +8,7 @@ import { site } from "../../data/site";
  */
 export function ClosingCTA({
   title = "Every claim on this site should survive “can you show me?”",
-  body = "That is the constraint we build under. If you run a security or compliance programme and want to shape what the GRC product becomes, early access is open to a small number of teams.",
+  body = "That is the constraint we build under. If you run a security or compliance programme and want to shape what GRC 360 becomes, early access is open to a small number of teams.",
   stage = false,
 }: {
   title?: string;

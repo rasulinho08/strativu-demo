@@ -13,7 +13,7 @@ const STATUS_NOTE: Record<FrameworkStatus, string> = {
 };
 
 export function Coverage() {
-  usePageMeta("Coverage", "Frameworks and regulations the Strativu GRC product maps to, with an honest status for each: supported, mapping, or planned.");
+  usePageMeta("Coverage", "Frameworks and regulations GRC 360 maps to, with an honest status for each: supported, mapping, or planned.");
   return (
     <>
       <PageHeader

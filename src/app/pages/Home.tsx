@@ -169,7 +169,7 @@ function WorkShot() {
           src="/projects/grc.webp"
           width={1800}
           height={811}
-          alt="Strativu GRC development build: command centre with task lists and an asset-risk heat map."
+          alt="GRC 360 development build: command centre with task lists and an asset-risk heat map."
           className="block h-auto w-full"
           loading="lazy"
           decoding="async"
@@ -338,7 +338,7 @@ export default function Home() {
           <Lane>
             <Reveal>
               <p className="eyebrow">Our work</p>
-              <h2 className="t-h2 mt-5 text-ink">Strativu GRC</h2>
+              <h2 className="t-h2 mt-5 text-ink">GRC 360</h2>
               <p className="mt-4 max-w-[48ch] text-[17px] leading-[1.6] text-ink-2">
                 Our first product, in active development. This is the working build.
               </p>

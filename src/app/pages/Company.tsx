@@ -111,7 +111,7 @@ export function Contact() {
 }
 
 export function EarlyAccess() {
-  usePageMeta("Early access", "Early access to the Strativu GRC product for teams that run a compliance programme against a supported framework.");
+  usePageMeta("Early access", "Early access to GRC 360 for teams that run a compliance programme against a supported framework.");
   return (
     <>
       <PageHeader
