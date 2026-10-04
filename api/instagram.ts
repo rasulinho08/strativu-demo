@@ -27,8 +27,8 @@ export default async function handler(_req: unknown, res: {
 }) {
   const token = process.env.INSTAGRAM_TOKEN;
   if (!token) {
-    res.setHeader("Cache-Control", "s-maxage=300");
-    return res.status(200).json({ posts: [] });
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(200).json({ posts: [], reason: "no_token" });
   }
   try {
     const url =
@@ -36,7 +36,17 @@ export default async function handler(_req: unknown, res: {
       "?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp" +
       `&limit=${LIMIT}&access_token=${encodeURIComponent(token)}`;
     const r = await fetch(url);
-    if (!r.ok) throw new Error(`instagram ${r.status}`);
+    if (!r.ok) {
+      // Səbəbi göstər (token heç vaxt cavaba yazılmır): məs. 190 = token etibarsız/vaxtı keçib.
+      const err = (await r.json().catch(() => null)) as { error?: { code?: number; type?: string } } | null;
+      res.setHeader("Cache-Control", "no-store");
+      return res.status(200).json({
+        posts: [],
+        reason: `instagram_${r.status}`,
+        code: err?.error?.code ?? null,
+        type: err?.error?.type ?? null,
+      });
+    }
     const data = (await r.json()) as { data?: IgMedia[] };
     const posts = (data.data ?? [])
       .map((m) => ({
@@ -50,8 +60,8 @@ export default async function handler(_req: unknown, res: {
     res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate=86400");
     return res.status(200).json({ posts });
   } catch {
-    // Instagram əlçatan deyil və ya token vaxtı keçib: bölməni gizlət, saytı sındırma.
-    res.setHeader("Cache-Control", "s-maxage=300");
-    return res.status(200).json({ posts: [] });
+    // Instagram əlçatan deyil: bölməni gizlət, saytı sındırma.
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(200).json({ posts: [], reason: "fetch_failed" });
   }
 }
