@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { Logo } from "../site/Logo";
 import { Btn, Container } from "../site/primitives";
@@ -42,9 +42,24 @@ export default function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  /** Aşağı scroll edəndə header gizlənir, yuxarı edəndə qayıdır. */
+  const [hidden, setHidden] = useState(false);
+  /** Siçanın üzərində olduğu link (sürüşən vurğu üçün). */
+  const [hovered, setHovered] = useState<string | null>(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, { stiffness: 200, damping: 30, restDelta: 0.001 });
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 8);
+      if (Math.abs(y - lastY) > 6) {
+        setHidden(y > lastY && y > 160);
+        lastY = y;
+      }
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -80,30 +95,59 @@ export default function Layout({ children }: { children: ReactNode }) {
       </a>
 
       {/* ─── Header: floating rounded bar. Logo left · pages centre · Contact, theme, Early access right ─── */}
-      <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-5 md:pt-4">
+      <header
+        className={`fixed inset-x-0 top-0 z-50 px-3 pt-3 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:px-5 md:pt-4 ${
+          hidden && !open && !reduce ? "-translate-y-[120%]" : "translate-y-0"
+        }`}
+      >
         <div
-          className={`relative mx-auto flex h-14 max-w-[1240px] items-center justify-between gap-4 rounded-full border pl-5 pr-2 transition-[background-color,border-color,box-shadow] duration-300 md:h-16 md:pl-6 ${
+          className={`relative mx-auto flex items-center justify-between gap-4 overflow-hidden rounded-full border pl-5 pr-2 transition-[max-width,height,background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:pl-6 ${
             scrolled || open
-              ? "border-line bg-[color-mix(in_srgb,var(--ground)_88%,transparent)] shadow-[var(--e2)] backdrop-blur-xl"
-              : "border-line/70 bg-[color-mix(in_srgb,var(--ground)_55%,transparent)] backdrop-blur-md"
+              ? "h-14 max-w-[1080px] border-line bg-[color-mix(in_srgb,var(--ground)_88%,transparent)] shadow-[var(--e2)] backdrop-blur-xl"
+              : "h-14 max-w-[1240px] border-line/70 bg-[color-mix(in_srgb,var(--ground)_55%,transparent)] backdrop-blur-md md:h-16"
           }`}
         >
+          {/* səhifə boyu irəliləyiş xətti */}
+          <motion.span
+            aria-hidden
+            style={{ scaleX: progress }}
+            className={`pointer-events-none absolute inset-x-6 bottom-0 h-px origin-left bg-brand/70 transition-opacity duration-300 ${
+              scrolled ? "opacity-100" : "opacity-0"
+            }`}
+          />
           <Logo />
 
-          <nav aria-label="Primary" className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex">
-            {NAV.map((n) => (
-              <NavLink
-                key={n.to}
-                to={n.to}
-                className={({ isActive }) =>
-                  `rounded-full px-4 py-2 text-[15px] transition-colors duration-200 ${
-                    isActive ? "bg-surface-2 text-ink" : "text-ink-2 hover:text-ink"
-                  }`
-                }
-              >
-                {n.label}
-              </NavLink>
-            ))}
+          <nav
+            aria-label="Primary"
+            className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex"
+            onMouseLeave={() => setHovered(null)}
+          >
+            {NAV.map((n) => {
+              const active = location.pathname === n.to || location.pathname.startsWith(n.to.split("/").slice(0, 2).join("/") + "/");
+              const lit = hovered ? hovered === n.to : active;
+              return (
+                <NavLink
+                  key={n.to}
+                  to={n.to}
+                  onMouseEnter={() => setHovered(n.to)}
+                  onFocus={() => setHovered(n.to)}
+                  className={`relative isolate rounded-full px-4 py-2 text-[15px] transition-colors duration-200 ${
+                    lit ? "text-ink" : "text-ink-2 hover:text-ink"
+                  }`}
+                >
+                  {/* siçanı izləyən yumşaq vurğu: linkdən linkə sürüşür */}
+                  {lit && (
+                    <motion.span
+                      layoutId="nav-pill"
+                      aria-hidden
+                      className="absolute inset-0 -z-10 rounded-full bg-ink/[0.07]"
+                      transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                    />
+                  )}
+                  {n.label}
+                </NavLink>
+              );
+            })}
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
