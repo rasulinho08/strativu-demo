@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { Logo } from "../site/Logo";
-import { Container } from "../site/primitives";
+import { Btn, Container } from "../site/primitives";
 import { LogoScene } from "../site/LogoScene";
 import { ThemeToggle } from "../theme-toggle";
 import { site } from "../../data/site";
@@ -79,42 +79,46 @@ export default function Layout({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      {/* ─── Header: minimal, sticky. Logo + pages left, Contact + theme right ─── */}
-      <header
-        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color] duration-300 ${
-          scrolled || open
-            ? "border-b border-line bg-[color-mix(in_srgb,var(--ground)_92%,transparent)] backdrop-blur-xl"
-            : "border-b border-transparent"
-        }`}
-      >
-        <Container className="flex h-16 items-center justify-between gap-6">
-          <div className="flex items-center gap-10">
-            <Logo />
-            <nav aria-label="Primary" className="hidden items-center gap-7 lg:flex">
-              {NAV.map((n) => (
-                <NavLink
-                  key={n.to}
-                  to={n.to}
-                  className={({ isActive }) =>
-                    `text-[14px] transition-colors duration-200 ${isActive ? "text-ink" : "text-ink-3 hover:text-ink"}`
-                  }
-                >
-                  {n.label}
-                </NavLink>
-              ))}
-            </nav>
-          </div>
+      {/* ─── Header: floating rounded bar. Logo left · pages centre · Contact, theme, Early access right ─── */}
+      <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-5 md:pt-4">
+        <div
+          className={`relative mx-auto flex h-14 max-w-[1240px] items-center justify-between gap-4 rounded-full border pl-5 pr-2 transition-[background-color,border-color,box-shadow] duration-300 md:h-16 md:pl-6 ${
+            scrolled || open
+              ? "border-line bg-[color-mix(in_srgb,var(--ground)_88%,transparent)] shadow-[var(--e2)] backdrop-blur-xl"
+              : "border-line/70 bg-[color-mix(in_srgb,var(--ground)_55%,transparent)] backdrop-blur-md"
+          }`}
+        >
+          <Logo />
 
-          <div className="hidden items-center gap-3 lg:flex">
+          <nav aria-label="Primary" className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex">
+            {NAV.map((n) => (
+              <NavLink
+                key={n.to}
+                to={n.to}
+                className={({ isActive }) =>
+                  `rounded-full px-4 py-2 text-[15px] transition-colors duration-200 ${
+                    isActive ? "bg-surface-2 text-ink" : "text-ink-2 hover:text-ink"
+                  }`
+                }
+              >
+                {n.label}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="hidden items-center gap-2 lg:flex">
             <NavLink
               to="/company/contact"
               className={({ isActive }) =>
-                `text-[14px] transition-colors duration-200 ${isActive ? "text-ink" : "text-ink-3 hover:text-ink"}`
+                `px-3 text-[15px] transition-colors duration-200 ${isActive ? "text-ink" : "text-ink-2 hover:text-ink"}`
               }
             >
               Contact
             </NavLink>
-            <ThemeToggle className="text-ink-3 hover:bg-surface-2 hover:text-ink" />
+            <ThemeToggle className="text-ink-2 hover:bg-surface-2 hover:text-ink" />
+            <Btn to="/early-access" size="md" className="ml-1">
+              Early access
+            </Btn>
           </div>
 
           <div className="flex items-center gap-1 lg:hidden">
@@ -129,7 +133,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               {open ? <X className="h-5 w-5" strokeWidth={1.75} /> : <Menu className="h-5 w-5" strokeWidth={1.75} />}
             </button>
           </div>
-        </Container>
+        </div>
 
         {/* ─── Mobile menu ─── */}
       </header>
@@ -144,7 +148,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-y-auto bg-ground lg:hidden"
+            className="fixed inset-0 z-40 overflow-y-auto bg-ground pt-24 lg:hidden"
           >
             <Container className="flex h-full flex-col pt-4">
               <div className="flex flex-col">
@@ -161,7 +165,10 @@ export default function Layout({ children }: { children: ReactNode }) {
                 ))}
               </div>
               <div className="mt-8">
-                <p className="text-[13px] text-ink-3">
+                <Btn to="/early-access" size="lg" className="w-full">
+                  Early access
+                </Btn>
+                <p className="mt-5 text-[13px] text-ink-3">
                   {site.status.label} · {site.status.detail}
                 </p>
               </div>
