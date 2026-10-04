@@ -1,7 +1,9 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { Btn, Container, Eyebrow, Lane, PageHeader, Rows, Section, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
 import { site } from "../data/site";
+import { grcFigures, grcFrameworkPackages, grcIntegrations, grcModules, grcStatus } from "../data/grc360";
 import { usePageMeta } from "../components/site/Seo";
 
 /**
@@ -65,14 +67,74 @@ export function Platform() {
   );
 }
 
+/* ── Module explorer: one row per module, opens to show what it does and its screens ── */
+function ModuleExplorer() {
+  const [openIdx, setOpenIdx] = useState<number | null>(0);
+  return (
+    <ul className="mt-10 border-t border-line">
+      {grcModules.map((m, i) => {
+        const open = openIdx === i;
+        return (
+          <li key={m.name} className="border-b border-line">
+            <button
+              type="button"
+              onClick={() => setOpenIdx(open ? null : i)}
+              aria-expanded={open}
+              className="group grid w-full grid-cols-[40px_1fr_auto] items-baseline gap-x-4 py-5 text-left md:grid-cols-[56px_1fr_auto]"
+            >
+              <span className="font-mono text-[13px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
+              <span className={`text-[clamp(19px,1.8vw,24px)] font-semibold tracking-[-0.02em] transition-colors ${open ? "text-brand" : "text-ink group-hover:text-brand"}`}>
+                {m.name}
+              </span>
+              <span
+                aria-hidden
+                className={`text-[20px] leading-none text-ink-3 transition-transform duration-300 ${open ? "rotate-45" : ""}`}
+              >
+                +
+              </span>
+            </button>
+            <AnimatePresence initial={false}>
+              {open && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="pb-6 pl-[56px] md:pl-[72px]">
+                    <p className="max-w-[52ch] text-[16px] leading-[1.6] text-ink-2">{m.does}</p>
+                    {m.screens.length > 0 && (
+                      <ul className="mt-4 flex flex-wrap gap-2">
+                        {m.screens.map((sc) => (
+                          <li key={sc} className="rounded-full border border-line px-3 py-1 text-[13px] text-ink-2">
+                            {sc}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 export function PlatformGRC() {
-  usePageMeta("GRC 360", "GRC 360, a GRC product where the control register is the system of record: one control set, collector-attached evidence, a hash-chained audit trail.");
+  usePageMeta(
+    "GRC 360",
+    "GRC 360 brings risks, assets, vendors, controls, audits and incidents into one connected system: one control set for every framework, evidence collected automatically, and a public Trust Center."
+  );
   return (
     <>
       <PageHeader
         eyebrow={`Platform · GRC 360 · ${site.status.label}`}
-        title="The control register is the system of record."
-        lead="One control set, evidence attached by collectors, and an audit trail your auditor can read directly."
+        title="Governance, risk and compliance. All of it, in one place."
+        lead="Twelve connected modules: risks, assets, vendors, controls, audits and incidents live in one system instead of a folder of spreadsheets."
       >
         <Btn to="/early-access" size="lg">
           Request early access
@@ -90,14 +152,14 @@ export function PlatformGRC() {
                     src="/projects/grc.webp"
                     width={1800}
                     height={811}
-                    alt="GRC 360 development build: command centre with expired, today and future task lists and an asset-risk heat map."
+                    alt="GRC 360 development build: command centre with overdue, today and upcoming task lists and an asset-risk heat map."
                     className="block h-auto w-full"
                     loading="lazy"
                     decoding="async"
                   />
                 </div>
                 <figcaption className="mt-3 font-mono text-[11px] text-ink-3">
-                  Development build, September 2026. Data is illustrative.
+                  Command Center, development build. Data is illustrative.
                 </figcaption>
               </figure>
             </Reveal>
@@ -105,17 +167,53 @@ export function PlatformGRC() {
         </Container>
       </div>
 
-      <Section id="mapping">
+      {/* Figures — only numbers verified in the product */}
+      <Section>
+        <Lane>
+          <dl className="grid grid-cols-2 gap-x-8 gap-y-10 border-t border-line pt-10 md:grid-cols-4">
+            {grcFigures.map((f, i) => (
+              <Reveal key={f.label} delay={i * 0.06}>
+                <dt className="sr-only">{f.label}</dt>
+                <dd>
+                  <span className="block text-[clamp(44px,5vw,72px)] font-semibold leading-none tracking-[-0.04em] text-ink">
+                    {f.value}
+                  </span>
+                  <span className="mt-3 block font-mono text-[12px] uppercase leading-[1.5] tracking-[0.12em] text-ink-3">
+                    {f.label}
+                  </span>
+                </dd>
+              </Reveal>
+            ))}
+          </dl>
+        </Lane>
+      </Section>
+
+      {/* Modules */}
+      <Section id="modules" className="pt-0 md:pt-0">
         <Lane>
           <Reveal>
-            <Eyebrow>Controls</Eyebrow>
+            <Eyebrow>Modules</Eyebrow>
+            <h2 className="t-h2 text-ink">Twelve modules. One model underneath.</h2>
+            <p className={BODY}>Every module reads and writes the same registers, so a risk, the asset it affects, the control that treats it and the audit finding that tests it stay linked.</p>
+          </Reveal>
+          <ModuleExplorer />
+        </Lane>
+      </Section>
+
+      <Section id="mapping" className="pt-0 md:pt-0">
+        <Lane>
+          <Reveal>
+            <Eyebrow>One control, many frameworks</Eyebrow>
             <h2 className="t-h2 text-ink">Write a control once. Map it everywhere.</h2>
             <p className={BODY}>
-              Each control carries the ISO/IEC 27002:2022 attributes and maps to every framework you are audited against. Adding SOC 2 to
-              an ISO programme becomes a gap review, not a second register.
+              A control is written once and linked to ISO 27001, SOC 2, NIST and PCI DSS requirements at the same time. Adding a framework
+              becomes a gap review, not a second register.
+            </p>
+            <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">
+              Framework packages: {grcFrameworkPackages.join(" · ")}
             </p>
             <div className="mt-8">
-              <TextLink to="/coverage">Frameworks we map to</TextLink>
+              <TextLink to="/coverage">Coverage and status per framework</TextLink>
             </div>
           </Reveal>
         </Lane>
@@ -125,13 +223,26 @@ export function PlatformGRC() {
         <Lane>
           <Reveal>
             <Eyebrow>Evidence</Eyebrow>
-            <h2 className="t-h2 text-ink">Collectors, not screenshots.</h2>
+            <h2 className="t-h2 text-ink">Evidence that collects itself.</h2>
             <p className={BODY}>
-              Collectors read configuration from cloud, identity and source-control systems on a schedule and attach it to the controls
-              it proves. Every artefact is hashed on ingest and re-verified on read.
+              Collectors check your cloud, identity and source-control systems on a schedule and attach the result to the control it
+              proves. A failed check opens a Jira ticket and posts a Slack alert, so issues are fixed before the audit, not during it.
             </p>
             <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">
-              Collectors today: AWS IAM, GitHub. In progress: Okta, Cloudflare, Google Workspace, Microsoft Entra ID.
+              Live today: AWS IAM, GitHub. Integration catalogue: {grcIntegrations.join(", ")}.
+            </p>
+          </Reveal>
+        </Lane>
+      </Section>
+
+      <Section id="trust-center" className="pt-0 md:pt-0">
+        <Lane>
+          <Reveal>
+            <Eyebrow>Trust Center</Eyebrow>
+            <h2 className="t-h2 text-ink">Answer security questionnaires before they arrive.</h2>
+            <p className={BODY}>
+              A public Trust Center shows your customers your certifications, controls, subprocessors and documents in one place, so
+              less time goes into answering the same questions over and over.
             </p>
           </Reveal>
         </Lane>
@@ -152,6 +263,35 @@ export function PlatformGRC() {
             <div className="mt-8">
               <TextLink to="/platform/architecture#audit-trail">How the chain is verified</TextLink>
             </div>
+          </Reveal>
+        </Lane>
+      </Section>
+
+      <Section id="local" className="pt-0 md:pt-0">
+        <Lane>
+          <Reveal>
+            <Eyebrow>Built in Baku</Eyebrow>
+            <h2 className="t-h2 text-ink">Local law, mapped like any other framework.</h2>
+            <p className={BODY}>
+              The Law of the Republic of Azerbaijan on Personal Data (No. 998-IIIQ) is being mapped onto the same control set, next to
+              GDPR, so one programme covers both.
+            </p>
+          </Reveal>
+        </Lane>
+      </Section>
+
+      <Section id="status" className="pt-0 md:pt-0">
+        <Lane>
+          <Reveal>
+            <Eyebrow>Where it stands</Eyebrow>
+            <h2 className="t-h2 text-ink">Built in the open.</h2>
+          </Reveal>
+          <Rows className="mt-10" items={grcStatus.map((st) => ({ title: st.k, body: st.v }))} />
+          <Reveal className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
+            <Btn to="/early-access" size="lg">
+              Request early access
+            </Btn>
+            <TextLink to="/changelog">Build log</TextLink>
           </Reveal>
         </Lane>
       </Section>
