@@ -11,39 +11,27 @@ export type ChangelogEntry = {
 
 export const changelog: ChangelogEntry[] = [
   {
-    date: "2026-09-12",
-    title: "Cross-framework control mapping",
-    body: "A single control can now satisfy requirements in several frameworks. ISO 27001 Annex A and SOC 2 TSC share one control set; overlap is shown at requirement level.",
+    date: "2026-10-04",
+    title: "All twelve modules on the live back end",
+    body: "Every module now reads and writes through the API, with server-side paging and CSV import and export on every register.",
     tag: "product",
   },
   {
-    date: "2026-08-29",
-    title: "Immutable audit trail, first cut",
-    body: "Every write to a control, risk or evidence record is appended to a hash-chained log. Entries carry actor, tenant, timestamp and the before/after diff.",
+    date: "2026-10-04",
+    title: "Sign-in with LDAP, OAuth and SAML; permissions per action",
+    body: "LDAP and Active Directory, OAuth and SAML single sign-on next to email and password. Permissions are granted per module and per action and checked on the server.",
     tag: "platform",
   },
   {
-    date: "2026-08-14",
-    title: "NIST CSF 2.0 coverage in progress",
-    body: "Started mapping the 106 subcategories to the shared control set. Identify and Protect functions are drafted; Detect, Respond, Recover and Govern follow.",
-    tag: "coverage",
-  },
-  {
-    date: "2026-07-31",
-    title: "Evidence collectors: AWS IAM and GitHub",
-    body: "First two automated collectors. MFA enforcement, access-key age and branch-protection state are pulled on a schedule and attached to the relevant controls.",
+    date: "2026-10-04",
+    title: "Trust Center and notifications",
+    body: "A public security page for customers, and scheduled alerts for expiring contracts and exceptions, due objective audits and overdue targets.",
     tag: "product",
   },
   {
-    date: "2026-07-17",
-    title: "Tenant isolation model finalised",
-    body: "Row-level isolation with a per-tenant encryption key, enforced at the data layer rather than in application code. Design notes are on the Architecture page.",
-    tag: "platform",
-  },
-  {
-    date: "2026-07-03",
-    title: "Risk register and control register",
-    body: "The two core registers are usable end to end: create, assign owners, link controls to risks, and export to CSV.",
+    date: "2026-09-04",
+    title: "GRC 360 front end 0.1.0",
+    body: "First versioned release of the web application: twelve modules, thirty-one screens, fully in Azerbaijani and English.",
     tag: "product",
   },
 ];

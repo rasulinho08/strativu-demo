@@ -7,19 +7,19 @@ import { frameworks, statusLabel, type FrameworkStatus } from "../data/coverage"
 import { usePageMeta } from "../components/site/Seo";
 
 const STATUS_NOTE: Record<FrameworkStatus, string> = {
-  supported: "Mapped to the shared control set and usable in the current build.",
-  "in-progress": "Being mapped now. Partial coverage is visible in the product, marked as draft.",
+  supported: "Runs as a compliance package in the current build. Requirements are added in the product or imported from CSV; a bundled catalogue is not included yet.",
+  "in-progress": "A ready-made package is being prepared.",
   planned: "On the roadmap. Priority is set by early-access participants.",
 };
 
 export function Coverage() {
-  usePageMeta("Coverage", "Frameworks and regulations GRC 360 maps to, with an honest status for each: supported, mapping, or planned.");
+  usePageMeta("Coverage", "Frameworks and regulations GRC 360 works with, with an honest status for each: supported or planned.");
   return (
     <>
       <PageHeader
         eyebrow="Coverage"
         title="Frameworks and regulations we map to."
-        lead="Each standard is a view on one shared control set."
+        lead="Each standard is a compliance package, linked to the same controls."
       />
 
       <Section className="pt-0 md:pt-0">

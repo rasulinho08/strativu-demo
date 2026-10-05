@@ -21,7 +21,7 @@ npm run typecheck  # tsc --noEmit
 | Social preview image | `public/og.png` (1200×630) |
 | Products (Platform list, home "Our work") — add a new product here | `src/app/data/products.ts` |
 | GRC 360 modules, figures, status | `src/app/data/grc360.ts` |
-| GRC development build screenshot (home "Our work" + /platform/grc) | `public/projects/grc.webp` |
+| GRC 360 screenshots and logo (gallery on /platform/grc, home "Our work") | `public/projects/grc360/` + list in `src/app/data/grc360.ts` |
 | Framework coverage və statuslar | `src/app/data/coverage.ts` |
 | Changelog girişləri | `src/app/data/changelog.ts` |
 | Rəng / şrift / radius tokenləri | `src/styles/theme.css`, `src/styles/fonts.css` |

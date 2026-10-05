@@ -66,20 +66,20 @@ const Dot = ({ tone }: { tone: "ok" | "warn" | "brand" }) => (
   />
 );
 
-/* ── 1. Evidence collectors: checks arrive one by one ── */
-const CHECKS = [
-  { src: "AWS IAM", what: "MFA enforced for all users", ok: true },
-  { src: "GitHub", what: "Branch protection on main", ok: true },
-  { src: "Okta", what: "2 inactive accounts found", ok: false },
-  { src: "AWS S3", what: "Buckets encrypted at rest", ok: true },
+/* ── 1. Scheduled alerts: expiries and due dates arrive one by one ── */
+const ALERTS = [
+  { src: "Third Parties", what: "Service agreement with CloudHost expires in 2 weeks", warn: true },
+  { src: "Governance", what: "Objective audit due: Access reviews", warn: false },
+  { src: "Risk Management", what: "Risk exception R-031 expires on 30 Oct", warn: true },
+  { src: "Governance", what: "Target overdue: Policy review cycle", warn: true },
 ];
 
-export function CollectorFeed() {
-  const { ref, step } = useTicker(1300, CHECKS.length + 1);
-  const shown = CHECKS.slice(0, Math.min(step, CHECKS.length));
+export function AlertFeed() {
+  const { ref, step } = useTicker(1300, ALERTS.length + 1);
+  const shown = ALERTS.slice(0, Math.min(step, ALERTS.length));
   return (
     <div ref={ref}>
-      <Panel title="Evidence collectors">
+      <Panel title="Notifications">
         <ul className="min-h-[268px] space-y-2.5">
           <AnimatePresence initial={false}>
             {shown.map((c) => (
@@ -93,21 +93,11 @@ export function CollectorFeed() {
                 className="rounded-[var(--r-md)] border border-line-soft px-4 py-3"
               >
                 <div className="flex items-center gap-3">
-                  <Dot tone={c.ok ? "ok" : "warn"} />
+                  <Dot tone={c.warn ? "warn" : "brand"} />
                   <span className="font-mono text-[12px] text-ink-3">{c.src}</span>
-                  <span className="ml-auto font-mono text-[11px] text-ink-3">{c.ok ? "passed" : "failed"}</span>
+                  <span className="ml-auto font-mono text-[11px] text-ink-3">{c.warn ? "action" : "scheduled"}</span>
                 </div>
                 <p className="mt-1.5 text-[14px] text-ink">{c.what}</p>
-                {!c.ok && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-1.5 font-mono text-[11.5px] text-brand"
-                  >
-                    → Jira ticket opened · Slack alert sent
-                  </motion.p>
-                )}
               </motion.li>
             ))}
           </AnimatePresence>
@@ -175,26 +165,26 @@ export function ControlMap() {
   );
 }
 
-/* ── 3. Audit trail: entries are appended, each linked to the previous hash ── */
+/* ── 3. System log: every change is written with who and when ── */
 const ENTRIES = [
-  { who: "a.mammadov", what: "updated CTL-014 owner", hash: "9f3a…c21e" },
-  { who: "collector:aws", what: "attached evidence to CTL-022", hash: "41bd…77a0" },
-  { who: "n.aliyeva", what: "accepted risk R-031", hash: "e0c4…3b9d" },
-  { who: "auditor:ext", what: "viewed CTL-014 (read-only)", hash: "7a12…f04c" },
-  { who: "t.huseynli", what: "closed finding AF-007", hash: "c88e…19b2" },
+  { who: "a.mammadov", what: "updated owner of control CTL-014", at: "09:12" },
+  { who: "n.aliyeva", what: "accepted risk R-031 as an exception", at: "09:40" },
+  { who: "admin", what: "granted Auditor group view on Compliance Hub", at: "10:05" },
+  { who: "t.huseynli", what: "closed audit finding AF-007", at: "10:31" },
+  { who: "r.karimov", what: "signed in with SAML SSO", at: "10:48" },
 ];
 
-export function AuditChain() {
+export function SystemLog() {
   const { ref, step } = useTicker(1500, ENTRIES.length);
   const visible = ENTRIES.slice(Math.max(0, step - 3), step + 1).slice(-4);
   return (
     <div ref={ref}>
-      <Panel title="Audit trail">
+      <Panel title="System log">
         <ol className="min-h-[268px] space-y-2">
           <AnimatePresence initial={false} mode="popLayout">
             {visible.map((e) => (
               <motion.li
-                key={e.hash}
+                key={e.who + e.at}
                 layout
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -205,13 +195,54 @@ export function AuditChain() {
                 <p className="text-[13.5px] text-ink">
                   <span className="font-mono text-[12px] text-ink-3">{e.who}</span> {e.what}
                 </p>
-                <p className="mt-1 font-mono text-[11px] text-ink-3">
-                  sha256 {e.hash} <span className="text-ok">· chain verified</span>
-                </p>
+                <p className="mt-1 font-mono text-[11px] text-ink-3">today · {e.at} · tenant log</p>
               </motion.li>
             ))}
           </AnimatePresence>
         </ol>
+      </Panel>
+    </div>
+  );
+}
+
+/* ── 3b. One risk, linked to everything that treats it ── */
+const LINKS = [
+  { kind: "Control", name: "CTL-014 MFA for privileged access" },
+  { kind: "Policy", name: "Access Control Policy v3" },
+  { kind: "Asset", name: "Customer portal" },
+  { kind: "Project", name: "SSO rollout" },
+  { kind: "Requirement", name: "ISO 27001 A.5.17" },
+];
+
+export function RiskLinks() {
+  const { ref, step, reduce } = useTicker(800, LINKS.length + 2);
+  const lit = reduce ? LINKS.length : Math.min(step, LINKS.length);
+  return (
+    <div ref={ref}>
+      <Panel title="Linked records">
+        <div className="min-h-[268px]">
+          <div className="rounded-[var(--r-md)] border border-brand/40 bg-brand-soft/60 px-4 py-3">
+            <p className="font-mono text-[11px] text-ink-3">R-031 · score 16 · above appetite</p>
+            <p className="mt-1 text-[14px] font-medium text-ink">Misconfigured IAM roles</p>
+          </div>
+          <ul className="mt-3 space-y-2 border-l border-line pl-4">
+            {LINKS.map((l, i) => {
+              const on = i < lit;
+              return (
+                <motion.li
+                  key={l.kind}
+                  initial={false}
+                  animate={{ opacity: on ? 1 : 0.25, x: on ? 0 : -6 }}
+                  transition={{ duration: 0.45, ease: EASE }}
+                  className="flex items-center gap-3 rounded-[var(--r-md)] border border-line-soft px-3 py-2"
+                >
+                  <span className="w-[84px] shrink-0 font-mono text-[11px] text-ink-3">{l.kind}</span>
+                  <span className="truncate text-[13px] text-ink">{l.name}</span>
+                </motion.li>
+              );
+            })}
+          </ul>
+        </div>
       </Panel>
     </div>
   );

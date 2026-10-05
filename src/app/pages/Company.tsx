@@ -5,7 +5,7 @@ import { InstagramFeed } from "../components/site/InstagramFeed";
 import { EarlyAccessForm } from "../components/site/EarlyAccessForm";
 import { site } from "../data/site";
 import { usePageMeta } from "../components/site/Seo";
-import { AuditChain, Split } from "../components/site/Visuals";
+import { Split, SystemLog } from "../components/site/Visuals";
 
 /**
  * About, Contact, Early access and Trust.
@@ -39,8 +39,8 @@ export function About() {
               need for it, with a separate control register for every framework.
             </p>
             <p className={BODY}>
-              We start from the model instead: controls written once and mapped across standards, evidence read from systems and hashed on the way in,
-              and a log an auditor can read directly. It is slower to build, and the only version we would trust with our
+              We start from the model instead: risks, controls, policies and requirements linked as one record set, frameworks loaded as packages,
+              and every change in a log an auditor can read. It is slower to build, and the only version we would trust with our
               own programme.
             </p>
           </Reveal>
@@ -176,14 +176,14 @@ export function Trust() {
         lead="A GRC vendor should model the behaviour it sells. Here is what is true now, what we are pursuing, and when."
       />
       <Section className="pt-0 md:pt-0">
-        <Split sticky visual={<Reveal><AuditChain /></Reveal>}>
+        <Split sticky visual={<Reveal><SystemLog /></Reveal>}>
           <Rows
             items={[
               {
                 title: "Architecture",
                 body: (
                   <>
-                    Row-level tenant isolation, per-tenant encryption keys and an append-only, hash-chained audit trail.{" "}
+                    Tenant isolation at the query level, covered by regression tests; permissions per module and action, checked on the server; and a per-tenant system log.{" "}
                     <Link to="/platform/architecture" className={INLINE_LINK}>
                       Architecture notes
                     </Link>
@@ -192,11 +192,11 @@ export function Trust() {
               },
               {
                 title: "Hosting",
-                body: "EU (Frankfurt), managed cloud. Each tenant’s region is fixed when it is created.",
+                body: "Multi-tenant cloud, or on-premise in your own data centre.",
               },
               {
                 title: "Subprocessors",
-                body: "Cloud hosting (EU), transactional email and error monitoring. The named list goes to early-access tenants and will be public at launch.",
+                body: "The named list goes to early-access tenants and will be public at launch.",
               },
               {
                 title: "Certifications",

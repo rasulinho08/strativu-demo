@@ -14,11 +14,12 @@ import { Reveal, Stagger } from "../components/site/Reveal";
 import { ClosingCTA } from "../components/site/ClosingCTA";
 import { formatLogDate } from "../components/site/ChangelogList";
 import { usePageMeta } from "../components/site/Seo";
-import { AuditChain, CollectorFeed, ControlMap, RiskHeatmap, Split } from "../components/site/Visuals";
+import { AlertFeed, RiskHeatmap, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
 import { changelog } from "../data/changelog";
 import { frameworks } from "../data/coverage";
 import { site } from "../data/site";
 import { products } from "../data/products";
+import { grcFigures } from "../data/grc360";
 
 /**
  * Ana səhifə.
@@ -28,38 +29,33 @@ import { products } from "../data/products";
  * Bütün rəqəmlər saytın öz datasından gəlir — uydurma statistika yoxdur.
  */
 
-const STATEMENT = "One control set. Every framework. Evidence the system collects itself.";
+const STATEMENT = "Every risk, control and audit in one system. Every link kept. Every change logged.";
 
 const WHAT_WE_DO = [
-  { n: "01", title: "Controls", line: "Write a control once and map it to every framework you are audited against.", to: "/platform/grc#mapping" },
-  { n: "02", title: "Evidence", line: "Collectors read your systems on a schedule and attach proof automatically.", to: "/platform/grc#evidence" },
-  { n: "03", title: "Audit trail", line: "Every change is recorded in a tamper-evident log your auditor can follow.", to: "/platform/grc#audit" },
+  { n: "01", title: "Risks", line: "Score risks 5×5 against your own appetite and link each one to what treats it.", to: "/platform/grc#links" },
+  { n: "02", title: "Compliance", line: "Load any framework as a package and see the gaps per requirement.", to: "/platform/grc#mapping" },
+  { n: "03", title: "Control", line: "Permissions per module and action, alerts before anything expires, every change logged.", to: "/platform/grc#access" },
 ];
 
-const BELIEF_VISUALS = [CollectorFeed, ControlMap, AuditChain];
+const BELIEF_VISUALS = [RiskLinks, AlertFeed, SystemLog];
 
 const BELIEFS = [
   {
-    title: "Evidence should be collected by the system, not the team.",
-    body: "If a configuration proves a control, the platform reads it on a schedule. People review exceptions; they do not take screenshots.",
+    title: "Links belong in the system, not in someone’s head.",
+    body: "A risk, the asset it affects, the control that treats it and the requirement it meets are one record set. Nothing is kept in sync by hand.",
   },
   {
-    title: "One control set is enough. Frameworks are views on it.",
-    body: "ISO 27001, SOC 2 and NIST CSF ask overlapping questions. One register means one answer.",
+    title: "Deadlines should come to you.",
+    body: "Contracts, exceptions, objective audits and targets are watched on a schedule. Owners hear about them before the auditor does.",
   },
   {
-    title: "The audit trail is the product, not a feature of it.",
-    body: "Every screen is a projection of what changed, by whom and when. That log is complete and tamper-evident from the first commit.",
+    title: "Every change has a name and a time.",
+    body: "Creates, updates, deletes, sign-ins and permission changes go to the system log, per tenant, from day one.",
   },
 ];
 
-/** Facts from the site's own data (coverage.ts, the GRC product page). */
-const FACTS = [
-  { value: frameworks.length, label: "frameworks on the coverage map" },
-  { value: 93, label: "ISO 27001 Annex A controls modelled" },
-  { value: 2, label: "evidence collectors live today" },
-  { value: 1, label: "control set behind all of them" },
-];
+/** Facts from the product (data/grc360.ts). */
+const FACTS = grcFigures;
 
 /* ── Statement: words light up one by one as it scrolls through the viewport ── */
 function Word({ word, range, progress }: { word: string; range: [number, number]; progress: MotionValue<number> }) {
@@ -201,7 +197,7 @@ function WorkShot({ image }: { image: { src: string; width: number; height: numb
 }
 
 /* ── One figure: a brand line draws across the top, the number counts up, a short label below ── */
-function Fact({ value, label, i }: { value: number; label: string; i: number }) {
+function Fact({ value, suffix, label, i }: { value: number; suffix?: string; label: string; i: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "0px 0px -15% 0px" });
   const reduce = useReducedMotion();
@@ -226,8 +222,9 @@ function Fact({ value, label, i }: { value: number; label: string; i: number }) 
       />
       <dt className="sr-only">{label}</dt>
       <dd>
-        <span className="block text-[clamp(56px,7vw,104px)] font-semibold leading-[0.9] tracking-[-0.04em] text-ink">
+        <span className="block text-[clamp(52px,6.2vw,92px)] font-semibold leading-[0.9] tracking-[-0.04em] text-ink">
           <CountUp to={value} />
+          {suffix}
         </span>
         <span className="mt-5 block max-w-[20ch] font-mono text-[12px] uppercase leading-[1.6] tracking-[0.12em] text-ink-3">
           {label}
@@ -395,7 +392,7 @@ export default function Home() {
           </Reveal>
           <dl className="mt-14 grid grid-cols-2 md:grid-cols-4">
             {FACTS.map((f, i) => (
-              <Fact key={f.label} value={f.value} label={f.label} i={i} />
+              <Fact key={f.label} value={f.value} suffix={f.suffix} label={f.label} i={i} />
             ))}
           </dl>
         </Container>

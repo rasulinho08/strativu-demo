@@ -4,9 +4,18 @@ import { Btn, Container, Eyebrow, Lane, PageHeader, Rows, Section, TextLink } fr
 import { Reveal } from "../components/site/Reveal";
 import { site } from "../data/site";
 import { products } from "../data/products";
-import { grcFigures, grcFrameworkPackages, grcIntegrations, grcModules, grcStatus } from "../data/grc360";
+import {
+  GRC_SCREEN_SIZE,
+  grcConnections,
+  grcFigures,
+  grcFrameworkPackages,
+  grcModules,
+  grcScreens,
+  grcStack,
+  grcStatus,
+} from "../data/grc360";
 import { usePageMeta } from "../components/site/Seo";
-import { AuditChain, CollectorFeed, ControlMap, Split } from "../components/site/Visuals";
+import { AlertFeed, ControlMap, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
 
 /**
  * Platform, GRC and Architecture pages.
@@ -19,26 +28,26 @@ const BODY = "mt-5 max-w-[52ch] text-[17px] leading-[1.65] text-ink-2";
 const MODEL = [
   { n: "01", title: "Registers", body: "Risks, assets, vendors and processing activities." },
   { n: "02", title: "Controls", body: "One shared control set, mapped across frameworks, with owners and review cycles." },
-  { n: "03", title: "Evidence", body: "Read by collectors or uploaded by hand, then hashed and timestamped." },
-  { n: "04", title: "Workflow", body: "Tasks, reviews and exceptions." },
-  { n: "05", title: "Reporting", body: "Audit packs, the Statement of Applicability and a board view." },
+  { n: "03", title: "Links", body: "A risk is tied to the controls, policies, assets, projects and requirements that treat it." },
+  { n: "04", title: "Workflow", body: "Tasks, reviews, exceptions and alerts before anything expires." },
+  { n: "05", title: "Reporting", body: "Heat maps, compliance analysis and a public Trust Center." },
 ];
 
 export function Platform() {
-  usePageMeta("Platform", "One model for governance, risk and compliance: registers, controls, evidence, workflow and reporting under an append-only audit trail.");
+  usePageMeta("Platform", "One model for governance, risk and compliance: registers, controls, links, workflow and reporting, with every change in the system log.");
   return (
     <>
       <PageHeader
         eyebrow="Platform"
         title="One model for governance, risk and compliance."
-        lead="One object graph under an append-only audit trail, shared by every product we build. GRC 360 is the first."
+        lead="One connected model with every change in the system log, shared by every product we build. GRC 360 is the first."
       />
 
       <Section>
         <Split visual={<Reveal><ControlMap /></Reveal>}>
           <Reveal>
             <Eyebrow>The model</Eyebrow>
-            <h2 className="t-h2 text-ink">Five object types, one graph.</h2>
+            <h2 className="t-h2 text-ink">Five parts, one model.</h2>
           </Reveal>
           <Rows className="mt-12" items={MODEL} />
         </Split>
@@ -157,15 +166,97 @@ function ModuleExplorer() {
   );
 }
 
+/* ── Screens from the product: tabs on top, the selected screen below. Advances on its own until clicked. ── */
+function ScreenGallery() {
+  const [idx, setIdx] = useState(0);
+  const [pinned, setPinned] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { margin: "-20% 0px -20% 0px" });
+  const reduce = useReducedMotion();
+  useEffect(() => {
+    if (pinned || reduce || !inView) return;
+    const id = window.setInterval(() => setIdx((v) => (v + 1) % grcScreens.length), 4200);
+    return () => window.clearInterval(id);
+  }, [pinned, reduce, inView]);
+  const sc = grcScreens[idx];
+  return (
+    <figure ref={ref}>
+      <div role="tablist" aria-label="GRC 360 screens" className="-mx-1 flex gap-1 overflow-x-auto pb-3 [scrollbar-width:none]">
+        {grcScreens.map((g, i) => {
+          const on = i === idx;
+          return (
+            <button
+              key={g.key}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              onClick={() => {
+                setIdx(i);
+                setPinned(true);
+              }}
+              className={`relative shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
+                on ? "text-ink" : "text-ink-3 hover:text-ink"
+              }`}
+            >
+              {on && (
+                <motion.span
+                  layoutId="screen-pill"
+                  className="absolute inset-0 rounded-full bg-ink/[0.07]"
+                  transition={{ type: "spring", stiffness: 420, damping: 36 }}
+                />
+              )}
+              <span className="relative">{g.label}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="relative overflow-hidden rounded-[var(--r-xl)] border border-line bg-surface shadow-[var(--e3)]" style={{ aspectRatio: `${GRC_SCREEN_SIZE.width} / ${GRC_SCREEN_SIZE.height}` }}>
+        <AnimatePresence initial={false}>
+          <motion.img
+            key={sc.key}
+            src={sc.src}
+            width={GRC_SCREEN_SIZE.width}
+            height={GRC_SCREEN_SIZE.height}
+            alt={sc.alt}
+            initial={reduce ? false : { opacity: 0, scale: 1.01 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-0 block h-full w-full object-cover object-top"
+            decoding="async"
+          />
+        </AnimatePresence>
+      </div>
+      <figcaption className="mt-3 flex items-center justify-between gap-4 font-mono text-[11px] text-ink-3">
+        <span>{sc.label}, current build. Demo data: names and records are made up.</span>
+        <span className="hidden sm:inline">
+          {String(idx + 1).padStart(2, "0")} / {String(grcScreens.length).padStart(2, "0")}
+        </span>
+      </figcaption>
+      {/* növbəti şəkilləri əvvəlcədən yüklə */}
+      <div aria-hidden className="hidden">
+        {grcScreens.map((g) => (
+          <link key={g.key} rel="prefetch" href={g.src} as="image" />
+        ))}
+      </div>
+    </figure>
+  );
+}
+
 export function PlatformGRC() {
   usePageMeta(
     "GRC 360",
-    "GRC 360 brings risks, assets, vendors, controls, audits and incidents into one connected system: one control set for every framework, evidence collected automatically, and a public Trust Center."
+    "GRC 360 brings risks, assets, vendors, controls, audits and incidents into one connected system, in Azerbaijani and English, in the cloud or on your own servers."
   );
   return (
     <>
       <PageHeader
-        eyebrow={`Platform · GRC 360 · ${site.status.label}`}
+        eyebrow={
+          <span className="inline-flex items-center gap-2.5">
+            <img src="/projects/grc360/grc360-mark.webp" width={20} height={20} alt="" className="h-5 w-5" />
+            {`Platform · GRC 360 · ${site.status.label}`}
+          </span>
+        }
         title="Governance, risk and compliance. All of it, in one place."
         lead="Twelve connected modules: risks, assets, vendors, controls, audits and incidents live in one system instead of a folder of spreadsheets."
       >
@@ -174,42 +265,26 @@ export function PlatformGRC() {
         </Btn>
       </PageHeader>
 
-      {/* Real development build — not a mock. */}
+      {/* Real screens from the current build — not mock-ups. */}
       <div className="pb-4 pt-4 md:pt-8">
         <Container>
-          <Lane>
-            <Reveal>
-              <figure>
-                <div className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-surface shadow-[var(--e3)]">
-                  <img
-                    src="/projects/grc.webp"
-                    width={1800}
-                    height={811}
-                    alt="GRC 360 development build: command centre with overdue, today and upcoming task lists and an asset-risk heat map."
-                    className="block h-auto w-full"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-                <figcaption className="mt-3 font-mono text-[11px] text-ink-3">
-                  Command Center, development build. Data is illustrative.
-                </figcaption>
-              </figure>
-            </Reveal>
-          </Lane>
+          <Reveal>
+            <ScreenGallery />
+          </Reveal>
         </Container>
       </div>
 
       {/* Figures — only numbers verified in the product */}
       <Section>
         <Lane>
-          <dl className="grid grid-cols-2 gap-x-8 gap-y-10 border-t border-line pt-10 md:grid-cols-4">
+          <dl className="grid grid-cols-2 gap-x-8 gap-y-10 border-t border-line pt-10">
             {grcFigures.map((f, i) => (
               <Reveal key={f.label} delay={i * 0.06}>
                 <dt className="sr-only">{f.label}</dt>
                 <dd>
                   <span className="block text-[clamp(44px,5vw,72px)] font-semibold leading-none tracking-[-0.04em] text-ink">
                     {f.value}
+                    {f.suffix}
                   </span>
                   <span className="mt-3 block font-mono text-[12px] uppercase leading-[1.5] tracking-[0.12em] text-ink-3">
                     {f.label}
@@ -227,7 +302,7 @@ export function PlatformGRC() {
           <Reveal>
             <Eyebrow>Modules</Eyebrow>
             <h2 className="t-h2 text-ink">Twelve modules. One model underneath.</h2>
-            <p className={BODY}>Every module reads and writes the same registers, so a risk, the asset it affects, the control that treats it and the audit finding that tests it stay linked.</p>
+            <p className={BODY}>Every module reads and writes the same records, so a risk, the asset it affects, the control that treats it and the audit finding that tests it stay linked. Thirty-one screens in all.</p>
           </Reveal>
         </Lane>
         <Reveal className="mt-12">
@@ -235,36 +310,50 @@ export function PlatformGRC() {
         </Reveal>
       </Section>
 
+      <Section id="links" className="pt-0 md:pt-0">
+        <Split visual={<Reveal><RiskLinks /></Reveal>}>
+          <Reveal>
+            <Eyebrow>Everything is linked</Eyebrow>
+            <h2 className="t-h2 text-ink">No more links kept by hand.</h2>
+            <p className={BODY}>
+              A risk is tied directly to the controls, policies, assets, projects and framework requirements that treat it. In a
+              spreadsheet those links are kept by hand and break; here they are part of the record.
+            </p>
+            <p className={BODY}>
+              Scoring is 5×5, likelihood by impact, against your own risk-appetite thresholds, and the residual risk is calculated
+              for you.
+            </p>
+          </Reveal>
+        </Split>
+      </Section>
+
       <Section id="mapping" className="pt-0 md:pt-0">
         <Split visual={<Reveal><ControlMap /></Reveal>}>
           <Reveal>
-            <Eyebrow>One control, many frameworks</Eyebrow>
-            <h2 className="t-h2 text-ink">Write a control once. Map it everywhere.</h2>
+            <Eyebrow>Frameworks</Eyebrow>
+            <h2 className="t-h2 text-ink">Any framework, as a package.</h2>
             <p className={BODY}>
-              A control is written once and linked to ISO 27001, SOC 2, NIST and PCI DSS requirements at the same time. Adding a framework
-              becomes a gap review, not a second register.
+              A framework is a compliance package: its requirements, linked to the controls that meet them. Packages are built in the
+              product or imported from CSV, and Compliance Analysis shows the gaps per requirement.
             </p>
             <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">
-              Framework packages: {grcFrameworkPackages.join(" · ")}
+              Packages in the demo build: {grcFrameworkPackages.join(" · ")}
             </p>
             <div className="mt-8">
-              <TextLink to="/coverage">Coverage and status per framework</TextLink>
+              <TextLink to="/coverage">Frameworks we work with</TextLink>
             </div>
           </Reveal>
         </Split>
       </Section>
 
-      <Section id="evidence" className="pt-0 md:pt-0">
-        <Split visual={<Reveal><CollectorFeed /></Reveal>}>
+      <Section id="alerts" className="pt-0 md:pt-0">
+        <Split visual={<Reveal><AlertFeed /></Reveal>}>
           <Reveal>
-            <Eyebrow>Evidence</Eyebrow>
-            <h2 className="t-h2 text-ink">Evidence that collects itself.</h2>
+            <Eyebrow>Alerts</Eyebrow>
+            <h2 className="t-h2 text-ink">Nothing expires quietly.</h2>
             <p className={BODY}>
-              Collectors check your cloud, identity and source-control systems on a schedule and attach the result to the control it
-              proves. A failed check opens a Jira ticket and posts a Slack alert, so issues are fixed before the audit, not during it.
-            </p>
-            <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">
-              Live today: AWS IAM, GitHub. Integration catalogue: {grcIntegrations.join(", ")}.
+              Scheduled checks watch the dates: contracts that end in weeks, objective audits that are due, overdue targets and
+              exceptions about to lapse. Owners are told before it becomes an audit finding.
             </p>
           </Reveal>
         </Split>
@@ -276,40 +365,49 @@ export function PlatformGRC() {
             <Eyebrow>Trust Center</Eyebrow>
             <h2 className="t-h2 text-ink">Answer security questionnaires before they arrive.</h2>
             <p className={BODY}>
-              A public Trust Center shows your customers your certifications, controls, subprocessors and documents in one place, so
-              less time goes into answering the same questions over and over.
+              A public security page for your customers: the practices you apply, how their data is handled, and an honest view of
+              your certification roadmap.
             </p>
           </Reveal>
         </Lane>
       </Section>
 
-      <Section id="audit" className="pt-0 md:pt-0">
-        <Split visual={<Reveal><AuditChain /></Reveal>}>
+      <Section id="access" className="pt-0 md:pt-0">
+        <Split visual={<Reveal><SystemLog /></Reveal>}>
           <Reveal>
-            <Eyebrow>Audit trail</Eyebrow>
-            <h2 className="t-h2 text-ink">
-              <span className="whitespace-nowrap">Append-only.</span> <span className="whitespace-nowrap">Hash-chained.</span> Readable by
-              your auditor.
-            </h2>
+            <Eyebrow>Access and log</Eyebrow>
+            <h2 className="t-h2 text-ink">Your directory, your permissions, every change logged.</h2>
             <p className={BODY}>
-              Every write is appended to a chained log with actor, tenant, object and diff. Auditors get a scoped, read-only,
-              time-boxed session that is itself logged.
+              Sign in with LDAP or Active Directory, OAuth or SAML single sign-on. Permissions are set per module and per action, and
+              checked on the server. Creates, updates, deletes, sign-ins and permission changes go to a per-tenant system log.
             </p>
-            <div className="mt-8">
-              <TextLink to="/platform/architecture#audit-trail">How the chain is verified</TextLink>
-            </div>
+            <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">{grcConnections.join(" · ")}</p>
           </Reveal>
         </Split>
+      </Section>
+
+      <Section id="deployment" className="pt-0 md:pt-0">
+        <Lane>
+          <Reveal>
+            <Eyebrow>Deployment</Eyebrow>
+            <h2 className="t-h2 text-ink">In our cloud or on your servers.</h2>
+            <p className={BODY}>
+              Multi-tenant SaaS, or an on-premise and air-gapped install for banks, government and critical infrastructure. The
+              on-premise build ships with Docker Compose.
+            </p>
+            <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">{grcStack.join(" · ")}</p>
+          </Reveal>
+        </Lane>
       </Section>
 
       <Section id="local" className="pt-0 md:pt-0">
         <Lane>
           <Reveal>
             <Eyebrow>Built in Baku</Eyebrow>
-            <h2 className="t-h2 text-ink">Local law, mapped like any other framework.</h2>
+            <h2 className="t-h2 text-ink">In Azerbaijani, with local law built in.</h2>
             <p className={BODY}>
-              The Law of the Republic of Azerbaijan on Personal Data (No. 998-IIIQ) is being mapped onto the same control set, next to
-              GDPR, so one programme covers both.
+              The whole interface is in Azerbaijani and English. The Law of the Republic of Azerbaijan on Personal Data (No. 998-IIIQ)
+              loads as its own package, next to GDPR.
             </p>
           </Reveal>
         </Lane>
@@ -336,46 +434,34 @@ export function PlatformGRC() {
 
 const ARCH: { h: string; p: ReactNode[] }[] = [
   {
-    h: "Tenancy",
+    h: "Deployment",
     p: [
-      "Every row carries a tenant identifier, enforced by a row-level security policy that reads the tenant from the authenticated session, never from a request parameter. The database will not return another tenant’s rows.",
-      "Each tenant has its own data-encryption key, wrapped by a per-region key in a managed KMS. Deleting a tenant destroys the key first.",
+      "Multi-tenant SaaS, or on-premise and air-gapped for customers who keep data in their own data centre.",
+      `The on-premise build is a Docker Compose stack: ${grcStack.join(", ")}.`,
     ],
   },
   {
-    h: "Audit trail",
+    h: "Tenant isolation",
+    p: ["Every record is scoped to a tenant at the query level, and cross-tenant access is covered by regression tests. One customer’s data is never returned to another."],
+  },
+  {
+    h: "Sign-in and sessions",
     p: [
-      <>
-        Every write goes through a single command path that emits an event before the transaction commits. Each entry carries the{" "}
-        <span className="whitespace-nowrap">SHA-256</span> of the previous one, and the chain head is published daily to an external
-        timestamping service, so the log can be verified without trusting Strativu.
-      </>,
-      "Reads by auditors and customers are logged too. No privileged read path bypasses the log.",
+      "Email and password, LDAP or Active Directory, OAuth and SAML single sign-on. Passwords are stored as BCrypt hashes; connector secrets such as LDAP service-account passwords are stored encrypted and never returned by the API.",
+      "Access tokens are short-lived and the refresh token lives in an HttpOnly cookie that scripts cannot read. Idle sessions are warned and then ended, and a user can end all of their sessions at once.",
     ],
   },
   {
     h: "Permissions",
-    p: [
-      "Roles for coarse grants (admin, editor, reviewer, auditor); attributes for scope (framework, business unit, time window). An auditor session is a role, a scope and an expiry, issued by a tenant admin and visible in the trail.",
-    ],
+    p: ["Permissions are granted per module and per action (view, create, edit, delete) through roles, users, departments and groups. Every API endpoint checks them on the server; hiding a button is never the only barrier."],
   },
   {
-    h: "API-first",
-    p: [
-      "The web application is a client of the public REST API: a versioned OpenAPI 3.1 specification with generated SDKs, and webhooks for every state change in the audit trail.",
-    ],
+    h: "System log",
+    p: ["Creates, updates, deletes, sign-ins and permission changes are written to a per-tenant system log with the acting user and a timestamp."],
   },
   {
-    h: "Data residency and deployment",
-    p: [
-      "EU (Frankfurt) at launch. Region is chosen at tenant creation and is immutable. Single-tenant deployment is on the roadmap for regulated customers; the isolation model does not depend on it.",
-    ],
-  },
-  {
-    h: "Evidence integrity",
-    p: [
-      "Artefacts are content-addressed: the storage key is the hash of the file. A replaced file becomes a new artefact, linked to the old one in the trail. Nothing is overwritten.",
-    ],
+    h: "API",
+    p: ["The web application is a client of a REST API with more than 600 endpoints. CSV import and export work on every register. A full OpenAPI contract is in progress."],
   },
 ];
 
@@ -383,12 +469,12 @@ const ARCH: { h: string; p: ReactNode[] }[] = [
 const slug = (h: string) => h.toLowerCase().replace(/\s+/g, "-");
 
 export function Architecture() {
-  usePageMeta("Architecture", "Multi-tenant model, audit trail, permissions, API-first design and data residency, written for the engineer doing the vendor review.");
+  usePageMeta("Architecture", "Deployment, tenant isolation, sign-in, permissions, system log and API, written for the engineer doing the vendor review.");
   return (
     <>
       <PageHeader
         eyebrow="Platform · Architecture"
-        title="Multi-tenant model, audit trail, data residency."
+        title="How GRC 360 is built."
         lead="Written for the engineer doing the vendor review. Until we have a SOC 2 report, this is what we can show."
       />
 

@@ -26,14 +26,14 @@ export const products: Product[] = [
   {
     name: "GRC 360",
     summary:
-      "Governance, risk and compliance in one system: twelve connected modules, one control set for every framework, and evidence collected automatically.",
+      "Governance, risk and compliance in one system: twelve connected modules, in Azerbaijani and English, in the cloud or on your own servers.",
     status: "In development",
     to: "/platform/grc",
     image: {
-      src: "/projects/grc.webp",
-      width: 1800,
-      height: 811,
-      alt: "GRC 360 development build: command centre with task lists and an asset-risk heat map.",
+      src: "/projects/grc360/01-command-center.webp",
+      width: 2000,
+      height: 1250,
+      alt: "GRC 360 Command Center: overdue, today and upcoming tasks above an asset-risk heat map.",
     },
     featured: true,
   },

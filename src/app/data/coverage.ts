@@ -1,6 +1,10 @@
 /**
  * Framework coverage. Status dəyişmək bir sətirdir:
- *   "supported" → indi dəstəklənir, "in-progress" → xəritələnir, "planned" → planlaşdırılıb
+ *   "supported" → GRC 360-da paket kimi işləyir (demo build-də var)
+ *   "in-progress" → hazır kataloq hazırlanır
+ *   "planned" → planlaşdırılıb
+ * Diqqət: kataloq hələ hazır gəlmir — tələblər istifadəçi tərəfindən yaradılır və ya CSV ilə import olunur.
+ * "detail" bəndlərində standartın özünü təsvir edin, məhsulda olmayan funksiyanı yazmayın.
  */
 export type FrameworkStatus = "supported" | "in-progress" | "planned";
 
@@ -25,10 +29,9 @@ export const frameworks: Framework[] = [
     controls: "93 Annex A controls · 4 themes",
     summary: "The 2022 revision restructured Annex A into four themes: organisational, people, physical and technological. Strativu maps each control to shared evidence so an ISMS can be maintained continuously rather than rebuilt before each surveillance audit.",
     detail: [
-      "All 93 Annex A controls modelled with attributes (control type, security property, cybersecurity concept, operational capability, security domain).",
-      "Statement of Applicability generated from the control register, with justification text carried per control.",
-      "Clause 4–10 management-system requirements tracked as evidence-bearing tasks with owners and review cycles.",
-      "Overlap with SOC 2 CC-series and NIST CSF shown at requirement level.",
+      "93 Annex A controls in four themes: organisational, people, physical and technological.",
+      "Clauses 4–10 set the management-system requirements: context, leadership, planning, support, operation, evaluation and improvement.",
+      "In GRC 360, requirements live in a compliance package and link to the controls, policies and risks that meet them.",
     ],
   },
   {
@@ -41,9 +44,8 @@ export const frameworks: Framework[] = [
     summary: "SOC 2 is evidence-heavy: auditors ask for populations, samples and screenshots across an observation window. Strativu keeps evidence attached to the criteria continuously, so the observation window is the product's normal operation.",
     detail: [
       "Security (common criteria CC1–CC9) plus Availability, Processing Integrity, Confidentiality and Privacy.",
-      "Points of focus tracked per criterion; each links to one or more controls in the shared register.",
-      "Automated collectors produce timestamped evidence for the audit window, with sampling exports for the auditor.",
-      "Type I and Type II readiness views.",
+      "Type I looks at control design at a point in time; Type II at operation over an observation window.",
+      "In GRC 360, criteria live in a compliance package and link to the controls that meet them.",
     ],
   },
   {
@@ -51,13 +53,12 @@ export const frameworks: Framework[] = [
     id: "NIST CSF 2.0",
     name: "Cybersecurity Framework",
     body: "NIST",
-    status: "in-progress",
+    status: "supported",
     controls: "6 functions · 106 subcategories",
-    summary: "CSF 2.0 added the Govern function and is increasingly the language boards use to talk about cyber risk. Mapping is under way from the shared control set.",
+    summary: "CSF 2.0 added the Govern function and is increasingly the language boards use to talk about cyber risk.",
     detail: [
       "Govern, Identify, Protect, Detect, Respond and Recover functions.",
-      "Identify and Protect drafted; remaining functions in progress.",
-      "Current-profile and target-profile comparison planned.",
+      "In GRC 360, subcategories live in a compliance package and link to the controls that meet them.",
     ],
   },
   {
@@ -65,13 +66,13 @@ export const frameworks: Framework[] = [
     id: "GDPR (EU 2016/679)",
     name: "General Data Protection Regulation",
     body: "EU",
-    status: "in-progress",
+    status: "supported",
     controls: "Art. 5–49 · 99 articles",
-    summary: "GDPR obligations are organisational as much as technical. The register models processing activities (Art. 30), lawful bases, DPIAs and subprocessor relationships alongside security controls.",
+    summary: "GDPR obligations are organisational as much as technical. In GRC 360 the asset register carries data flows and GDPR questions alongside security controls.",
     detail: [
-      "Records of processing activities with lawful basis and retention per activity.",
-      "Data-subject request workflow with statutory timers.",
-      "Subprocessor register linked to the Trust page.",
+      "Data flows and GDPR questions per asset in Asset Management.",
+      "Legal and contractual obligations tracked in the Obligations register.",
+      "Vendors and service agreements in Third Parties.",
     ],
   },
   {
@@ -79,13 +80,12 @@ export const frameworks: Framework[] = [
     id: "Azerbaijan Law No. 998-IIIQ",
     name: "Law on Personal Data",
     body: "AZ",
-    status: "in-progress",
+    status: "supported",
     controls: "Registration · consent · cross-border transfer",
-    summary: "Domestic obligations for organisations processing personal data in Azerbaijan, including information-system registration and cross-border transfer rules. Mapped against GDPR controls where they overlap.",
+    summary: "Domestic obligations for organisations processing personal data in Azerbaijan, including information-system registration and cross-border transfer rules. Loads as its own package, next to GDPR.",
     detail: [
-      "Information-system registration requirements tracked as evidence-bearing tasks.",
-      "Consent and notification obligations mapped to GDPR equivalents.",
-      "Cross-border transfer conditions modelled as a control.",
+      "Registration, consent and cross-border transfer requirements in one package.",
+      "Requirements link to the same controls that serve GDPR where they overlap.",
     ],
   },
   {
@@ -103,10 +103,10 @@ export const frameworks: Framework[] = [
     id: "PCI DSS v4.0.1",
     name: "Payment card data security",
     body: "PCI SSC",
-    status: "planned",
+    status: "supported",
     controls: "12 requirements · ~250 sub-requirements",
-    summary: "Prescriptive and technical. Best served by automated evidence from network, logging and access-control systems.",
-    detail: ["12 principal requirements with testing procedures.", "Customised-approach documentation support."],
+    summary: "Prescriptive and technical, and a standing requirement for banks and payment companies.",
+    detail: ["12 principal requirements with testing procedures.", "In GRC 360, requirements live in a compliance package and link to the controls that meet them."],
   },
   {
     slug: "hipaa",
@@ -162,6 +162,6 @@ export const frameworks: Framework[] = [
 
 export const statusLabel: Record<FrameworkStatus, string> = {
   supported: "Supported",
-  "in-progress": "Mapping",
+  "in-progress": "In progress",
   planned: "Planned",
 };
