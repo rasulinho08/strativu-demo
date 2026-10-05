@@ -143,6 +143,15 @@ const BASE_ROT_X = 0.1;
 const SCREENS_PER_TURN = 1.6;
 /** Açılış (mərkəz) pozasından sağdakı pozaya keçid neçə ekran scroll-da tamamlanır. */
 const INTRO_SCREENS = 1.05;
+/**
+ * Açılış animasiyası (sayt yüklənəndə bir dəfə): loqo yaxından, böyük və dönərək görünür,
+ * sonra geri "düşür" — öz yerinə və ölçüsünə; daxili səhifələrdə həm də fona solğunlaşır.
+ * Bitəndən sonra hər şey adi scroll xoreoqrafiyası ilə davam edir.
+ *   duration → saniyə, delay → model yüklənəndən sonra gözləmə, scale → başlanğıc ölçü (1 = adi),
+ *   spin → neçə tam dövr (soldan sağa), tiltX → başlanğıc aşma (radian), rise → başlanğıcda nə qədər aşağıda (ekran payı),
+ *   glow → başlanğıcda şəffaflıq (daxili səhifələrdə loqo əvvəl parlaq görünür, sonra fona keçir).
+ */
+const INTRO = { duration: 2.4, delay: 0.1, scale: 1.75, spin: 1, tiltX: -0.55, rise: 0.1, glow: 1 };
 /** Siçan ilə əyilmə (radian). 0 = söndürülür. */
 const TILT = 0.14;
 /** Hərəkətin yumşaqlığı: böyük → daha sürətli izləyir. */
@@ -205,6 +214,7 @@ const FIELD_RESIZE = 0.03;
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const ease = (t: number) => t * t * (3 - 2 * t);
 /** Kinematoqrafik keçid: yavaş başlayır, ortada sürətlənir, yumşaq dayanır. */
+const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 const mixPose = (a: Pose, b: Pose, t: number): Pose => ({
@@ -635,6 +645,9 @@ export function LogoScene() {
       const lastFloor = [NaN, NaN, NaN, NaN, 0, 0];
       let lastActive = performance.now();
       let lastScrollY = window.scrollY;
+      /** Açılış animasiyası: ilk kadrda başlayır; bitəndə kəsik adi ölçüyə qaytarılır. */
+      let introStart = NaN;
+      let introDone = false;
 
       /** Scroll mövqeyindən hədəf pozanı hesablayır. */
       const target = () => {
@@ -677,7 +690,8 @@ export function LogoScene() {
         if (!w || !h) return;
         hostW = w;
         hostH = h;
-        const px = Math.min(maxSize(narrowMq.matches ? "mobile" : "desktop") * h, w * 0.85);
+        const grow = introDone ? 1 : INTRO.scale; // açılışda loqo böyükdür — kəsik də böyük olsun
+        const px = Math.min(maxSize(narrowMq.matches ? "mobile" : "desktop") * h * grow, w * 0.85 * grow);
         const bufW = Math.ceil(px * CROP.w * pixelRatio);
         const bufH = Math.ceil(px * CROP.h * pixelRatio);
         cropW = bufW / pixelRatio;
@@ -811,18 +825,41 @@ export function LogoScene() {
         cur.rx = mix(cur.rx, goal.rx, k);
         cur.rz = mix(cur.rz, goal.rz, k);
 
-        const px = Math.min(viewH * cur.size, viewW * 0.85);
+        // Açılış: böyük və dönərək başlayır, geri öz yerinə düşür (bax: INTRO).
+        let iScale = 1;
+        let iSpin = 0;
+        let iTilt = 0;
+        let iRise = 0;
+        let iOp = cur.op;
+        if (!introDone) {
+          if (Number.isNaN(introStart)) introStart = now;
+          const p = clamp01(((now - introStart) / 1000 - INTRO.delay) / INTRO.duration);
+          const e = easeOutQuart(p);
+          iScale = mix(INTRO.scale, 1, e);
+          iSpin = (1 - e) * INTRO.spin * Math.PI * 2;
+          iTilt = (1 - e) * INTRO.tiltX;
+          iRise = (1 - ease(p)) * INTRO.rise;
+          // əvvəl görünür olur, sonra (daxili səhifələrdə) fona solğunlaşır
+          iOp = Math.min(clamp01(p / 0.22), mix(Math.max(INTRO.glow, cur.op), cur.op, ease(clamp01((p - 0.35) / 0.65))));
+          lastActive = now;
+          if (p >= 1) {
+            introDone = true;
+            resize();
+          }
+        }
+
+        const px = Math.min(viewH * cur.size, viewW * 0.85) * iScale;
         rig.scale.setScalar(px * unit);
         rig.position.x = viewW * cur.x;
-        rig.position.y = viewH * cur.y + Math.sin(t * 0.5) * viewH * BOB;
-        spin.rotation.y = cur.ry + Math.sin(t * 0.35) * SWAY;
-        spin.rotation.x = cur.rx + Math.sin(t * 0.22) * SWAY * 0.3;
+        rig.position.y = viewH * (cur.y - iRise) + Math.sin(t * 0.5) * viewH * BOB;
+        spin.rotation.y = cur.ry - iSpin + Math.sin(t * 0.35) * SWAY;
+        spin.rotation.x = cur.rx + iTilt + Math.sin(t * 0.22) * SWAY * 0.3;
         spin.rotation.z = cur.rz;
-        for (const m of logoMats) m.opacity = cur.op;
+        for (const m of logoMats) m.opacity = iOp;
 
         // Kəsik loqonun ekran mövqeyini izləyir (cihaz pikselinə yuvarlaqlaşdırılır → bulanıqlıq yoxdur).
         const ox = Math.round((hostW * (0.5 + cur.x) - cropW * 0.5) * pixelRatio) / pixelRatio;
-        const oy = Math.round((hostH * (0.5 - cur.y) - cropH * CROP.top) * pixelRatio) / pixelRatio;
+        const oy = Math.round((hostH * (0.5 - (cur.y - iRise)) - cropH * CROP.top) * pixelRatio) / pixelRatio;
         if (ox !== cropX || oy !== cropY) {
           cropX = ox;
           cropY = oy;
@@ -831,7 +868,7 @@ export function LogoScene() {
         }
         syncTheme();
         updateLight(dt);
-        updateTrails(now / 1000, cur.op);
+        updateTrails(now / 1000, iOp);
         if (composer && bloomPass?.enabled) composer.render();
         else renderer.render(scene, camera);
       };
