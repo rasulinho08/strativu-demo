@@ -19,6 +19,8 @@ npm run typecheck  # tsc --noEmit
 | Logo, status line, company details, social links (null = hidden), Formspree ID | `src/app/data/site.ts` |
 | Logo files | `public/brand/logo-full.png` (light), `public/brand/logo-mark.png` (dark: mark + CSS wordmark). Optional `logo.darkSrc` in `site.ts` |
 | Social preview image | `public/og.png` (1200×630) |
+| Products (Platform list, home "Our work") — add a new product here | `src/app/data/products.ts` |
+| GRC 360 modules, figures, status | `src/app/data/grc360.ts` |
 | GRC development build screenshot (home "Our work" + /platform/grc) | `public/projects/grc.webp` |
 | Framework coverage və statuslar | `src/app/data/coverage.ts` |
 | Changelog girişləri | `src/app/data/changelog.ts` |

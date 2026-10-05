@@ -18,6 +18,7 @@ import { AuditChain, CollectorFeed, ControlMap, RiskHeatmap, Split } from "../co
 import { changelog } from "../data/changelog";
 import { frameworks } from "../data/coverage";
 import { site } from "../data/site";
+import { products } from "../data/products";
 
 /**
  * Ana səhifə.
@@ -176,7 +177,7 @@ function Beliefs() {
 }
 
 /* ── Product shot eases up and scales in as it enters ── */
-function WorkShot() {
+function WorkShot({ image }: { image: { src: string; width: number; height: number; alt: string } }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center center"] });
@@ -186,10 +187,10 @@ function WorkShot() {
     <motion.div ref={ref} style={reduce ? undefined : { scale, opacity }} className="origin-bottom">
       <div className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-surface shadow-[var(--e3)]">
         <img
-          src="/projects/grc.webp"
-          width={1800}
-          height={811}
-          alt="GRC 360 development build: command centre with task lists and an asset-risk heat map."
+          src={image.src}
+          width={image.width}
+          height={image.height}
+          alt={image.alt}
           className="block h-auto w-full"
           loading="lazy"
           decoding="async"
@@ -285,6 +286,8 @@ function FrameworkMarquee() {
   );
 }
 
+const featured = products.filter((p) => p.featured);
+
 export default function Home() {
   usePageMeta(
     null,
@@ -352,23 +355,33 @@ export default function Home() {
       {/* ── 04 What we believe: pinned, three statements ── */}
       <Beliefs />
 
-      {/* ── 05 Our work ── */}
+      {/* ── 05 Our work (from data/products.ts) ── */}
       <section className="py-24 md:py-36">
         <Container>
           <Lane>
             <Reveal>
               <p className="eyebrow">Our work</p>
-              <h2 className="t-h2 mt-5 text-ink">GRC 360</h2>
-              <p className="mt-4 max-w-[48ch] text-[17px] leading-[1.6] text-ink-2">
-                Our first product, in active development. This is the working build.
-              </p>
+              <h2 className="t-h2 mt-5 text-ink">{featured[0].name}</h2>
+              <p className="mt-4 max-w-[48ch] text-[17px] leading-[1.6] text-ink-2">{featured[0].summary}</p>
             </Reveal>
-            <div className="mt-12">
-              <WorkShot />
-            </div>
+            {featured[0].image && (
+              <div className="mt-12">
+                <WorkShot image={featured[0].image} />
+              </div>
+            )}
             <Reveal className="mt-8">
-              <TextLink to="/platform/grc">View the product</TextLink>
+              {featured[0].to ? (
+                <TextLink to={featured[0].to}>View {featured[0].name}</TextLink>
+              ) : (
+                featured[0].href && <TextLink href={featured[0].href}>View {featured[0].name}</TextLink>
+              )}
             </Reveal>
+            {featured.length > 1 && (
+              <Rows
+                className="mt-14"
+                items={featured.slice(1).map((pr) => ({ title: pr.name, body: pr.summary, meta: pr.status, to: pr.to, href: pr.href }))}
+              />
+            )}
           </Lane>
         </Container>
       </section>

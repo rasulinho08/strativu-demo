@@ -1,8 +1,9 @@
-import { useState, type ReactNode } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { Btn, Container, Eyebrow, Lane, PageHeader, Rows, Section, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
 import { site } from "../data/site";
+import { products } from "../data/products";
 import { grcFigures, grcFrameworkPackages, grcIntegrations, grcModules, grcStatus } from "../data/grc360";
 import { usePageMeta } from "../components/site/Seo";
 import { AuditChain, CollectorFeed, ControlMap, Split } from "../components/site/Visuals";
@@ -50,14 +51,7 @@ export function Platform() {
           </Reveal>
           <Rows
             className="mt-8"
-            items={[
-              {
-                title: "GRC 360",
-                body: "Control and risk registers, automated evidence, cross-framework mapping and audit-ready reporting.",
-                meta: site.status.label,
-                to: "/platform/grc",
-              },
-            ]}
+            items={products.map((pr) => ({ title: pr.name, body: pr.summary, meta: pr.status, to: pr.to, href: pr.href }))}
           />
           <Reveal className="mt-10">
             <TextLink to="/platform/architecture">How the platform is built</TextLink>
@@ -68,60 +62,98 @@ export function Platform() {
   );
 }
 
-/* ── Module explorer: one row per module, opens to show what it does and its screens ── */
+/* ── Module explorer: compact grid of names (left), selected module in a panel (right).
+   Advances on its own while on screen until the visitor picks a module. ── */
 function ModuleExplorer() {
-  const [openIdx, setOpenIdx] = useState<number | null>(0);
+  const [idx, setIdx] = useState(0);
+  const [pinned, setPinned] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { margin: "-20% 0px -20% 0px" });
+  const reduce = useReducedMotion();
+  useEffect(() => {
+    if (pinned || reduce || !inView) return;
+    const id = window.setInterval(() => setIdx((v) => (v + 1) % grcModules.length), 3200);
+    return () => window.clearInterval(id);
+  }, [pinned, reduce, inView]);
+  const m = grcModules[idx];
+
   return (
-    <ul className="mt-10 border-t border-line">
-      {grcModules.map((m, i) => {
-        const open = openIdx === i;
-        return (
-          <li key={m.name} className="border-b border-line">
-            <button
-              type="button"
-              onClick={() => setOpenIdx(open ? null : i)}
-              aria-expanded={open}
-              className="group grid w-full grid-cols-[40px_1fr_auto] items-baseline gap-x-4 py-5 text-left md:grid-cols-[56px_1fr_auto]"
-            >
-              <span className="font-mono text-[13px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
-              <span className={`text-[clamp(19px,1.8vw,24px)] font-semibold tracking-[-0.02em] transition-colors ${open ? "text-brand" : "text-ink group-hover:text-brand"}`}>
-                {m.name}
+    <div ref={ref}>
+      <Split
+        sticky
+        visual={
+          <figure className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-[color-mix(in_srgb,var(--surface)_94%,transparent)] shadow-[var(--e2)] backdrop-blur-md">
+            <div className="flex items-center justify-between border-b border-line-soft px-6 py-3.5">
+              <span className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink-3">
+                Module {String(idx + 1).padStart(2, "0")} / {grcModules.length}
               </span>
-              <span
-                aria-hidden
-                className={`text-[20px] leading-none text-ink-3 transition-transform duration-300 ${open ? "rotate-45" : ""}`}
-              >
-                +
+              {/* irəliləyiş: hansı modulda olduğunu göstərir */}
+              <span className="hidden gap-1 sm:flex" aria-hidden>
+                {grcModules.map((_, k) => (
+                  <span key={k} className={`h-1 w-3 rounded-full transition-colors ${k === idx ? "bg-brand" : "bg-line"}`} />
+                ))}
               </span>
-            </button>
-            <AnimatePresence initial={false}>
-              {open && (
+            </div>
+            <div className="min-h-[300px] p-6 md:p-8">
+              <AnimatePresence mode="wait">
                 <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  className="overflow-hidden"
+                  key={m.name}
+                  initial={reduce ? false : { opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <div className="pb-6 pl-[56px] md:pl-[72px]">
-                    <p className="max-w-[52ch] text-[16px] leading-[1.6] text-ink-2">{m.does}</p>
-                    {m.screens.length > 0 && (
-                      <ul className="mt-4 flex flex-wrap gap-2">
+                  <h3 className="t-h2 text-ink">{m.name}</h3>
+                  <p className="mt-4 text-[17px] leading-[1.6] text-ink-2">{m.does}</p>
+                  {m.screens.length > 0 && (
+                    <>
+                      <p className="mt-8 font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink-3">Screens</p>
+                      <ul className="mt-3 flex flex-wrap gap-2">
                         {m.screens.map((sc) => (
                           <li key={sc} className="rounded-full border border-line px-3 py-1 text-[13px] text-ink-2">
                             {sc}
                           </li>
                         ))}
                       </ul>
-                    )}
-                  </div>
+                    </>
+                  )}
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </li>
-        );
-      })}
-    </ul>
+              </AnimatePresence>
+            </div>
+          </figure>
+        }
+      >
+        <ul className="grid grid-cols-2 gap-x-6 border-t border-line">
+          {grcModules.map((mod, i) => {
+            const on = i === idx;
+            return (
+              <li key={mod.name} className="border-b border-line">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIdx(i);
+                    setPinned(true);
+                  }}
+                  aria-pressed={on}
+                  className="group flex w-full items-baseline gap-3 py-4 text-left"
+                >
+                  <span className={`font-mono text-[12px] transition-colors ${on ? "text-brand" : "text-ink-3"}`}>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span
+                    className={`text-[15.5px] font-medium leading-[1.3] transition-colors ${
+                      on ? "text-ink" : "text-ink-2 group-hover:text-ink"
+                    }`}
+                  >
+                    {mod.name}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </Split>
+    </div>
   );
 }
 
@@ -197,8 +229,10 @@ export function PlatformGRC() {
             <h2 className="t-h2 text-ink">Twelve modules. One model underneath.</h2>
             <p className={BODY}>Every module reads and writes the same registers, so a risk, the asset it affects, the control that treats it and the audit finding that tests it stay linked.</p>
           </Reveal>
-          <ModuleExplorer />
         </Lane>
+        <Reveal className="mt-12">
+          <ModuleExplorer />
+        </Reveal>
       </Section>
 
       <Section id="mapping" className="pt-0 md:pt-0">
