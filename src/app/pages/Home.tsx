@@ -14,6 +14,7 @@ import { Reveal, Stagger } from "../components/site/Reveal";
 import { ClosingCTA } from "../components/site/ClosingCTA";
 import { formatLogDate } from "../components/site/ChangelogList";
 import { usePageMeta } from "../components/site/Seo";
+import { AuditChain, CollectorFeed, ControlMap, RiskHeatmap, Split } from "../components/site/Visuals";
 import { changelog } from "../data/changelog";
 import { frameworks } from "../data/coverage";
 import { site } from "../data/site";
@@ -33,6 +34,8 @@ const WHAT_WE_DO = [
   { n: "02", title: "Evidence", line: "Collectors read your systems on a schedule and attach proof automatically.", to: "/platform/grc#evidence" },
   { n: "03", title: "Audit trail", line: "Every change is recorded in a tamper-evident log your auditor can follow.", to: "/platform/grc#audit" },
 ];
+
+const BELIEF_VISUALS = [CollectorFeed, ControlMap, AuditChain];
 
 const BELIEFS = [
   {
@@ -123,11 +126,28 @@ function Beliefs() {
   }
 
   const b = BELIEFS[active];
+  const Visual = BELIEF_VISUALS[active];
   return (
     <section ref={ref} className="relative h-[320svh]">
       <div className="sticky top-0 flex h-[100svh] items-center">
         <Container>
-          <Lane>
+          <Split
+            visual={
+              <div className="hidden lg:block">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={active}
+                    initial={{ opacity: 0, x: 24 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -24 }}
+                    transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <Visual />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            }
+          >
             <p className="eyebrow">What we believe</p>
             <div className="mt-10 min-h-[340px] md:min-h-[380px]">
               <AnimatePresence mode="wait">
@@ -148,7 +168,7 @@ function Beliefs() {
                 <BeliefBar key={i} i={i} progress={scrollYProgress} />
               ))}
             </div>
-          </Lane>
+          </Split>
         </Container>
       </div>
     </section>
@@ -320,12 +340,12 @@ export default function Home() {
       {/* ── 03 What we do ── */}
       <section className="py-24 md:py-36">
         <Container>
-          <Lane>
+          <Split visual={<Reveal><RiskHeatmap /></Reveal>}>
             <Reveal>
               <p className="eyebrow">What we do</p>
             </Reveal>
             <Rows className="mt-10" items={WHAT_WE_DO.map((w) => ({ n: w.n, title: w.title, body: w.line, to: w.to }))} />
-          </Lane>
+          </Split>
         </Container>
       </section>
 

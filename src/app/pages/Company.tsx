@@ -5,6 +5,7 @@ import { InstagramFeed } from "../components/site/InstagramFeed";
 import { EarlyAccessForm } from "../components/site/EarlyAccessForm";
 import { site } from "../data/site";
 import { usePageMeta } from "../components/site/Seo";
+import { AuditChain, Split } from "../components/site/Visuals";
 
 /**
  * About, Contact, Early access and Trust.
@@ -175,7 +176,7 @@ export function Trust() {
         lead="A GRC vendor should model the behaviour it sells. Here is what is true now, what we are pursuing, and when."
       />
       <Section className="pt-0 md:pt-0">
-        <Lane>
+        <Split sticky visual={<Reveal><AuditChain /></Reveal>}>
           <Rows
             items={[
               {
@@ -223,7 +224,7 @@ export function Trust() {
           <Reveal className="mt-10">
             <TextLink to="/company/contact">Ask a security question</TextLink>
           </Reveal>
-        </Lane>
+        </Split>
       </Section>
     </>
   );

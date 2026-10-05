@@ -56,7 +56,7 @@ const CHOREO: Record<"home" | "page", { desktop: Choreo; mobile: Choreo }> = {
   home: {
     desktop: {
       hero: { x: 0, y: 0.16, size: 0.44, op: 1 },
-      rest: { x: 0, y: 0.02, size: 0.36, op: 0.34 },
+      rest: { x: 0, y: 0.02, size: 0.36, op: 0.22 },
       end: { x: 0, y: 0.17, size: 0.34, op: 1 },
     },
     mobile: {

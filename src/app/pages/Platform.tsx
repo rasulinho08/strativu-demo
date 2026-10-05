@@ -5,6 +5,7 @@ import { Reveal } from "../components/site/Reveal";
 import { site } from "../data/site";
 import { grcFigures, grcFrameworkPackages, grcIntegrations, grcModules, grcStatus } from "../data/grc360";
 import { usePageMeta } from "../components/site/Seo";
+import { AuditChain, CollectorFeed, ControlMap, Split } from "../components/site/Visuals";
 
 /**
  * Platform, GRC and Architecture pages.
@@ -33,13 +34,13 @@ export function Platform() {
       />
 
       <Section>
-        <Lane>
+        <Split visual={<Reveal><ControlMap /></Reveal>}>
           <Reveal>
             <Eyebrow>The model</Eyebrow>
             <h2 className="t-h2 text-ink">Five object types, one graph.</h2>
           </Reveal>
           <Rows className="mt-12" items={MODEL} />
-        </Lane>
+        </Split>
       </Section>
 
       <Section className="pt-0 md:pt-0">
@@ -201,7 +202,7 @@ export function PlatformGRC() {
       </Section>
 
       <Section id="mapping" className="pt-0 md:pt-0">
-        <Lane>
+        <Split visual={<Reveal><ControlMap /></Reveal>}>
           <Reveal>
             <Eyebrow>One control, many frameworks</Eyebrow>
             <h2 className="t-h2 text-ink">Write a control once. Map it everywhere.</h2>
@@ -216,11 +217,11 @@ export function PlatformGRC() {
               <TextLink to="/coverage">Coverage and status per framework</TextLink>
             </div>
           </Reveal>
-        </Lane>
+        </Split>
       </Section>
 
       <Section id="evidence" className="pt-0 md:pt-0">
-        <Lane>
+        <Split visual={<Reveal><CollectorFeed /></Reveal>}>
           <Reveal>
             <Eyebrow>Evidence</Eyebrow>
             <h2 className="t-h2 text-ink">Evidence that collects itself.</h2>
@@ -232,7 +233,7 @@ export function PlatformGRC() {
               Live today: AWS IAM, GitHub. Integration catalogue: {grcIntegrations.join(", ")}.
             </p>
           </Reveal>
-        </Lane>
+        </Split>
       </Section>
 
       <Section id="trust-center" className="pt-0 md:pt-0">
@@ -249,7 +250,7 @@ export function PlatformGRC() {
       </Section>
 
       <Section id="audit" className="pt-0 md:pt-0">
-        <Lane>
+        <Split visual={<Reveal><AuditChain /></Reveal>}>
           <Reveal>
             <Eyebrow>Audit trail</Eyebrow>
             <h2 className="t-h2 text-ink">
@@ -264,7 +265,7 @@ export function PlatformGRC() {
               <TextLink to="/platform/architecture#audit-trail">How the chain is verified</TextLink>
             </div>
           </Reveal>
-        </Lane>
+        </Split>
       </Section>
 
       <Section id="local" className="pt-0 md:pt-0">
