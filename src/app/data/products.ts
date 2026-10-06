@@ -10,6 +10,7 @@
  *   to       → saytdakı səhifəsi (məs. "/platform/grc"), yoxdursa
  *   href     → kənar link (məs. "https://uniaz.info") — ikisindən biri kifayətdir
  *   image    → şəkil yolu (public/ qovluğunda), məs. "/projects/yeni.webp" (istəyə görə)
+ *   video    → qısa film (istəyə görə): { src (mp4), webm?, poster } — varsa ana səhifədə şəkil yerinə oynayır
  *   featured → ana səhifədə göstərilsin?
  */
 export type Product = {
@@ -19,6 +20,7 @@ export type Product = {
   to?: string;
   href?: string;
   image?: { src: string; width: number; height: number; alt: string };
+  video?: { src: string; webm?: string; poster: string };
   featured?: boolean;
 };
 
@@ -34,6 +36,11 @@ export const products: Product[] = [
       width: 2000,
       height: 1250,
       alt: "GRC 360 Command Center: overdue, today and upcoming tasks above an asset-risk heat map.",
+    },
+    video: {
+      src: "/projects/grc360/grc360-film.mp4",
+      webm: "/projects/grc360/grc360-film.webm",
+      poster: "/projects/grc360/grc360-film-poster.webp",
     },
     featured: true,
   },

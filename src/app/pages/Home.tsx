@@ -14,12 +14,13 @@ import { Reveal, Stagger } from "../components/site/Reveal";
 import { ClosingCTA } from "../components/site/ClosingCTA";
 import { formatLogDate } from "../components/site/ChangelogList";
 import { usePageMeta } from "../components/site/Seo";
+import { Film } from "../components/site/Film";
 import { AlertFeed, RiskHeatmap, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
 import { changelog } from "../data/changelog";
 import { frameworks } from "../data/coverage";
 import { site } from "../data/site";
 import { products } from "../data/products";
-import { grcFigures } from "../data/grc360";
+import { grcModules } from "../data/grc360";
 
 /**
  * Ana səhifə.
@@ -29,33 +30,38 @@ import { grcFigures } from "../data/grc360";
  * Bütün rəqəmlər saytın öz datasından gəlir — uydurma statistika yoxdur.
  */
 
-const STATEMENT = "Every risk, control and audit in one system. Every link kept. Every change logged.";
+const STATEMENT = "Software that makes risk visible, compliance routine and audits calm.";
 
 const WHAT_WE_DO = [
-  { n: "01", title: "Risks", line: "Score risks 5×5 against your own appetite and link each one to what treats it.", to: "/platform/grc#links" },
-  { n: "02", title: "Compliance", line: "Load any framework as a package and see the gaps per requirement.", to: "/platform/grc#mapping" },
-  { n: "03", title: "Control", line: "Permissions per module and action, alerts before anything expires, every change logged.", to: "/platform/grc#access" },
+  { n: "01", title: "Products", line: "We design and build our own software. GRC 360 is the first.", to: "/platform" },
+  { n: "02", title: "Made for the region", line: "Azerbaijani and English, local law, in the cloud or on your servers.", to: "/platform/grc#local" },
+  { n: "03", title: "Built in the open", line: "What we ship and what is next is public.", to: "/changelog" },
 ];
 
 const BELIEF_VISUALS = [RiskLinks, AlertFeed, SystemLog];
 
 const BELIEFS = [
   {
-    title: "Links belong in the system, not in someone’s head.",
-    body: "A risk, the asset it affects, the control that treats it and the requirement it meets are one record set. Nothing is kept in sync by hand.",
+    title: "Software should remove work, not move it.",
+    body: "If a spreadsheet, an email chain and a shared folder are holding a process together, the tool has not done its job.",
   },
   {
-    title: "Deadlines should come to you.",
-    body: "Contracts, exceptions, objective audits and targets are watched on a schedule. Owners hear about them before the auditor does.",
+    title: "Built where we live.",
+    body: "Our language, our laws and our customers' data centres come first, not as a later localisation.",
   },
   {
-    title: "Every change has a name and a time.",
-    body: "Creates, updates, deletes, sign-ins and permission changes go to the system log, per tenant, from day one.",
+    title: "Honest about where we are.",
+    body: "We say what works today, what is in progress and what is next. Nothing more.",
   },
 ];
 
-/** Facts from the product (data/grc360.ts). */
-const FACTS = grcFigures;
+/** Strativu haqqında qısa, doğru rəqəmlər. */
+const FACTS: { value: number; suffix?: string; label: string }[] = [
+  { value: products.length, label: products.length === 1 ? "product in development" : "products" },
+  { value: grcModules.length, label: "modules in GRC 360" },
+  { value: 2, label: "languages, Azerbaijani and English" },
+  { value: 2, label: "ways to run it: cloud or on-premise" },
+];
 
 /* ── Statement: words light up one by one as it scrolls through the viewport ── */
 function Word({ word, range, progress }: { word: string; range: [number, number]; progress: MotionValue<number> }) {
@@ -173,7 +179,7 @@ function Beliefs() {
 }
 
 /* ── Product shot eases up and scales in as it enters ── */
-function WorkShot({ image }: { image: { src: string; width: number; height: number; alt: string } }) {
+function WorkShot({ image, video }: { image?: { src: string; width: number; height: number; alt: string }; video?: { src: string; webm?: string; poster: string } }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center center"] });
@@ -182,15 +188,21 @@ function WorkShot({ image }: { image: { src: string; width: number; height: numb
   return (
     <motion.div ref={ref} style={reduce ? undefined : { scale, opacity }} className="origin-bottom">
       <div className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-surface shadow-[var(--e3)]">
-        <img
-          src={image.src}
-          width={image.width}
-          height={image.height}
-          alt={image.alt}
-          className="block h-auto w-full"
-          loading="lazy"
-          decoding="async"
-        />
+        {video ? (
+          <Film src={video.src} webm={video.webm} poster={video.poster} label="GRC 360 product film: tasks, risk heat maps, assets, risks, frameworks and the system log" />
+        ) : (
+          image && (
+            <img
+              src={image.src}
+              width={image.width}
+              height={image.height}
+              alt={image.alt}
+              className="block h-auto w-full"
+              loading="lazy"
+              decoding="async"
+            />
+          )
+        )}
       </div>
     </motion.div>
   );
@@ -288,7 +300,7 @@ const featured = products.filter((p) => p.featured);
 export default function Home() {
   usePageMeta(
     null,
-    "Strativu is building a GRC platform where one control set maps to the frameworks you are audited against and evidence is collected by the system, not the team."
+    "Strativu is a software company in Baku building products for governance, risk and compliance. GRC 360 is the first."
   );
 
   return (
@@ -305,7 +317,7 @@ export default function Home() {
           />
           <Stagger>
             <h1 className="mx-auto max-w-[16ch] text-[clamp(40px,6vw,84px)] font-semibold leading-[1.02] tracking-[-0.032em] text-ink">
-              Compliance evidence, <span className="text-brand">engineered.</span>
+              We build software for <span className="text-brand">risk and compliance.</span>
             </h1>
             <p className="chapter mt-7">
               <b>{site.status.label}</b> · {site.status.detail}
@@ -324,7 +336,7 @@ export default function Home() {
             <Statement />
             <Reveal>
               <p className="t-lead mt-10 max-w-[46ch]">
-                We build GRC software that keeps your controls, evidence and audit trail in one place.
+                Strativu is a software company in Baku. We build products that help organisations run governance, risk and compliance with less paperwork.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <Btn to="/early-access" size="lg">
@@ -361,9 +373,9 @@ export default function Home() {
               <h2 className="t-h2 mt-5 text-ink">{featured[0].name}</h2>
               <p className="mt-4 max-w-[48ch] text-[17px] leading-[1.6] text-ink-2">{featured[0].summary}</p>
             </Reveal>
-            {featured[0].image && (
+            {(featured[0].image || featured[0].video) && (
               <div className="mt-12">
-                <WorkShot image={featured[0].image} />
+                <WorkShot image={featured[0].image} video={featured[0].video} />
               </div>
             )}
             <Reveal className="mt-8">
@@ -388,7 +400,7 @@ export default function Home() {
         <Container>
           <Reveal>
             <p className="eyebrow">In numbers</p>
-            <h2 className="t-h2 mt-5 max-w-[18ch] text-ink">The platform in figures.</h2>
+            <h2 className="t-h2 mt-5 max-w-[18ch] text-ink">Strativu in figures.</h2>
           </Reveal>
           <dl className="mt-14 grid grid-cols-2 md:grid-cols-4">
             {FACTS.map((f, i) => (
