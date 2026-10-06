@@ -4,6 +4,12 @@ import { Reveal } from "./Reveal";
 
 const ORDER: FrameworkStatus[] = ["supported", "in-progress", "planned"];
 
+const NOTE: Record<FrameworkStatus, string> = {
+  supported: "Run as compliance packages in the current build.",
+  "in-progress": "A ready-made package is being prepared.",
+  planned: "On the roadmap. Early-access teams set the order.",
+};
+
 /**
  * Framework list grouped by status (Supported, Mapping, Planned).
  * Hairline rows, no tiles: id as title, full name underneath, each row links to its framework page.
@@ -16,14 +22,13 @@ export function CoverageGrid({ limit }: { limit?: number }) {
         const group = list.filter((f) => f.status === status);
         if (!group.length) return null;
         return (
-          <div key={status}>
-            <Reveal>
+          <div key={status} className="grid grid-cols-1 gap-x-16 gap-y-6 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] xl:gap-x-24">
+            <Reveal className="lg:sticky lg:top-28 lg:self-start">
               <h2 className="eyebrow">{statusLabel[status]}</h2>
+              <p className="mt-4 text-[clamp(44px,5vw,72px)] font-semibold leading-none tracking-[-0.04em] text-ink">{group.length}</p>
+              <p className="mt-3 max-w-[32ch] text-[15px] leading-[1.6] text-ink-3">{NOTE[status]}</p>
             </Reveal>
-            <Rows
-              className="mt-6"
-              items={group.map((f) => ({ title: f.id, body: f.name, to: `/coverage/${f.slug}` }))}
-            />
+            <Rows items={group.map((f) => ({ title: f.id, body: f.name, to: `/coverage/${f.slug}` }))} />
           </div>
         );
       })}

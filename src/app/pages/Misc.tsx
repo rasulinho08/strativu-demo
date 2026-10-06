@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import { NotFound } from "./NotFound";
-import { PageHeader, Section, Lane, Prose } from "../components/site/primitives";
+import { Duo, PageHeader, Section, Prose } from "../components/site/primitives";
 import { ChangelogList } from "../components/site/ChangelogList";
 import { site } from "../data/site";
 import { usePageMeta } from "../components/site/Seo";
@@ -15,9 +15,7 @@ export function Changelog() {
     <>
       <PageHeader eyebrow="Changelog" title="Public build log." lead="What changed and why, with real dates." />
       <Section className={BODY}>
-        <Lane>
-          <ChangelogList />
-        </Lane>
+        <ChangelogList />
       </Section>
     </>
   );
@@ -82,11 +80,23 @@ export function Legal() {
     <>
       <PageHeader eyebrow={`Legal · Updated ${page.updated}`} title={page.title} />
       <Section className={BODY}>
-        <Lane>
+        <Duo
+          sticky
+          head={
+            <div className="border-t border-line pt-6">
+              <p className="mono-label">Last updated</p>
+              <p className="mt-2 text-[15px] text-ink">{page.updated}</p>
+              <p className="mono-label mt-8">Questions</p>
+              <a href={`mailto:${site.company.email}`} className="mt-2 inline-block text-[15px] text-ink link-line">
+                {site.company.email}
+              </a>
+            </div>
+          }
+        >
           <Prose className="border-t border-line pt-10 [&>*:first-child]:mt-0 [&_a]:text-brand-ink [&_a]:underline [&_a]:decoration-line-strong [&_a]:underline-offset-4 [&_a:hover]:decoration-current">
             {page.body}
           </Prose>
-        </Lane>
+        </Duo>
       </Section>
     </>
   );

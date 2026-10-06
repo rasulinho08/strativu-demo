@@ -9,13 +9,15 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
-import { Btn, Container, Lane, Rows, TextLink } from "../components/site/primitives";
+import { Link } from "react-router";
+import { ArrowRight } from "lucide-react";
+import { Btn, Container, Duo, Rows, TextLink } from "../components/site/primitives";
 import { Reveal, Stagger } from "../components/site/Reveal";
 import { ClosingCTA } from "../components/site/ClosingCTA";
 import { formatLogDate } from "../components/site/ChangelogList";
 import { usePageMeta } from "../components/site/Seo";
 import { Film } from "../components/site/Film";
-import { AlertFeed, RiskHeatmap, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
+import { AlertFeed, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
 import { changelog } from "../data/changelog";
 import { frameworks } from "../data/coverage";
 import { site } from "../data/site";
@@ -53,6 +55,14 @@ const BELIEFS = [
     title: "Honest about where we are.",
     body: "We say what works today, what is in progress and what is next. Nothing more.",
   },
+];
+
+/** "Who we are" — sağ tərəfdəki qısa şirkət məlumatı. */
+const GLANCE = [
+  { k: "Company", v: `${site.company.legalName}, Baku` },
+  { k: "First product", v: "GRC 360" },
+  { k: "Status", v: site.status.label },
+  { k: "Next", v: site.status.detail },
 ];
 
 /** Strativu haqqında qısa, doğru rəqəmlər. */
@@ -112,17 +122,15 @@ function Beliefs() {
     return (
       <section className="py-24 md:py-36">
         <Container>
-          <Lane>
-            <p className="eyebrow">What we believe</p>
-            <div className="mt-10 space-y-16">
-              {BELIEFS.map((b, i) => (
-                <div key={i}>
-                  <h3 className="t-h2 text-ink">{b.title}</h3>
-                  <p className="mt-5 max-w-[48ch] text-[17px] leading-[1.65] text-ink-2">{b.body}</p>
-                </div>
-              ))}
-            </div>
-          </Lane>
+          <p className="eyebrow">What we believe</p>
+          <div className="mt-10 grid grid-cols-1 gap-x-12 gap-y-14 border-t border-line pt-10 md:grid-cols-3">
+            {BELIEFS.map((b, i) => (
+              <div key={i}>
+                <h3 className="t-h3 text-ink">{b.title}</h3>
+                <p className="mt-4 max-w-[40ch] text-[16px] leading-[1.65] text-ink-2">{b.body}</p>
+              </div>
+            ))}
+          </div>
         </Container>
       </section>
     );
@@ -329,15 +337,24 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 02 What we are building: the mark settles on the right as this arrives ── */}
+      {/* ── 02 Who we are: statement on the left, the company at a glance on the right ── */}
       <section className="py-28 md:py-44">
         <Container>
-          <Lane>
+          <div className="grid grid-cols-1 gap-x-16 gap-y-14 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-end xl:gap-x-24">
             <Statement />
             <Reveal>
-              <p className="t-lead mt-10 max-w-[46ch]">
-                Strativu is a software company in Baku. We build products that help organisations run governance, risk and compliance with less paperwork.
+              <p className="t-lead max-w-[46ch]">
+                Strativu is a software company in Baku. We build products that help organisations run governance, risk and
+                compliance with less paperwork.
               </p>
+              <dl className="mt-10 border-t border-line">
+                {GLANCE.map((g) => (
+                  <div key={g.k} className="flex items-baseline justify-between gap-6 border-b border-line py-3.5">
+                    <dt className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink-3">{g.k}</dt>
+                    <dd className="text-right text-[15px] text-ink">{g.v}</dd>
+                  </div>
+                ))}
+              </dl>
               <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <Btn to="/early-access" size="lg">
                   Request early access
@@ -345,63 +362,99 @@ export default function Home() {
                 <TextLink to="/platform">See the platform</TextLink>
               </div>
             </Reveal>
-          </Lane>
+          </div>
         </Container>
       </section>
 
-      {/* ── 03 What we do ── */}
+      {/* ── 03 What we do: heading row, then three columns across the page ── */}
       <section className="py-24 md:py-36">
         <Container>
-          <Split visual={<Reveal><RiskHeatmap /></Reveal>}>
+          <Duo
+            head={
+              <Reveal>
+                <p className="eyebrow">What we do</p>
+                <h2 className="t-h2 mt-5 text-ink">Products for governance, risk and compliance.</h2>
+              </Reveal>
+            }
+          >
             <Reveal>
-              <p className="eyebrow">What we do</p>
+              <p className="t-lead max-w-[46ch]">
+                We design, build and run our own software, for organisations that answer to regulators, auditors and customers.
+              </p>
             </Reveal>
-            <Rows className="mt-10" items={WHAT_WE_DO.map((w) => ({ n: w.n, title: w.title, body: w.line, to: w.to }))} />
-          </Split>
+          </Duo>
+          <ol className="mt-16 grid grid-cols-1 border-t border-line md:grid-cols-3">
+            {WHAT_WE_DO.map((w, i) => (
+              <Reveal
+                as="li"
+                key={w.n}
+                delay={i * 0.08}
+                className={`border-b border-line md:border-b-0 ${i > 0 ? "md:border-l md:border-line" : ""}`}
+              >
+                <Link to={w.to} className="group flex h-full flex-col py-8 md:px-8 md:py-10 md:first:pl-0">
+                  <span className="font-mono text-[12px] text-brand">{w.n}</span>
+                  <span className="t-h3 mt-6 text-ink transition-colors group-hover:text-brand">{w.title}</span>
+                  <span className="mt-3 max-w-[34ch] text-[16px] leading-[1.6] text-ink-2">{w.line}</span>
+                  <ArrowRight
+                    className="mt-8 h-4 w-4 text-ink-3 transition-all duration-200 group-hover:translate-x-1 group-hover:text-brand"
+                    aria-hidden
+                  />
+                </Link>
+              </Reveal>
+            ))}
+          </ol>
         </Container>
       </section>
 
       {/* ── 04 What we believe: pinned, three statements ── */}
       <Beliefs />
 
-      {/* ── 05 Our work (from data/products.ts) ── */}
+      {/* ── 05 Our work (from data/products.ts): text on the left, the film on the right ── */}
       <section className="py-24 md:py-36">
         <Container>
-          <Lane>
+          <div className="grid grid-cols-1 gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:items-center xl:gap-x-20">
             <Reveal>
               <p className="eyebrow">Our work</p>
               <h2 className="t-h2 mt-5 text-ink">{featured[0].name}</h2>
-              <p className="mt-4 max-w-[48ch] text-[17px] leading-[1.6] text-ink-2">{featured[0].summary}</p>
-            </Reveal>
-            {(featured[0].image || featured[0].video) && (
-              <div className="mt-12">
-                <WorkShot image={featured[0].image} video={featured[0].video} />
+              <p className="mt-4 max-w-[40ch] text-[17px] leading-[1.6] text-ink-2">{featured[0].summary}</p>
+              <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-line px-3 py-1 text-[13px] text-ink-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-brand" aria-hidden />
+                {featured[0].status}
+              </p>
+              <div className="mt-8">
+                {featured[0].to ? (
+                  <TextLink to={featured[0].to}>View {featured[0].name}</TextLink>
+                ) : (
+                  featured[0].href && <TextLink href={featured[0].href}>View {featured[0].name}</TextLink>
+                )}
               </div>
-            )}
-            <Reveal className="mt-8">
-              {featured[0].to ? (
-                <TextLink to={featured[0].to}>View {featured[0].name}</TextLink>
-              ) : (
-                featured[0].href && <TextLink href={featured[0].href}>View {featured[0].name}</TextLink>
-              )}
             </Reveal>
-            {featured.length > 1 && (
-              <Rows
-                className="mt-14"
-                items={featured.slice(1).map((pr) => ({ title: pr.name, body: pr.summary, meta: pr.status, to: pr.to, href: pr.href }))}
-              />
-            )}
-          </Lane>
+            {(featured[0].image || featured[0].video) && <WorkShot image={featured[0].image} video={featured[0].video} />}
+          </div>
+          {featured.length > 1 && (
+            <Rows
+              className="mt-14"
+              items={featured.slice(1).map((pr) => ({ title: pr.name, body: pr.summary, meta: pr.status, to: pr.to, href: pr.href }))}
+            />
+          )}
         </Container>
       </section>
 
       {/* ── 06 In numbers (all from the site's own data) ── */}
       <section className="py-24 md:py-36">
         <Container>
-          <Reveal>
-            <p className="eyebrow">In numbers</p>
-            <h2 className="t-h2 mt-5 max-w-[18ch] text-ink">Strativu in figures.</h2>
-          </Reveal>
+          <Duo
+            head={
+              <Reveal>
+                <p className="eyebrow">In numbers</p>
+                <h2 className="t-h2 mt-5 max-w-[18ch] text-ink">Strativu in figures.</h2>
+              </Reveal>
+            }
+          >
+            <Reveal>
+              <p className="t-lead max-w-[46ch]">Small on purpose. Every number here is true today.</p>
+            </Reveal>
+          </Duo>
           <dl className="mt-14 grid grid-cols-2 md:grid-cols-4">
             {FACTS.map((f, i) => (
               <Fact key={f.label} value={f.value} suffix={f.suffix} label={f.label} i={i} />
@@ -427,22 +480,22 @@ export default function Home() {
         </Container>
       </section>
 
-      {/* ── 08 Latest from the build log ── */}
+      {/* ── 08 Latest from the build log: heading left, entries right ── */}
       <section className="py-24 md:py-36">
         <Container>
-          <Lane>
-            <Reveal>
-              <p className="eyebrow">Build log</p>
-              <h2 className="t-h2 mt-5 text-ink">What shipped recently.</h2>
-            </Reveal>
-            <Rows
-              className="mt-10"
-              items={changelog.slice(0, 3).map((e) => ({ title: e.title, meta: formatLogDate(e.date), to: "/changelog" }))}
-            />
-            <Reveal className="mt-8">
-              <TextLink to="/changelog">Full build log</TextLink>
-            </Reveal>
-          </Lane>
+          <Duo
+            head={
+              <Reveal>
+                <p className="eyebrow">Build log</p>
+                <h2 className="t-h2 mt-5 text-ink">What shipped recently.</h2>
+                <div className="mt-8">
+                  <TextLink to="/changelog">Full build log</TextLink>
+                </div>
+              </Reveal>
+            }
+          >
+            <Rows items={changelog.slice(0, 3).map((e) => ({ title: e.title, meta: formatLogDate(e.date), to: "/changelog" }))} />
+          </Duo>
         </Container>
       </section>
 

@@ -16,12 +16,13 @@ export function ChangelogList({ limit, entries = changelog }: { limit?: number; 
     <ol className="border-t border-line">
       {list.map((e, i) => (
         <Reveal as="li" key={e.date + e.title} delay={Math.min(i, 4) * 0.06} className="border-b border-line py-8">
-          <article>
-            <time dateTime={e.date} className="tabular block font-mono text-[12.5px] text-ink-3">
+          {/* masaüstü: tarix | başlıq | mətn — səhifənin bütün enini doldurur */}
+          <article className="grid grid-cols-1 gap-x-12 gap-y-3 lg:grid-cols-[140px_minmax(0,5fr)_minmax(0,6fr)]">
+            <time dateTime={e.date} className="tabular block pt-1.5 font-mono text-[12.5px] text-ink-3">
               {formatLogDate(e.date)}
             </time>
-            <h2 className="t-h3 mt-3 text-ink">{e.title}</h2>
-            <p className="mt-2 max-w-[52ch] text-[16px] leading-[1.6] text-ink-2">{e.body}</p>
+            <h2 className="t-h3 text-ink">{e.title}</h2>
+            <p className="max-w-[52ch] text-[16px] leading-[1.6] text-ink-2">{e.body}</p>
           </article>
         </Reveal>
       ))}

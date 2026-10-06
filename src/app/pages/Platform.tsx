@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
-import { Btn, Container, Eyebrow, Lane, PageHeader, Rows, Section, TextLink } from "../components/site/primitives";
+import { Btn, Container, Duo, Eyebrow, PageHeader, Rows, Section, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
 import { site } from "../data/site";
 import { products } from "../data/products";
@@ -24,6 +24,8 @@ import { AlertFeed, ControlMap, RiskLinks, Split, SystemLog } from "../component
  */
 
 const BODY = "mt-5 max-w-[52ch] text-[17px] leading-[1.65] text-ink-2";
+/** Duo-nun sağ sütununda ilk abzas (yuxarı boşluq lazım deyil). */
+const BODY_R = "max-w-[52ch] text-[17px] leading-[1.65] text-ink-2";
 
 const MODEL = [
   { n: "01", title: "Registers", body: "Risks, assets, vendors and processing activities." },
@@ -54,18 +56,19 @@ export function Platform() {
       </Section>
 
       <Section className="pt-0 md:pt-0">
-        <Lane>
-          <Reveal>
-            <h2 className="eyebrow mb-4">Products</h2>
-          </Reveal>
-          <Rows
-            className="mt-8"
-            items={products.map((pr) => ({ title: pr.name, body: pr.summary, meta: pr.status, to: pr.to, href: pr.href }))}
-          />
-          <Reveal className="mt-10">
-            <TextLink to="/platform/architecture">How the platform is built</TextLink>
-          </Reveal>
-        </Lane>
+        <Duo
+          head={
+            <Reveal>
+              <Eyebrow>Products</Eyebrow>
+              <h2 className="t-h2 text-ink">What we have built on it.</h2>
+              <div className="mt-8">
+                <TextLink to="/platform/architecture">How the platform is built</TextLink>
+              </div>
+            </Reveal>
+          }
+        >
+          <Rows items={products.map((pr) => ({ title: pr.name, body: pr.summary, meta: pr.status, to: pr.to, href: pr.href }))} />
+        </Duo>
       </Section>
     </>
   );
@@ -276,8 +279,8 @@ export function PlatformGRC() {
 
       {/* Figures — only numbers verified in the product */}
       <Section>
-        <Lane>
-          <dl className="grid grid-cols-2 gap-x-8 gap-y-10 border-t border-line pt-10">
+        <div>
+          <dl className="grid grid-cols-2 gap-x-8 gap-y-10 border-t border-line pt-10 lg:grid-cols-4">
             {grcFigures.map((f, i) => (
               <Reveal key={f.label} delay={i * 0.06}>
                 <dt className="sr-only">{f.label}</dt>
@@ -293,18 +296,23 @@ export function PlatformGRC() {
               </Reveal>
             ))}
           </dl>
-        </Lane>
+        </div>
       </Section>
 
       {/* Modules */}
       <Section id="modules" className="pt-0 md:pt-0">
-        <Lane>
+        <Duo
+          head={
+            <Reveal>
+              <Eyebrow>Modules</Eyebrow>
+              <h2 className="t-h2 text-ink">Twelve modules. One model underneath.</h2>
+            </Reveal>
+          }
+        >
           <Reveal>
-            <Eyebrow>Modules</Eyebrow>
-            <h2 className="t-h2 text-ink">Twelve modules. One model underneath.</h2>
-            <p className={BODY}>Every module reads and writes the same records, so a risk, the asset it affects, the control that treats it and the audit finding that tests it stay linked. Thirty-one screens in all.</p>
+            <p className={BODY_R}>Every module reads and writes the same records, so a risk, the asset it affects, the control that treats it and the audit finding that tests it stay linked. Thirty-one screens in all.</p>
           </Reveal>
-        </Lane>
+        </Duo>
         <Reveal className="mt-12">
           <ModuleExplorer />
         </Reveal>
@@ -360,16 +368,21 @@ export function PlatformGRC() {
       </Section>
 
       <Section id="trust-center" className="pt-0 md:pt-0">
-        <Lane>
+        <Duo
+          head={
+            <Reveal>
+              <Eyebrow>Trust Center</Eyebrow>
+              <h2 className="t-h2 text-ink">Answer security questionnaires before they arrive.</h2>
+            </Reveal>
+          }
+        >
           <Reveal>
-            <Eyebrow>Trust Center</Eyebrow>
-            <h2 className="t-h2 text-ink">Answer security questionnaires before they arrive.</h2>
-            <p className={BODY}>
+            <p className={BODY_R}>
               A public security page for your customers: the practices you apply, how their data is handled, and an honest view of
               your certification roadmap.
             </p>
           </Reveal>
-        </Lane>
+        </Duo>
       </Section>
 
       <Section id="access" className="pt-0 md:pt-0">
@@ -387,46 +400,59 @@ export function PlatformGRC() {
       </Section>
 
       <Section id="deployment" className="pt-0 md:pt-0">
-        <Lane>
+        <Duo
+          head={
+            <Reveal>
+              <Eyebrow>Deployment</Eyebrow>
+              <h2 className="t-h2 text-ink">In our cloud or on your servers.</h2>
+            </Reveal>
+          }
+        >
           <Reveal>
-            <Eyebrow>Deployment</Eyebrow>
-            <h2 className="t-h2 text-ink">In our cloud or on your servers.</h2>
-            <p className={BODY}>
+            <p className={BODY_R}>
               Multi-tenant SaaS, or an on-premise and air-gapped install for banks, government and critical infrastructure. The
               on-premise build ships with Docker Compose.
             </p>
             <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">{grcStack.join(" · ")}</p>
           </Reveal>
-        </Lane>
+        </Duo>
       </Section>
 
       <Section id="local" className="pt-0 md:pt-0">
-        <Lane>
+        <Duo
+          head={
+            <Reveal>
+              <Eyebrow>Built in Baku</Eyebrow>
+              <h2 className="t-h2 text-ink">In Azerbaijani, with local law built in.</h2>
+            </Reveal>
+          }
+        >
           <Reveal>
-            <Eyebrow>Built in Baku</Eyebrow>
-            <h2 className="t-h2 text-ink">In Azerbaijani, with local law built in.</h2>
-            <p className={BODY}>
+            <p className={BODY_R}>
               The whole interface is in Azerbaijani and English. The Law of the Republic of Azerbaijan on Personal Data (No. 998-IIIQ)
               loads as its own package, next to GDPR.
             </p>
           </Reveal>
-        </Lane>
+        </Duo>
       </Section>
 
       <Section id="status" className="pt-0 md:pt-0">
-        <Lane>
-          <Reveal>
-            <Eyebrow>Where it stands</Eyebrow>
-            <h2 className="t-h2 text-ink">Built in the open.</h2>
-          </Reveal>
-          <Rows className="mt-10" items={grcStatus.map((st) => ({ title: st.k, body: st.v }))} />
-          <Reveal className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
-            <Btn to="/early-access" size="lg">
-              Request early access
-            </Btn>
-            <TextLink to="/changelog">Build log</TextLink>
-          </Reveal>
-        </Lane>
+        <Duo
+          head={
+            <Reveal>
+              <Eyebrow>Where it stands</Eyebrow>
+              <h2 className="t-h2 text-ink">Built in the open.</h2>
+              <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
+                <Btn to="/early-access" size="lg">
+                  Request early access
+                </Btn>
+                <TextLink to="/changelog">Build log</TextLink>
+              </div>
+            </Reveal>
+          }
+        >
+          <Rows items={grcStatus.map((st) => ({ title: st.k, body: st.v }))} />
+        </Duo>
       </Section>
     </>
   );
@@ -480,28 +506,26 @@ export function Architecture() {
 
       <div className="pb-24 pt-4 md:pb-36 md:pt-8">
         <Container>
-          <Lane>
-            <div className="border-b border-line">
-              {ARCH.map((a, i) => (
-                <section key={a.h} id={slug(a.h)} className="scroll-mt-24 border-t border-line py-10 md:py-12">
-                  <Reveal className="grid grid-cols-[48px_1fr] gap-x-4 md:grid-cols-[64px_1fr]">
-                    <span className="pt-1.5 font-mono text-[13px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
-                    <div className="min-w-0">
-                      <h2 className="t-h3 text-ink">{a.h}</h2>
-                      {a.p.map((t, j) => (
-                        <p key={j} className="mt-4 max-w-[60ch] text-[16.5px] leading-[1.7] text-ink-2">
-                          {t}
-                        </p>
-                      ))}
-                    </div>
-                  </Reveal>
-                </section>
-              ))}
-            </div>
-            <Reveal className="mt-10">
-              <TextLink to="/trust">Certifications we are pursuing</TextLink>
-            </Reveal>
-          </Lane>
+          <div className="border-b border-line">
+            {ARCH.map((a, i) => (
+              <section key={a.h} id={slug(a.h)} className="scroll-mt-24 border-t border-line py-10 md:py-12">
+                <Reveal className="grid grid-cols-[48px_1fr] gap-x-4 gap-y-4 md:grid-cols-[64px_1fr] lg:grid-cols-[64px_minmax(0,4fr)_minmax(0,7fr)] lg:gap-x-12">
+                  <span className="pt-1.5 font-mono text-[13px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
+                  <h2 className="t-h3 text-ink">{a.h}</h2>
+                  <div className="col-start-2 min-w-0 lg:col-start-3">
+                    {a.p.map((t, j) => (
+                      <p key={j} className={`${j ? "mt-4" : ""} max-w-[60ch] text-[16.5px] leading-[1.7] text-ink-2`}>
+                        {t}
+                      </p>
+                    ))}
+                  </div>
+                </Reveal>
+              </section>
+            ))}
+          </div>
+          <Reveal className="mt-10">
+            <TextLink to="/trust">Certifications we are pursuing</TextLink>
+          </Reveal>
         </Container>
       </div>
     </>

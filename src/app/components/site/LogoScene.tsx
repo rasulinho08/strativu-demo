@@ -56,23 +56,23 @@ const CHOREO: Record<"home" | "page", { desktop: Choreo; mobile: Choreo }> = {
   home: {
     desktop: {
       hero: { x: 0, y: 0.16, size: 0.44, op: 1 },
-      rest: { x: 0, y: 0.02, size: 0.36, op: 0.22 },
+      rest: { x: 0, y: 0.02, size: 0.36, op: 0.14 },
       end: { x: 0, y: 0.17, size: 0.34, op: 1 },
     },
     mobile: {
       hero: { x: 0, y: 0.17, size: 0.3, op: 1 },
-      rest: { x: 0, y: 0.04, size: 0.26, op: 0.24 },
+      rest: { x: 0, y: 0.04, size: 0.26, op: 0.16 },
       end: { x: 0, y: 0.24, size: 0.22, op: 1 },
     },
   },
   page: {
     desktop: {
-      hero: { x: 0, y: 0.04, size: 0.4, op: 0.34 },
-      rest: { x: 0, y: 0.02, size: 0.36, op: 0.3 },
+      hero: { x: 0, y: 0.04, size: 0.4, op: 0.24 },
+      rest: { x: 0, y: 0.02, size: 0.36, op: 0.16 },
     },
     mobile: {
       hero: { x: 0, y: 0.3, size: 0.17, op: 1 },
-      rest: { x: 0, y: 0.04, size: 0.26, op: 0.24 },
+      rest: { x: 0, y: 0.04, size: 0.26, op: 0.16 },
     },
   },
 };

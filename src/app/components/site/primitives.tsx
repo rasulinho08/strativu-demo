@@ -40,6 +40,29 @@ export function Lane({ children, className = "" }: { children: ReactNode; classN
   return <div className={`max-w-[640px] lg:max-w-[56%] ${className}`}>{children}</div>;
 }
 
+/**
+ * İki tərəfli bölmə: solda başlıq (eyebrow + h2), sağda mətn/siyahı. Masaüstündə səhifəni balanslı doldurur,
+ * mobildə üst-üstə düşür. `sticky` → uzun sağ tərəfdə başlıq ekranda qalır.
+ */
+export function Duo({
+  head,
+  children,
+  className = "",
+  sticky = false,
+}: {
+  head: ReactNode;
+  children: ReactNode;
+  className?: string;
+  sticky?: boolean;
+}) {
+  return (
+    <div className={`grid grid-cols-1 gap-x-16 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:gap-x-24 ${className}`}>
+      <div className={`min-w-0 ${sticky ? "lg:sticky lg:top-28 lg:self-start" : ""}`}>{head}</div>
+      <div className="min-w-0 lg:pt-2">{children}</div>
+    </div>
+  );
+}
+
 export type RowItem = {
   /** Small index shown on the left, e.g. "01". */
   n?: string;
@@ -210,15 +233,22 @@ export function PageHeader({
   lead?: ReactNode;
   children?: ReactNode;
 }) {
+  // Masaüstü: başlıq solda, giriş mətni və düymə sağda (aşağıya düzlənib) — səhifə iki tərəfdən balanslıdır.
   return (
     <header className="relative pb-12 pt-[34svh] motion-reduce:pt-36 md:pb-16 md:pt-48">
       <Container>
-        <Lane>
-          <Eyebrow>{eyebrow}</Eyebrow>
-          <h1 className="t-h1 text-ink">{title}</h1>
-          {lead && <p className="t-lead mt-6 max-w-[48ch]">{lead}</p>}
-          {children && <div className="mt-10">{children}</div>}
-        </Lane>
+        <div className="grid grid-cols-1 gap-x-16 gap-y-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-end xl:gap-x-24">
+          <div className="min-w-0">
+            <Eyebrow>{eyebrow}</Eyebrow>
+            <h1 className="t-h1 text-ink">{title}</h1>
+          </div>
+          {(lead || children) && (
+            <div className="min-w-0 lg:pb-2">
+              {lead && <p className="t-lead max-w-[48ch]">{lead}</p>}
+              {children && <div className={lead ? "mt-8" : ""}>{children}</div>}
+            </div>
+          )}
+        </div>
       </Container>
     </header>
   );

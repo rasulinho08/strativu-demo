@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Eyebrow, Lane, PageHeader, Rows, Section, TextLink } from "../components/site/primitives";
+import { Duo, Eyebrow, PageHeader, Rows, Section, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
 import { InstagramFeed } from "../components/site/InstagramFeed";
 import { EarlyAccessForm } from "../components/site/EarlyAccessForm";
@@ -28,54 +28,60 @@ export function About() {
       />
 
       <Section>
-        <Lane>
-          <Reveal>
-            <Eyebrow>Why we exist</Eyebrow>
-            <h2 className="t-h2 text-ink">The category is full. The problem is still there.</h2>
-          </Reveal>
-          <Reveal delay={0.06} className="mt-8 space-y-5">
-            <p className={BODY}>
-              On both sides of the audit we kept finding tools that automate screenshot collection instead of removing the
-              need for it, with a separate control register for every framework.
-            </p>
-            <p className={BODY}>
-              We start from the model instead: risks, controls, policies and requirements linked as one record set, frameworks loaded as packages,
-              and every change in a log an auditor can read. It is slower to build, and the only version we would trust with our
-              own programme.
-            </p>
-          </Reveal>
-        </Lane>
+        <Duo
+          head={
+            <Reveal>
+              <Eyebrow>Why we exist</Eyebrow>
+              <h2 className="t-h2 text-ink">The category is full. The problem is still there.</h2>
+            </Reveal>
+          }
+        >
+            <Reveal delay={0.06} className="space-y-5">
+              <p className={BODY}>
+                On both sides of the audit we kept finding tools that automate screenshot collection instead of removing the
+                need for it, with a separate control register for every framework.
+              </p>
+              <p className={BODY}>
+                We start from the model instead: risks, controls, policies and requirements linked as one record set, frameworks loaded as packages,
+                and every change in a log an auditor can read. It is slower to build, and the only version we would trust with our
+                own programme.
+              </p>
+            </Reveal>
+        </Duo>
       </Section>
 
       {/* Instagram postları — token yoxdursa bu bölmə görünmür (bax: api/instagram.ts) */}
       <InstagramFeed />
 
       <Section className="pt-0 md:pt-0">
-        <Lane>
-          <Reveal>
-            <Eyebrow>Where</Eyebrow>
-            <h2 className="t-h2 text-ink">Baku, building for Europe.</h2>
-          </Reveal>
-          <Reveal className="mt-12">
-            <dl className="grid gap-x-8 gap-y-5 border-t border-line pt-8 md:grid-cols-[180px_1fr]">
-              <dt className="mono-label pt-1">Company</dt>
-              <dd className="text-[17px] leading-[1.6] text-ink">{`${site.company.legalName}. ${site.company.jurisdiction}.`}</dd>
-              <dt className="mono-label pt-1">Working hours</dt>
-              <dd className="text-[17px] leading-[1.6] text-ink">
-                09:00–18:00 AZT (UTC+4), covering the European morning and early afternoon.
-              </dd>
-              <dt className="mono-label pt-1">Email</dt>
-              <dd className="text-[17px] leading-[1.6] text-ink">
-                <a href={MAILTO} className={INLINE_LINK}>
-                  {site.company.email}
-                </a>
-              </dd>
-            </dl>
-          </Reveal>
-          <Reveal className="mt-10">
-            <TextLink to="/company/contact">Get in touch</TextLink>
-          </Reveal>
-        </Lane>
+        <Duo
+          head={
+            <Reveal>
+              <Eyebrow>Where</Eyebrow>
+              <h2 className="t-h2 text-ink">Baku, building for Europe.</h2>
+            </Reveal>
+          }
+        >
+            <Reveal>
+              <dl className="grid gap-x-8 gap-y-5 border-t border-line pt-8 md:grid-cols-[180px_1fr]">
+                <dt className="mono-label pt-1">Company</dt>
+                <dd className="text-[17px] leading-[1.6] text-ink">{`${site.company.legalName}. ${site.company.jurisdiction}.`}</dd>
+                <dt className="mono-label pt-1">Working hours</dt>
+                <dd className="text-[17px] leading-[1.6] text-ink">
+                  09:00–18:00 AZT (UTC+4), covering the European morning and early afternoon.
+                </dd>
+                <dt className="mono-label pt-1">Email</dt>
+                <dd className="text-[17px] leading-[1.6] text-ink">
+                  <a href={MAILTO} className={INLINE_LINK}>
+                    {site.company.email}
+                  </a>
+                </dd>
+              </dl>
+            </Reveal>
+            <Reveal className="mt-10">
+              <TextLink to="/company/contact">Get in touch</TextLink>
+            </Reveal>
+        </Duo>
       </Section>
     </>
   );
@@ -91,21 +97,35 @@ export function Contact() {
         lead="Product questions, partnerships, press, or a framework you need mapped. A named person replies within two working days."
       />
       <Section className="pt-0 md:pt-0">
-        <Lane>
+        <Duo
+          sticky
+          head={
+            <Reveal>
+              <dl className="border-t border-line">
+                <div className="border-b border-line py-5">
+                  <dt className="mono-label">Email</dt>
+                  <dd className="mt-2 text-[16px]">
+                    <a href={MAILTO} className="text-ink link-line">
+                      {site.company.email}
+                    </a>
+                  </dd>
+                </div>
+                <div className="border-b border-line py-5">
+                  <dt className="mono-label">Office</dt>
+                  <dd className="mt-2 text-[16px] text-ink">{site.company.address}</dd>
+                </div>
+                <div className="border-b border-line py-5">
+                  <dt className="mono-label">Reply time</dt>
+                  <dd className="mt-2 text-[16px] text-ink">Within two working days</dd>
+                </div>
+              </dl>
+            </Reveal>
+          }
+        >
           <Reveal>
             <EarlyAccessForm kind="contact" />
           </Reveal>
-          <Reveal className="mt-20 border-t border-line pt-8">
-            <ul className="flex flex-col gap-3 text-[15px] text-ink-2 sm:flex-row sm:flex-wrap sm:gap-x-10">
-              <li>
-                <a href={MAILTO} className="text-ink link-line">
-                  {site.company.email}
-                </a>
-              </li>
-              <li>{site.company.address}</li>
-            </ul>
-          </Reveal>
-        </Lane>
+        </Duo>
       </Section>
     </>
   );
@@ -121,8 +141,10 @@ export function EarlyAccess() {
         lead="Open to a small number of teams that run a compliance programme against a supported framework."
       />
       <Section className="pt-0 md:pt-0">
-        <Lane>
-          <Rows
+        <Duo
+          sticky
+          head={
+            <Rows
             items={[
               {
                 title: "Who it is for",
@@ -150,17 +172,15 @@ export function EarlyAccess() {
               },
             ]}
           />
-        </Lane>
-      </Section>
-      <Section className="pt-0 md:pt-0">
-        <Lane>
+          }
+        >
           <Reveal>
             <Eyebrow>Request access</Eyebrow>
           </Reveal>
           <Reveal delay={0.06} className="mt-8">
             <EarlyAccessForm kind="early-access" />
           </Reveal>
-        </Lane>
+        </Duo>
       </Section>
     </>
   );
