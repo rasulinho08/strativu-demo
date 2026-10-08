@@ -8,8 +8,9 @@
     <meta name="description" content="Strativu is a software company in Baku. Strativu GRC 360 brings risks, controls, audits and compliance into one system. Early access opens Q1 2027." />
     <meta name="author" content="Strativu" />
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#FAFBFD" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#03060D" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#FAFBFD" />
+    <!-- Dark theme before first paint (no white flash). Light is the default; the toggle keeps theme-color in sync. -->
+    <script>try{if(localStorage.getItem("theme")==="dark"){var d=document.documentElement;d.classList.add("dark");d.style.colorScheme="dark";document.querySelector('meta[name="theme-color"]').setAttribute("content","#03060D")}}catch(e){}</script>
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Strativu · We build software for risk and compliance" />

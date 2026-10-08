@@ -56,12 +56,45 @@ export const grcModules: GrcModule[] = [
   },
 ];
 
-/** Doğrulanmış rəqəmlər (kodda var). `suffix` istəyə görədir, məs. "+". */
+/** Doğrulanmış rəqəmlər (kodda var). `suffix` istəyə görədir, məs. "+". "600+ API endpoints" Architecture səhifəsindədir. */
 export const grcFigures: { value: number; suffix?: string; label: string }[] = [
   { value: grcModules.length, label: "modules" },
   { value: 31, label: "screens" },
-  { value: 600, suffix: "+", label: "API endpoints" },
   { value: 2, label: "languages, Azerbaijani and English" },
+  { value: 2, label: "ways to run it: cloud or on-premise" },
+];
+
+/** "Who it's for" — üç sətir. CBAR / Decision 411 iddiası yoxdur (hüquqşünas yoxlamadan yazılmır). */
+export const grcAudience = [
+  {
+    title: "Banks and financial institutions",
+    body: "On-premise in your data centre, permissions per module and per action, a system log for auditors, and PCI DSS as a compliance package you build or import from CSV.",
+  },
+  {
+    title: "Public bodies and critical infrastructure",
+    body: "An air-gapped install with Docker Compose, sign-in through LDAP or Active Directory, and an interface fully in Azerbaijani.",
+  },
+  {
+    title: "Growing companies",
+    body: "A tenant in our cloud, and CSV import of the registers you keep in spreadsheets today.",
+  },
+];
+
+/** Başlanğıc addımları — müddət yazılmır. */
+export const grcOnboarding = [
+  { n: "01", title: "Set up", body: "A tenant in our cloud, or an install on your own servers with Docker Compose." },
+  { n: "02", title: "Connect sign-in", body: "LDAP or Active Directory, OAuth or SAML single sign-on, or email and password." },
+  { n: "03", title: "Bring in your registers", body: "Import the risks, assets and vendors you keep in spreadsheets today from CSV." },
+  {
+    n: "04",
+    title: "Load your frameworks",
+    body: "Build compliance packages or import them from CSV. Azerbaijan’s Personal Data Law (998-IIIQ) loads as a package.",
+  },
+  {
+    n: "05",
+    title: "Score your first risks",
+    body: "5×5 likelihood by impact against your own risk-appetite thresholds, with the residual risk calculated for you.",
+  },
 ];
 
 /** Demo build-də yüklənmiş paket nümunələri (screenshot 04). Kataloq hazır gəlmir: paketlər yaradılır və ya CSV ilə import olunur. */
@@ -73,7 +106,17 @@ export const grcConnections = ["LDAP / Active Directory", "OAuth SSO", "SAML SSO
 /** On-premise üçün Docker Compose tərkibi. */
 export const grcStack = ["App", "PostgreSQL", "Redis", "MinIO", "Nginx", "Prometheus", "Grafana"];
 
-/** Ekran görüntüləri: public/projects/grc360/. Demo data ilə çəkilib (adlar uydurmadır). */
+/**
+ * Ekran görüntüləri: public/projects/grc360/. Demo data ilə çəkilib (adlar uydurmadır).
+ * Hər şəkil üçün 800/1200/1600w WebP variantları var (<ad>-800w.webp …); original 2000w-dir.
+ * Yeni şəkil əlavə edəndə variantları da yaradın (README → "Screenshots").
+ */
+const SCREEN_WIDTHS = [800, 1200, 1600];
+export const screenSrcSet = (src: string) =>
+  [...SCREEN_WIDTHS.map((w) => `${src.replace(/\.webp$/, `-${w}w.webp`)} ${w}w`), `${src} 2000w`].join(", ");
+/** Qalereya Container-in enində göstərilir (max 1200px, kənarlarda 20/33px boşluq). */
+export const SCREEN_SIZES = "(min-width: 1200px) 1134px, (min-width: 768px) calc(100vw - 66px), calc(100vw - 41px)";
+
 export const grcScreens = [
   { key: "command-center", label: "Command Center", src: "/projects/grc360/01-command-center.webp", alt: "GRC 360 Command Center: overdue, today and upcoming tasks above an asset-risk heat map." },
   { key: "asset-risks", label: "Asset Risks", src: "/projects/grc360/02-asset-risks.webp", alt: "GRC 360 asset-risk register with reviews, risk contacts and next review dates." },

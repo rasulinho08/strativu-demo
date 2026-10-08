@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router";
-import { useForm } from "@formspree/react";
+import { useFormspree } from "../../lib/formspree";
 import { Btn } from "./primitives";
 import { site } from "../../data/site";
 import { Check } from "lucide-react";
@@ -17,7 +17,7 @@ type FieldName = "name" | "email" | "company" | "role" | "frameworks" | "message
 const FIELDS: FieldName[] = ["name", "email", "company", "role", "frameworks", "message"];
 
 export function EarlyAccessForm({ kind = "early-access" }: { kind?: "early-access" | "contact" }) {
-  const [state, handleSubmit] = useForm(site.formspreeId);
+  const [state, handleSubmit] = useFormspree(site.formspreeId);
   const doneRef = useRef<HTMLParagraphElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const alertRef = useRef<HTMLParagraphElement>(null);
@@ -34,10 +34,11 @@ export function EarlyAccessForm({ kind = "early-access" }: { kind?: "early-acces
     (invalid ?? alertRef.current)?.focus();
   }, [state.errors, state.submitting]);
 
-  const fieldErrors = (f: FieldName) => state.errors?.getFieldErrors(f) ?? [];
+  const fieldErrors = (f: FieldName) => state.errors?.filter((e) => e.field === f) ?? [];
   const hasFieldErrors = FIELDS.some((f) => fieldErrors(f).length > 0);
-  // Any failure that is not tied to one field (network, blocked, form disabled …) gets one clear fallback line.
-  const showFormError = Boolean(state.errors) && (state.errors!.getFormErrors().length > 0 || !hasFieldErrors);
+  // Any failure that is not tied to one of the fields (network, blocked, form disabled …) gets one clear fallback line.
+  const showFormError =
+    Boolean(state.errors) && (state.errors!.some((e) => !e.field || !FIELDS.includes(e.field as FieldName)) || !hasFieldErrors);
 
   /** aria-invalid + aria-describedby for a field with an error, and its error line. */
   const a11y = (f: FieldName) => (fieldErrors(f).length ? { "aria-invalid": true, "aria-describedby": `${f}-error` } : {});

@@ -23,6 +23,7 @@ npm run typecheck  # tsc --noEmit
 | GRC 360 modules, figures, status | `src/app/data/grc360.ts` |
 | GRC 360 screenshots and logo (gallery on /platform/grc, home "Our work") | `public/projects/grc360/` + list in `src/app/data/grc360.ts` |
 | Framework coverage və statuslar | `src/app/data/coverage.ts` |
+| Səhifə başlıqları (`<title>`) və description-lar (≤160 simvol), hüquqi səhifələrin tarixləri | `src/app/data/meta.ts` |
 | Changelog girişləri | `src/app/data/changelog.ts` |
 | Rəng / şrift / radius tokenləri | `src/styles/theme.css`, `src/styles/fonts.css` |
 | 3D loqonun hərəkəti (açılış, scroll xoreoqrafiyası, şəffaflıq, formalarda solma), işıq, material | `src/app/components/site/LogoScene.tsx` → `CHOREO`, `OP_SCREENS`, `INTRO_SCREENS`, `HIDE_RAMP`, `STUDIO` |
@@ -33,8 +34,29 @@ npm run typecheck  # tsc --noEmit
 `/company/about` · `/company/contact` · `/trust` · `/changelog` · `/early-access` · `/legal/privacy|terms|dpa` ·
 anything else → 404 page
 
-Per-route `<title>` / description / Open Graph tags are set with `usePageMeta()` in `src/app/components/site/Seo.tsx`.
-`public/sitemap.xml` lists every route; regenerate it when frameworks are added.
+Per-route `<title>`, description, canonical and Open Graph tags come from `src/app/data/meta.ts`:
+- in the browser, `useRouteMeta()` (`src/app/components/site/Seo.tsx`, called in Layout) sets them on every navigation
+  (unknown paths get `noindex` and no canonical);
+- at build time the `strativu-site` plugin in `vite.config.ts` writes `dist/<route>/index.html` for every route with its own
+  head (plus JSON-LD on `/` and `/platform/grc`), and `dist/sitemap.xml` with the build date. The build fails if a page
+  route in `App.tsx` has no entry in `meta.ts`.
+
+## Screenshots
+
+`public/projects/grc360/0N-name.webp` (2000×1250) plus `-800w`, `-1200w`, `-1600w` WebP variants for `srcset`.
+When a screenshot changes, regenerate the variants (sharp: resize to each width, WebP quality 82).
+
+## 3D logo
+
+Skipped (static mark shown instead) with reduced motion, without WebGL, with software-only WebGL
+(`failIfMajorPerformanceCaveat`), with Save-Data or `deviceMemory ≤ 2`. To test the 3D path on a machine with
+software WebGL, set `localStorage["strativu:logo3d"] = "force"`. The render loop stops after 2.5 s without
+scroll, pointer, resize, theme or route changes.
+
+## Dependencies
+
+`.github/dependabot.yml` opens grouped update pull requests weekly. Forms post to Formspree with a plain `fetch`
+(`src/app/lib/formspree.ts`); there is no Formspree package.
 
 ## Deploy (Vercel)
 

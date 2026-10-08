@@ -1,0 +1,22 @@
+# Weekly dependency updates, grouped so they arrive as a few pull requests instead of many.
+# Every pull request gets a Vercel preview; merge after `npm run build` (type check + build) passes there.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Baku"
+    open-pull-requests-limit: 5
+    groups:
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom", "react-router"]
+      build-tooling:
+        patterns: ["vite", "@vitejs/*", "tailwindcss", "@tailwindcss/*", "typescript", "@types/node"]
+      three:
+        patterns: ["three", "@types/three"]
+      everything-else:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]

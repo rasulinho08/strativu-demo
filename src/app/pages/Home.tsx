@@ -15,8 +15,7 @@ import { Btn, Container, Duo, Rows, TextLink } from "../components/site/primitiv
 import { Reveal, Stagger } from "../components/site/Reveal";
 import { ClosingCTA } from "../components/site/ClosingCTA";
 import { formatLogDate } from "../components/site/ChangelogList";
-import { usePageMeta } from "../components/site/Seo";
-import { Film } from "../components/site/Film";
+import { Film, FilmScenes } from "../components/site/Film";
 import { AlertFeed, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
 import { changelog } from "../data/changelog";
 import { frameworks } from "../data/coverage";
@@ -109,20 +108,35 @@ function BeliefBar({ i, progress }: { i: number; progress: MotionValue<number> }
   );
 }
 
+/** true from the lg breakpoint (1024px) up — the pinned "What we believe" needs the side visual and the height. */
+function useWide() {
+  const q = "(min-width: 1024px)";
+  const [wide, setWide] = useState(() => typeof window !== "undefined" && window.matchMedia(q).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(q);
+    const on = () => setWide(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return wide;
+}
+
 function Beliefs() {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
+  const wide = useWide();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
   const [active, setActive] = useState(0);
   useMotionValueEvent(scrollYProgress, "change", (v) =>
     setActive(Math.min(BELIEFS.length - 1, Math.max(0, Math.floor(v * BELIEFS.length))))
   );
 
-  if (reduce) {
+  // Phones, tablets and reduced motion: a short static list instead of the 320svh pinned section.
+  if (reduce || !wide) {
     return (
       <section className="py-24 md:py-36">
         <Container>
-          <p className="eyebrow">What we believe</p>
+          <h2 className="eyebrow">What we believe</h2>
           <div className="mt-10 grid grid-cols-1 gap-x-12 gap-y-14 border-t border-line pt-10 md:grid-cols-3">
             {BELIEFS.map((b, i) => (
               <div key={i}>
@@ -140,7 +154,18 @@ function Beliefs() {
   const Visual = BELIEF_VISUALS[active];
   return (
     <section ref={ref} className="relative h-[320svh]">
-      <div className="sticky top-0 flex h-[100svh] items-center">
+      {/* All three beliefs for screen readers; the animated copy below shows one at a time. */}
+      <div className="sr-only">
+        <h2>What we believe</h2>
+        <ul>
+          {BELIEFS.map((x) => (
+            <li key={x.title}>
+              {x.title} {x.body}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div aria-hidden className="sticky top-0 flex h-[100svh] items-center">
         <Container>
           <Split
             visual={
@@ -197,7 +222,7 @@ function WorkShot({ image, video }: { image?: { src: string; width: number; heig
     <motion.div ref={ref} style={reduce ? undefined : { scale, opacity }} className="origin-bottom">
       <div className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-surface shadow-[var(--e3)]">
         {video ? (
-          <Film src={video.src} webm={video.webm} poster={video.poster} label="GRC 360 product film: tasks, risk heat maps, assets, risks, frameworks and the system log" />
+          <Film src={video.src} webm={video.webm} poster={video.poster} label="GRC 360 product film" describedBy="home-film-scenes" />
         ) : (
           image && (
             <img
@@ -246,7 +271,7 @@ function Fact({ value, suffix, label, i }: { value: number; suffix?: string; lab
           <CountUp to={value} />
           {suffix}
         </span>
-        <span className="mt-5 block max-w-[20ch] font-mono text-[12px] uppercase leading-[1.6] tracking-[0.12em] text-ink-3">
+        <span aria-hidden className="mt-5 block max-w-[20ch] font-mono text-[12px] uppercase leading-[1.6] tracking-[0.12em] text-ink-3">
           {label}
         </span>
       </dd>
@@ -275,7 +300,8 @@ function CountUp({ to }: { to: number }) {
   }, [inView, reduce, to]);
   return (
     <span ref={ref} className="tabular">
-      {n}
+      <span aria-hidden>{n}</span>
+      <span className="sr-only">{to}</span>
     </span>
   );
 }
@@ -288,6 +314,22 @@ function FrameworkMarquee() {
   const base = packageFrameworks.map((f) => f.id.split(" (")[0]);
   // Qısa siyahı ekranı doldurmur: bir sətirdə iki dəfə təkrarlanır ki, lent boşluqsuz dövr etsin.
   const names = base.length < 8 ? [...base, ...base] : base;
+  const reduce = useReducedMotion();
+  if (reduce) {
+    // No movement: the names as a calm wrapped list.
+    return (
+      <Container>
+        <ul className="flex flex-wrap gap-x-10 gap-y-4">
+          {base.map((n) => (
+            <li key={n} className="flex items-center gap-4 text-[clamp(20px,2.4vw,32px)] tracking-[-0.015em] text-ink-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand/60" aria-hidden />
+              {n}
+            </li>
+          ))}
+        </ul>
+      </Container>
+    );
+  }
   const row = (hidden?: boolean) => (
     <ul className="flex shrink-0 items-center" aria-hidden={hidden || undefined}>
       {names.map((n, i) => (
@@ -315,27 +357,37 @@ function FrameworkMarquee() {
 const featured = products.filter((p) => p.featured);
 
 export default function Home() {
-  usePageMeta(null, site.descriptionShort);
 
   return (
     <>
       {/* ── 01 Intro: the 3D mark is centred above this; headline sits below it ── */}
       <section className="relative flex min-h-[100svh] flex-col items-center justify-end pb-[12svh] text-center md:pb-[9svh]">
         <Container>
-          {/* 3D səhnə "reduce motion" rejimində qurulmur — onda yerində sadə loqo göstərilir. */}
+          {/* 3D səhnə qurulmayanda (reduce motion, WebGL yoxdur, zəif cihaz) yerində sadə loqo göstərilir (theme.css → .logo-fallback). */}
           <img
             src={site.logo.mark}
             alt=""
             aria-hidden
-            className="mx-auto mb-14 hidden h-auto w-[min(56vw,300px)] motion-reduce:block"
+            width={207}
+            height={144}
+            className="logo-fallback mx-auto mb-14 h-auto w-[min(56vw,300px)]"
           />
-          <Stagger>
-            <h1 className="mx-auto max-w-[16ch] text-[clamp(40px,6vw,84px)] font-semibold leading-[1.02] tracking-[-0.032em] text-ink">
+          {/* Not faded in: the headline is painted at once (LCP); it only rises into place. */}
+          <Stagger fade={false}>
+            <h1 className="mx-auto max-w-[16ch] text-[clamp(40px,min(6vw,9.5svh),84px)] font-semibold leading-[1.02] tracking-[-0.032em] text-ink">
               We build software for <span className="text-brand">risk and compliance.</span>
             </h1>
-            <p className="chapter mt-7">
-              <b>{site.status.label}</b> · {site.status.detail}
+            <p className="mx-auto mt-5 max-w-[46ch] text-[clamp(16px,1.3vw,19px)] leading-[1.55] text-ink-2">
+              Our first product, Strativu GRC 360, brings risks, controls, audits and compliance into one system.
             </p>
+            <div className="mt-7 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-7">
+              <Btn to="/early-access" size="lg">
+                Request early access
+              </Btn>
+              <p className="chapter">
+                <b className="whitespace-nowrap">{site.status.label}</b> · <span className="whitespace-nowrap">{site.status.detail}</span>
+              </p>
+            </div>
           </Stagger>
         </Container>
         <div className="absolute inset-x-0 bottom-6 flex justify-center">
@@ -436,7 +488,12 @@ export default function Home() {
                 )}
               </div>
             </Reveal>
-            {(featured[0].image || featured[0].video) && <WorkShot image={featured[0].image} video={featured[0].video} />}
+            {(featured[0].image || featured[0].video) && (
+              <div>
+                <WorkShot image={featured[0].image} video={featured[0].video} />
+                {featured[0].video && <FilmScenes id="home-film-scenes" className="mt-3" />}
+              </div>
+            )}
           </div>
           {featured.length > 1 && (
             <Rows

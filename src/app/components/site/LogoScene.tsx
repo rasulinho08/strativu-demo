@@ -27,8 +27,10 @@ import { useLocation } from "react-router";
  * artwork teksturasıdır; rənglər loqo ilə eyni qalsın deyə əsasən öz işığı (emissive) ilə görünür.
  * Kürələr və yan faskalar studiya əks-işığı (RoomEnvironment) ilə parlaq, cilalı görünür.
  *
- * Performans: three.js yalnız səhifə yüklənib boşalandan sonra dinamik import olunur;
- * `prefers-reduced-motion` və ya WebGL yoxdursa qurulmur; mobildə 30 fps; tab gizli olanda render yoxdur.
+ * Performans: three.js, loader-lər və model ilk rəsmdən, şriftlərdən və boş anı gözlədikdən sonra paralel yüklənir;
+ * `prefers-reduced-motion`, WebGL yoxdursa, yalnız proqram WebGL (failIfMajorPerformanceCaveat), Save-Data və ya
+ * deviceMemory ≤ 2 olanda qurulmur (statik işarə göstərilir); mobildə 30 fps; tab gizli olanda render yoxdur;
+ * SLEEP_AFTER_MS hərəkətsizlikdən sonra render dövrü dayanır.
  * İşıq sahələri yalnız `transform` ilə hərəkət edir (kompozitor, yenidən rəsm yoxdur). WebGL yalnız
  * loqonu və kölgəni çəkir və canvas bütün ekran deyil, yalnız loqonun ətrafındakı kəsikdir (CROP):
  * kamera `setViewOffset` ilə tam ekran kadrının həmin hissəsini çəkir, canvas `transform` ilə loqonu izləyir.
@@ -186,6 +188,10 @@ const BOB = 0.006;
 const CROP = { w: 1.34, h: 1.02, top: 0.47 };
 /** Sakit vəziyyətdə (scroll/siçan/keçid yoxdur) kadr tezliyi — yavaş nəfəs üçün kifayətdir, enerjiyə qənaət. */
 const IDLE_FPS = 20;
+/** Bu qədər hərəkətsizlikdən sonra (scroll, siçan, ölçü, tema, səhifə dəyişmir) render dövrü tam dayanır; hərəkətlə yenidən başlayır. */
+const SLEEP_AFTER_MS = 2500;
+/** Test üçün: localStorage-da bu açar "force" olsa, zəif cihaz/proqram WebGL yoxlaması keçilir. */
+const FORCE_KEY = "strativu:logo3d";
 
 /**
  * Hər tərəfə fırlanma (scroll ilə): Y → soldan sağa tam dövr (SCREENS_PER_TURN),
@@ -282,6 +288,9 @@ export function LogoScene() {
   const { pathname } = useLocation();
   const modeRef = useRef<"home" | "page">(pathname === "/" ? "home" : "page");
   modeRef.current = pathname === "/" ? "home" : "page";
+  /** Dayanmış render dövrünü yenidən başladır (səhifə dəyişəndə də). */
+  const wakeRef = useRef<() => void>(() => {});
+  useEffect(() => wakeRef.current(), [pathname]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -289,52 +298,91 @@ export function LogoScene() {
     const floorEl = floorRef.current;
     if (!host || !keyEl || !floorEl) return;
 
+    const root = document.documentElement;
+    /** 3D qurulmur → statik işarə görünür (theme.css → html[data-logo3d="off"] .logo-fallback). */
+    const off = () => {
+      root.dataset.logo3d = "off";
+    };
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
+    if (reduce) return off();
+    let force = false;
+    try {
+      force = localStorage.getItem(FORCE_KEY) === "force";
+    } catch {}
+    // Save-Data, az yaddaşlı cihaz və ya yalnız proqram WebGL (VDI, Citrix, GPU-suz kompüter): 3D-ni ümumiyyətlə yükləmirik.
+    const nav = navigator as Navigator & { connection?: { saveData?: boolean }; deviceMemory?: number };
+    const lowEnd = nav.connection?.saveData === true || (typeof nav.deviceMemory === "number" && nav.deviceMemory <= 2);
+    const gpuOk = (() => {
+      try {
+        const c = document.createElement("canvas");
+        const opts = { failIfMajorPerformanceCaveat: !force };
+        const gl = (c.getContext("webgl2", opts) || c.getContext("webgl", opts)) as WebGLRenderingContext | null;
+        if (!gl) return false;
+        gl.getExtension("WEBGL_lose_context")?.loseContext();
+        return true;
+      } catch {
+        return false;
+      }
+    })();
+    if ((lowEnd && !force) || !gpuOk) return off();
     // <1024px: tək sütunlu layout (telefon və planşet) → "mobile" pozalar.
     const narrowMq = window.matchMedia("(max-width: 1023px)");
 
     let disposed = false;
     const cleanups: Array<() => void> = [];
 
-    /** Wait for window load, then for an idle slot, so the 3D bundle never competes with content. */
-    const whenIdle = () =>
-      new Promise<void>((resolve) => {
-        const idle = () => {
-          if (typeof window.requestIdleCallback === "function") {
-            const id = window.requestIdleCallback(() => resolve(), { timeout: 2000 });
-            cleanups.push(() => window.cancelIdleCallback(id));
-          } else {
-            const t = window.setTimeout(resolve, 400);
-            cleanups.push(() => window.clearTimeout(t));
-          }
-        };
-        if (document.readyState === "complete") idle();
-        else {
-          window.addEventListener("load", idle, { once: true });
-          cleanups.push(() => window.removeEventListener("load", idle));
+    /** First paint, then the fonts, then an idle slot — so the 3D download never competes with the text. */
+    const whenReady = async () => {
+      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+      await Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => setTimeout(r, 2000))]);
+      await new Promise<void>((resolve) => {
+        if (typeof window.requestIdleCallback === "function") {
+          const id = window.requestIdleCallback(() => resolve(), { timeout: 1500 });
+          cleanups.push(() => window.cancelIdleCallback(id));
+        } else {
+          const t = window.setTimeout(resolve, 300);
+          cleanups.push(() => window.clearTimeout(t));
         }
       });
+    };
 
     (async () => {
-      await whenIdle();
+      await whenReady();
       if (disposed) return;
-      const THREE = await import("three");
-      const [{ GLTFLoader }, { RoomEnvironment }] = await Promise.all([
-        import("three/examples/jsm/loaders/GLTFLoader.js"),
-        import("three/examples/jsm/environments/RoomEnvironment.js"),
-      ]);
+      // three.js, the loaders and the model download in parallel.
+      let THREE: typeof import("three");
+      let GLTFLoader: typeof import("three/examples/jsm/loaders/GLTFLoader.js").GLTFLoader;
+      let RoomEnvironment: typeof import("three/examples/jsm/environments/RoomEnvironment.js").RoomEnvironment;
+      let modelBuffer: ArrayBuffer | null;
+      try {
+        [THREE, { GLTFLoader }, { RoomEnvironment }, modelBuffer] = await Promise.all([
+          import("three"),
+          import("three/examples/jsm/loaders/GLTFLoader.js"),
+          import("three/examples/jsm/environments/RoomEnvironment.js"),
+          fetch(MODEL_URL)
+            .then((r) => (r.ok ? r.arrayBuffer() : null))
+            .catch(() => null),
+        ]);
+      } catch {
+        return off(); // chunk failed to load (e.g. an old tab after a deploy)
+      }
       if (disposed || !hostRef.current) return;
+      if (!modelBuffer) return off();
 
-      // Model paralel yüklənir (renderer və studiya işığı hazırlanarkən).
-      const gltfPromise = new GLTFLoader().loadAsync(MODEL_URL).catch(() => null);
+      // Model parsed while the renderer and the studio light are prepared.
+      const gltfPromise = new GLTFLoader().parseAsync(modelBuffer, "").catch(() => null);
 
       // ── renderer ──────────────────────────────────────────────────────────
       let renderer: import("three").WebGLRenderer;
       try {
-        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "low-power" });
+        renderer = new THREE.WebGLRenderer({
+          alpha: true,
+          antialias: true,
+          powerPreference: "low-power",
+          failIfMajorPerformanceCaveat: !force,
+        });
       } catch {
-        return; // WebGL yoxdur — səssizcə heç nə göstərmirik
+        return off(); // WebGL yoxdur — statik işarə göstərilir
       }
       const pixelRatio = Math.min(window.devicePixelRatio, narrowMq.matches ? 1.25 : 1.5);
       renderer.setPixelRatio(1); // bufer ölçüsünü özümüz (cihaz pikseli ilə) veririk, bax: resize
@@ -395,6 +443,7 @@ export function LogoScene() {
       const gltf = await gltfPromise;
       if (disposed || !gltf) {
         bail();
+        if (!disposed) off();
         return;
       }
 
@@ -747,20 +796,32 @@ export function LogoScene() {
 
       const onVisibility = () => {
         visible = document.visibilityState === "visible";
+        if (visible) wake();
       };
       const onPointer = (e: PointerEvent) => {
         if (e.pointerType !== "mouse") return;
         pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
         pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
         lastActive = performance.now();
+        wake();
       };
+      const onResize = () => {
+        resize();
+        wake();
+      };
+      // Theme switch changes shadow colours: render again.
+      const themeObserver = new MutationObserver(() => wake());
+      themeObserver.observe(root, { attributes: true, attributeFilter: ["class"] });
 
-      window.addEventListener("resize", resize);
+      window.addEventListener("resize", onResize);
+      window.addEventListener("scroll", wake, { passive: true });
       document.addEventListener("visibilitychange", onVisibility);
       window.addEventListener("pointermove", onPointer, { passive: true });
-      cleanups.push(() => window.removeEventListener("resize", resize));
+      cleanups.push(() => window.removeEventListener("resize", onResize));
+      cleanups.push(() => window.removeEventListener("scroll", wake));
       cleanups.push(() => document.removeEventListener("visibilitychange", onVisibility));
       cleanups.push(() => window.removeEventListener("pointermove", onPointer));
+      cleanups.push(() => themeObserver.disconnect());
 
       resize();
 
@@ -838,6 +899,23 @@ export function LogoScene() {
       let last = t0;
       /** Loqo tam şəffafdır və kadr artıq təmizlənib. */
       let blank = false;
+      /** Render dövrü işləyir (SLEEP_AFTER_MS hərəkətsizlikdən sonra dayanır). */
+      let running = false;
+      function wake() {
+        if (running || disposed) return;
+        running = true;
+        last = performance.now();
+        lastActive = last;
+        renderer.setAnimationLoop(frame);
+      }
+      wakeRef.current = wake;
+      /** Uzun hərəkətsizlikdə dövrü dayandırır: son kadr ekranda qalır, "nəfəs" hərəkəti dayanır. */
+      const maybeSleep = (now: number) => {
+        if (introDone && now - lastActive > SLEEP_AFTER_MS) {
+          running = false;
+          renderer.setAnimationLoop(null);
+        }
+      };
       const frame = () => {
         if (!visible) return;
         const now = performance.now();
@@ -860,6 +938,7 @@ export function LogoScene() {
           light.size = goal.size;
           host.style.opacity = "1";
           host.dataset.ready = "";
+          root.dataset.logo3d = "on";
         }
         const k = 1 - Math.exp(-dt * FOLLOW);
         if (Math.abs(goal.x - cur.x) + Math.abs(goal.y - cur.y) + Math.abs(goal.ry - cur.ry) > 0.002) lastActive = now;
@@ -927,17 +1006,21 @@ export function LogoScene() {
             trailDirty = false;
             blank = true;
           }
+          maybeSleep(now);
           return;
         }
         blank = false;
         updateTrails(now / 1000, iOp);
         if (composer && bloomPass?.enabled) composer.render();
         else renderer.render(scene, camera);
+        maybeSleep(now);
       };
-      renderer.setAnimationLoop(frame);
+      wake();
 
       cleanups.push(() => {
         renderer.setAnimationLoop(null);
+        running = false;
+        wakeRef.current = () => {};
         delete host.dataset.ready;
         bail();
       });

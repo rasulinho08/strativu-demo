@@ -218,7 +218,14 @@
     font-size: var(--font-size);
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    /* anchors and focused elements stop below the fixed header */
+    scroll-padding-top: 88px;
   }
+  @media (min-width: 768px) {
+    html { scroll-padding-top: 96px; }
+  }
+  /* programmatic focus targets (page h1 after navigation, form messages) show no ring for mouse users */
+  [tabindex="-1"]:focus:not(:focus-visible) { outline: none; }
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
@@ -464,3 +471,17 @@
   .quiet-light__field > span { animation: none; }
 }
 
+
+/* ── When the 3D logo is not built ── */
+/*
+  LogoScene sets html[data-logo3d="off"] when it skips the 3D scene (reduced motion, no or software-only WebGL,
+  Save-Data, low memory). Then the static mark is shown in its place and the closing section drops the space it kept for the logo.
+*/
+.logo-fallback { display: none; }
+html[data-logo3d="off"] .logo-fallback { display: block; }
+.stage-pad { padding-top: 48svh; }
+html[data-logo3d="off"] .stage-pad { padding-top: 7rem; min-height: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .logo-fallback { display: block; }
+  .stage-pad { padding-top: 7rem; min-height: 0; }
+}

@@ -6,15 +6,19 @@ import { site } from "../data/site";
 import { products } from "../data/products";
 import {
   GRC_SCREEN_SIZE,
+  SCREEN_SIZES,
+  grcAudience,
   grcConnections,
   grcFigures,
   grcFrameworkPackages,
   grcModules,
+  grcOnboarding,
   grcScreens,
   grcStack,
   grcStatus,
+  screenSrcSet,
 } from "../data/grc360";
-import { usePageMeta } from "../components/site/Seo";
+import { Film, FilmScenes } from "../components/site/Film";
 import { AlertFeed, ControlMap, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
 
 /**
@@ -37,10 +41,6 @@ const MODEL = [
 ];
 
 export function Platform() {
-  usePageMeta(
-    "Platform",
-    "One model for governance, risk and compliance: registers, controls, links, workflow and reporting, with changes recorded in a per-tenant system log."
-  );
   return (
     <>
       <PageHeader
@@ -201,10 +201,21 @@ function ModuleExplorer() {
 }
 
 /* ── Screens from the product: tabs on top, the selected screen below.
-   Advances on its own until the visitor interacts (see useAutoAdvance). ── */
+   Advances on its own until the visitor interacts (see useAutoAdvance).
+   Responsive WebP (srcset); only the next screen is fetched, after the current one has loaded and the page is idle. ── */
 function ScreenGallery() {
   const { ref, idx, select, bind, reduce } = useAutoAdvance<HTMLElement>(grcScreens.length, 4200);
   const sc = grcScreens[idx];
+  const warmNext = () => {
+    const next = grcScreens[(idx + 1) % grcScreens.length];
+    const load = () => {
+      const img = new Image();
+      img.sizes = SCREEN_SIZES;
+      img.srcset = screenSrcSet(next.src);
+    };
+    if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(load, { timeout: 3000 });
+    else setTimeout(load, 1200);
+  };
   return (
     <figure ref={ref} {...bind}>
       <div role="tablist" aria-label="GRC 360 screens" className="-mx-1 flex gap-1 overflow-x-auto pb-3 [scrollbar-width:none]">
@@ -217,7 +228,7 @@ function ScreenGallery() {
               role="tab"
               aria-selected={on}
               onClick={() => select(i)}
-              className={`relative shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
+              className={`relative shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors pointer-coarse:min-h-11 ${
                 on ? "text-ink" : "text-ink-2 hover:text-ink"
               }`}
             >
@@ -238,9 +249,12 @@ function ScreenGallery() {
           <motion.img
             key={sc.key}
             src={sc.src}
+            srcSet={screenSrcSet(sc.src)}
+            sizes={SCREEN_SIZES}
             width={GRC_SCREEN_SIZE.width}
             height={GRC_SCREEN_SIZE.height}
             alt={sc.alt}
+            onLoad={warmNext}
             initial={reduce ? false : { opacity: 0, scale: 1.01 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
@@ -256,49 +270,118 @@ function ScreenGallery() {
           {String(idx + 1).padStart(2, "0")} / {String(grcScreens.length).padStart(2, "0")}
         </span>
       </figcaption>
-      {/* növbəti şəkilləri əvvəlcədən yüklə */}
-      <div aria-hidden className="hidden">
-        {grcScreens.map((g) => (
-          <link key={g.key} rel="prefetch" href={g.src} as="image" />
-        ))}
-      </div>
     </figure>
   );
 }
 
+const GRC_FILM = products.find((p) => p.to === "/platform/grc")?.video;
+
 export function PlatformGRC() {
-  usePageMeta(
-    "Strativu GRC 360",
-    "Strativu GRC 360 brings risks, assets, vendors, controls, audits and incidents into one system, in Azerbaijani and English, in the cloud or on your own servers."
-  );
   return (
     <>
       <PageHeader
         eyebrow={
           <span className="inline-flex items-center gap-2.5">
-            <img src="/projects/grc360/grc360-mark.webp" width={20} height={20} alt="" className="h-5 w-5" />
-            {`Platform · GRC 360 · ${site.status.label}`}
+            <img src="/projects/grc360/grc360-mark-40.webp" width={20} height={20} alt="" className="h-5 w-5" />
+            {`Strativu GRC 360 · ${site.status.label}`}
           </span>
         }
         title="Governance, risk and compliance. All of it, in one place."
-        lead="Twelve connected modules: risks, assets, vendors, controls, audits and incidents live in one system instead of a folder of spreadsheets."
+        lead="Twelve connected modules in Azerbaijani and English. Run it in our cloud or on your own servers, air-gapped if you need to."
       >
-        <Btn to="/early-access" size="lg">
-          Request early access
-        </Btn>
+        <div className="flex flex-wrap items-center gap-x-7 gap-y-4">
+          <Btn to="/early-access" size="lg">
+            Request early access
+          </Btn>
+          {GRC_FILM && <TextLink to="/platform/grc#film">Watch the film</TextLink>}
+        </div>
       </PageHeader>
 
-      {/* Real screens from the current build — not mock-ups. */}
+      {/* Real screens from the current build — not mock-ups. Not faded in: it is the first large image on the page. */}
       <div className="pb-4 pt-4 md:pt-8">
         <Container>
-          <Reveal>
+          <Reveal fade={false}>
             <ScreenGallery />
           </Reveal>
         </Container>
       </div>
 
+      <Section id="deployment">
+        <Duo
+          head={
+            <Reveal>
+              <Eyebrow>Deployment</Eyebrow>
+              <h2 className="t-h2 text-ink">In our cloud or on your servers.</h2>
+            </Reveal>
+          }
+        >
+          <Reveal>
+            <p className={BODY_R}>
+              Multi-tenant SaaS, or an on-premise and air-gapped install for banks, government and critical infrastructure. The
+              on-premise build ships with Docker Compose.
+            </p>
+            <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">{grcStack.join(" · ")}</p>
+          </Reveal>
+        </Duo>
+      </Section>
+
+      <Section id="local" className="pt-0 md:pt-0">
+        <Duo
+          head={
+            <Reveal>
+              <Eyebrow>Built in Baku</Eyebrow>
+              <h2 className="t-h2 text-ink">In Azerbaijani, with Azerbaijani law ready to load as a package.</h2>
+            </Reveal>
+          }
+        >
+          <Reveal>
+            <p className={BODY_R}>
+              The whole interface is in Azerbaijani and English. The Law of the Republic of Azerbaijan on Personal Data (No. 998-IIIQ)
+              loads as its own package, next to GDPR.
+            </p>
+          </Reveal>
+        </Duo>
+      </Section>
+
+      <Section id="who" className="pt-0 md:pt-0">
+        <Duo
+          head={
+            <Reveal>
+              <Eyebrow>Who it’s for</Eyebrow>
+              <h2 className="t-h2 text-ink">Teams that answer to regulators and auditors.</h2>
+            </Reveal>
+          }
+        >
+          <Rows headingLevel={3} items={grcAudience.map((a) => ({ title: a.title, body: a.body }))} />
+        </Duo>
+      </Section>
+
+      {GRC_FILM && (
+        <Section id="film" className="pt-0 md:pt-0">
+          <div className="grid grid-cols-1 gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:items-start xl:gap-x-20">
+            <Reveal>
+              <Eyebrow>The film</Eyebrow>
+              <h2 className="t-h2 text-ink">GRC 360 in 40 seconds.</h2>
+              <p className={BODY}>Real screens from the current build, with demo data.</p>
+            </Reveal>
+            <div>
+              <div className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-surface shadow-[var(--e3)]">
+                <Film
+                  src={GRC_FILM.src}
+                  webm={GRC_FILM.webm}
+                  poster={GRC_FILM.poster}
+                  label="GRC 360 product film"
+                  describedBy="grc-film-scenes"
+                />
+              </div>
+              <FilmScenes id="grc-film-scenes" className="mt-3" />
+            </div>
+          </div>
+        </Section>
+      )}
+
       {/* Figures — only numbers verified in the product */}
-      <Section>
+      <Section className="pt-0 md:pt-0">
         <div>
           <dl className="grid grid-cols-2 gap-x-8 gap-y-10 border-t border-line pt-10 lg:grid-cols-4">
             {grcFigures.map((f, i) => (
@@ -309,7 +392,7 @@ export function PlatformGRC() {
                     {f.value}
                     {f.suffix}
                   </span>
-                  <span className="mt-3 block font-mono text-[12px] uppercase leading-[1.5] tracking-[0.12em] text-ink-3">
+                  <span aria-hidden className="mt-3 block font-mono text-[12px] uppercase leading-[1.5] tracking-[0.12em] text-ink-3">
                     {f.label}
                   </span>
                 </dd>
@@ -409,7 +492,7 @@ export function PlatformGRC() {
         <Split visual={<Reveal><SystemLog /></Reveal>}>
           <Reveal>
             <Eyebrow>Access and log</Eyebrow>
-            <h2 className="t-h2 text-ink">Your directory, your permissions, every change logged.</h2>
+            <h2 className="t-h2 text-ink">Your directory, your permissions, a system log.</h2>
             <p className={BODY}>
               Sign in with LDAP or Active Directory, OAuth or SAML single sign-on. Permissions are set per module and per action, and
               checked on the server. Creates, updates, deletes, sign-ins and permission changes go to a per-tenant system log.
@@ -419,40 +502,16 @@ export function PlatformGRC() {
         </Split>
       </Section>
 
-      <Section id="deployment" className="pt-0 md:pt-0">
+      <Section id="getting-started" className="pt-0 md:pt-0">
         <Duo
           head={
             <Reveal>
-              <Eyebrow>Deployment</Eyebrow>
-              <h2 className="t-h2 text-ink">In our cloud or on your servers.</h2>
+              <Eyebrow>Getting started</Eyebrow>
+              <h2 className="t-h2 text-ink">From spreadsheets to one system.</h2>
             </Reveal>
           }
         >
-          <Reveal>
-            <p className={BODY_R}>
-              Multi-tenant SaaS, or an on-premise and air-gapped install for banks, government and critical infrastructure. The
-              on-premise build ships with Docker Compose.
-            </p>
-            <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">{grcStack.join(" · ")}</p>
-          </Reveal>
-        </Duo>
-      </Section>
-
-      <Section id="local" className="pt-0 md:pt-0">
-        <Duo
-          head={
-            <Reveal>
-              <Eyebrow>Built in Baku</Eyebrow>
-              <h2 className="t-h2 text-ink">In Azerbaijani, with Azerbaijani law ready to load as a package.</h2>
-            </Reveal>
-          }
-        >
-          <Reveal>
-            <p className={BODY_R}>
-              The whole interface is in Azerbaijani and English. The Law of the Republic of Azerbaijan on Personal Data (No. 998-IIIQ)
-              loads as its own package, next to GDPR.
-            </p>
-          </Reveal>
+          <Rows headingLevel={3} items={grcOnboarding} />
         </Duo>
       </Section>
 
@@ -471,7 +530,7 @@ export function PlatformGRC() {
             </Reveal>
           }
         >
-          <Rows items={grcStatus.map((st) => ({ title: st.k, body: st.v }))} />
+          <Rows headingLevel={3} items={grcStatus.map((st) => ({ title: st.k, body: st.v }))} />
         </Duo>
       </Section>
     </>
@@ -515,7 +574,6 @@ const ARCH: { h: string; p: ReactNode[] }[] = [
 const slug = (h: string) => h.toLowerCase().replace(/\s+/g, "-");
 
 export function Architecture() {
-  usePageMeta("Architecture", "Deployment, tenant isolation, sign-in, permissions, system log and API, written for the engineer doing the vendor review.");
   return (
     <>
       <PageHeader

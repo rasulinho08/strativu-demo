@@ -1,8 +1,6 @@
 import { Btn, Container, Lane, TextLink } from "../components/site/primitives";
-import { usePageMeta } from "../components/site/Seo";
 
 export function NotFound() {
-  usePageMeta("Page not found", "The page you asked for does not exist.");
   return (
     <section className="flex min-h-[80svh] flex-col justify-center pb-24 pt-36 md:pt-48">
       <Container>

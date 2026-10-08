@@ -42,7 +42,15 @@ export function Logo({ className = "", to = "/" }: { className?: string; to?: st
         />
       ) : (
         <span className="hidden items-center gap-2 dark:inline-flex">
-          <img src={site.logo.mark} alt="" aria-hidden height={h} style={{ height: h, width: "auto" }} decoding="async" />
+          <img
+            src={site.logo.mark}
+            alt=""
+            aria-hidden
+            height={h}
+            width={Math.round((h * 207) / 144)}
+            style={{ height: h, width: "auto" }}
+            decoding="async"
+          />
           <Wordmark />
         </span>
       )}

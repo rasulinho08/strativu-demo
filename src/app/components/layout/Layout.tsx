@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "motion/react";
 import { Menu, X } from "lucide-react";
@@ -6,6 +6,7 @@ import { Logo } from "../site/Logo";
 import { Btn, Container } from "../site/primitives";
 import { LogoScene } from "../site/LogoScene";
 import { ErrorBoundary } from "../site/ErrorBoundary";
+import { useRouteMeta } from "../site/Seo";
 import { ThemeToggle } from "../theme-toggle";
 import { site } from "../../data/site";
 
@@ -44,6 +45,7 @@ const LEGAL = [
 
 export default function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
+  useRouteMeta();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   /** Aşağı scroll edəndə header gizlənir, yuxarı edəndə qayıdır. */
@@ -51,6 +53,12 @@ export default function Layout({ children }: { children: ReactNode }) {
   /** Siçanın üzərində olduğu link (sürüşən vurğu üçün). */
   const [hovered, setHovered] = useState<string | null>(null);
   const reduce = useReducedMotion();
+  const headerRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
+  const firstPath = useRef(true);
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 200, damping: 30, restDelta: 0.001 });
 
@@ -60,7 +68,9 @@ export default function Layout({ children }: { children: ReactNode }) {
       const y = window.scrollY;
       setScrolled(y > 8);
       if (Math.abs(y - lastY) > 6) {
-        setHidden(y > lastY && y > 160);
+        // never hide the header while keyboard focus is inside it
+        const focusedInside = headerRef.current?.contains(document.activeElement) ?? false;
+        setHidden(!focusedInside && y > lastY && y > 160);
         lastY = y;
       }
     };
@@ -80,10 +90,50 @@ export default function Layout({ children }: { children: ReactNode }) {
     if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   }, [location.hash, location.pathname]);
 
+  // After a client-side navigation, move focus to the new page's heading so keyboard and screen-reader users land on it.
+  useEffect(() => {
+    if (firstPath.current) {
+      firstPath.current = false;
+      return;
+    }
+    const id = requestAnimationFrame(() => {
+      const h1 = document.querySelector<HTMLElement>("main h1");
+      if (!h1) return;
+      if (!h1.hasAttribute("tabindex")) h1.setAttribute("tabindex", "-1");
+      h1.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [location.pathname]);
+
+  // Mobile menu = modal dialog: page behind is inert, focus starts on the first link, Tab stays inside, Escape closes.
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
+    for (const el of [mainRef.current, footerRef.current]) if (el) el.inert = open;
+    if (!open) return;
+    const first = requestAnimationFrame(() => menuRef.current?.querySelector<HTMLElement>("a,button")?.focus());
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setOpen(false);
+        toggleRef.current?.focus();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const items = [toggleRef.current, ...Array.from(menuRef.current?.querySelectorAll<HTMLElement>("a,button") ?? [])].filter(
+        Boolean
+      ) as HTMLElement[];
+      if (!items.length) return;
+      const i = items.indexOf(document.activeElement as HTMLElement);
+      const next = e.shiftKey ? (i <= 0 ? items.length - 1 : i - 1) : i === -1 || i === items.length - 1 ? 0 : i + 1;
+      e.preventDefault();
+      items[next].focus();
+    };
+    document.addEventListener("keydown", onKey);
     return () => {
+      cancelAnimationFrame(first);
+      document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
+      for (const el of [mainRef.current, footerRef.current]) if (el) el.inert = false;
     };
   }, [open]);
 
@@ -100,6 +150,8 @@ export default function Layout({ children }: { children: ReactNode }) {
 
       {/* ─── Header: floating rounded bar. Logo left · pages centre · Contact, theme, Early access right ─── */}
       <header
+        ref={headerRef}
+        onFocusCapture={() => setHidden(false)}
         className={`fixed inset-x-0 top-0 z-50 px-3 pt-3 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:px-5 md:pt-4 ${
           hidden && !open && !reduce ? "-translate-y-[120%]" : "translate-y-0"
         }`}
@@ -172,10 +224,14 @@ export default function Layout({ children }: { children: ReactNode }) {
             </Btn>
           </div>
 
-          <div className="flex items-center gap-1 lg:hidden">
-            <ThemeToggle className="text-ink-2 hover:bg-surface-2 hover:text-ink" />
+          {/* phones and tablets: the main action stays in the bar; the theme toggle lives in the menu */}
+          <div className="flex items-center gap-1.5 lg:hidden">
+            <Btn to="/early-access" size="sm" className="h-11 px-4 text-[14px] max-[349px]:hidden">
+              Early access
+            </Btn>
             <button
-              className="rounded-full p-2.5 text-ink transition-colors hover:bg-surface-2"
+              ref={toggleRef}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink transition-colors hover:bg-surface-2"
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
               aria-controls="mobile-nav"
@@ -192,17 +248,20 @@ export default function Layout({ children }: { children: ReactNode }) {
       {/* ─── Mobile menu: own full-screen layer, fully opaque ─── */}
       <AnimatePresence>
         {open && (
-          <motion.nav
+          <motion.div
+            ref={menuRef}
             id="mobile-nav"
-            aria-label="Mobile"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-40 overflow-y-auto bg-ground pt-24 lg:hidden"
+            className="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-ground pt-24 lg:hidden"
           >
             <Container className="flex h-full flex-col pt-4">
-              <div className="flex flex-col">
+              <nav aria-label="Mobile" className="flex flex-col">
                 {NAV.concat([CONTACT]).map((n) => (
                   <NavLink
                     key={n.to}
@@ -215,38 +274,48 @@ export default function Layout({ children }: { children: ReactNode }) {
                     {n.label}
                   </NavLink>
                 ))}
-              </div>
+              </nav>
               <div className="mt-8">
                 <Btn to="/early-access" size="lg" className="w-full">
                   Early access
                 </Btn>
-                <p className="mt-5 text-[13px] text-ink-3">
-                  {site.status.label} · {site.status.detail}
-                </p>
+                <div className="mt-4 flex items-center justify-between gap-4">
+                  <p className="text-[13px] text-ink-3">
+                    {site.status.label} · {site.status.detail}
+                  </p>
+                  <ThemeToggle className="shrink-0 text-ink-2 hover:bg-surface-2 hover:text-ink" />
+                </div>
               </div>
             </Container>
-          </motion.nav>
+          </motion.div>
         )}
       </AnimatePresence>
 
-      <main id="main" className="relative z-10 flex-1">
+      <main id="main" ref={mainRef} className="relative z-10 flex-1">
         <ErrorBoundary resetKey={location.pathname}>{children}</ErrorBoundary>
       </main>
 
       {/* ─── Footer: minimal ─── */}
-      <footer className="relative z-10 border-t border-line bg-[color-mix(in_srgb,var(--ground)_85%,transparent)] backdrop-blur-xl">
+      <footer ref={footerRef} className="relative z-10 border-t border-line bg-[color-mix(in_srgb,var(--ground)_85%,transparent)] backdrop-blur-xl">
         <Container className="py-12 md:py-14">
           <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
             <Logo />
             <nav aria-label="Footer" className="flex flex-wrap gap-x-7 gap-y-3">
               {FOOTER.map((l) =>
                 l.to ? (
-                  <Link key={l.label} to={l.to} className="text-[14px] text-ink-3 transition-colors hover:text-ink">
+                  <Link key={l.label} to={l.to} className="-my-3 inline-block py-3 text-[14px] text-ink-3 transition-colors hover:text-ink">
                     {l.label}
                   </Link>
                 ) : (
-                  <a key={l.label} href={l.href} target="_blank" rel="noreferrer" className="text-[14px] text-ink-3 transition-colors hover:text-ink">
+                  <a
+                    key={l.label}
+                    href={l.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="-my-3 inline-block py-3 text-[14px] text-ink-3 transition-colors hover:text-ink"
+                  >
                     {l.label}
+                    <span className="sr-only"> (opens in a new tab)</span>
                   </a>
                 )
               )}
@@ -258,11 +327,11 @@ export default function Layout({ children }: { children: ReactNode }) {
               {site.company.registrationNo && ` · ${site.company.registrationNo}`}
             </p>
             <p className="flex flex-wrap gap-x-6 gap-y-2">
-              <a href={`mailto:${site.company.email}`} className="transition-colors hover:text-ink">
+              <a href={`mailto:${site.company.email}`} className="-my-3 inline-block py-3 transition-colors hover:text-ink">
                 {site.company.email}
               </a>
               {LEGAL.map((l) => (
-                <Link key={l.label} to={l.to} className="transition-colors hover:text-ink">
+                <Link key={l.label} to={l.to} className="-my-3 inline-block py-3 transition-colors hover:text-ink">
                   {l.label}
                 </Link>
               ))}

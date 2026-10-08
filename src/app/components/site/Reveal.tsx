@@ -11,6 +11,7 @@ export function Reveal({
   as = "div",
   y = 24,
   id,
+  fade = true,
 }: {
   children: ReactNode;
   delay?: number;
@@ -18,6 +19,8 @@ export function Reveal({
   as?: "div" | "li" | "section" | "article";
   y?: number;
   id?: string;
+  /** false → only moves (stays fully opaque); use above the fold so the content is painted at once (LCP). */
+  fade?: boolean;
 }) {
   const reduce = useReducedMotion();
   const Tag = (motion as any)[as] ?? motion.div;
@@ -31,7 +34,7 @@ export function Reveal({
     <Tag
       id={id}
       className={className}
-      initial={{ opacity: 0, y }}
+      initial={{ opacity: fade ? 0 : 1, y }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "0px 0px -8% 0px" }}
       transition={{ duration: 0.8, delay: Math.min(delay, 0.25), ease: [0.16, 1, 0.3, 1] }}
@@ -46,10 +49,13 @@ export function Stagger({
   children,
   className = "",
   step = 0.06,
+  fade = true,
 }: {
   children: ReactNode[];
   className?: string;
   step?: number;
+  /** false → children only rise into place and are fully opaque from the first paint (LCP). */
+  fade?: boolean;
 }) {
   const reduce = useReducedMotion();
   return (
@@ -60,7 +66,7 @@ export function Stagger({
         ) : (
           <motion.div
             key={i}
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: fade ? 0 : 1, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.04 + i * step, ease: EASE }}
           >

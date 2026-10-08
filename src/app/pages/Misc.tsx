@@ -3,14 +3,13 @@ import { NotFound } from "./NotFound";
 import { Duo, PageHeader, Section, Prose } from "../components/site/primitives";
 import { ChangelogList } from "../components/site/ChangelogList";
 import { site } from "../data/site";
-import { usePageMeta } from "../components/site/Seo";
+import { legalDocs } from "../data/meta";
 import type { ReactNode } from "react";
 
 /* Body sits right under the page header, so the section drops its top padding. */
 const BODY = "pt-0 md:pt-0";
 
 export function Changelog() {
-  usePageMeta("Changelog", "Public build log for the Strativu platform: what changed and why, with real dates.");
   return (
     <>
       <PageHeader eyebrow="Changelog" title="Public build log." lead="What changed and why, with real dates." />
@@ -23,12 +22,10 @@ export function Changelog() {
 
 /**
  * Hüquqi səhifələr — ümumi şablon. Hüquqşünasla yoxlanılmalıdır.
+ * Başlıq, tarix və description: src/app/data/meta.ts → legalDocs.
  */
-const LEGAL: Record<string, { title: string; updated: string; body: ReactNode }> = {
-  privacy: {
-    title: "Privacy policy",
-    updated: "2026-09-01",
-    body: (
+const LEGAL_BODY: Record<string, ReactNode> = {
+  privacy: (
       <>
         <h2>Who we are</h2>
         <p>{site.company.legalName}, {site.company.jurisdiction}. Contact: <a href={`mailto:${site.company.email}`}>{site.company.email}</a>.</p>
@@ -42,11 +39,7 @@ const LEGAL: Record<string, { title: string; updated: string; body: ReactNode }>
         <p>Access, rectification, erasure, restriction, portability and objection, under the GDPR and the Law of the Republic of Azerbaijan on Personal Data. Write to the address above.</p>
       </>
     ),
-  },
-  terms: {
-    title: "Terms of use",
-    updated: "2026-10-08",
-    body: (
+  terms: (
       <>
         <h2>Scope</h2>
         <p>These terms govern use of this website. Use of the Strativu product during early access is governed by a separate early-access agreement.</p>
@@ -59,11 +52,7 @@ const LEGAL: Record<string, { title: string; updated: string; body: ReactNode }>
         <p>Laws of the Republic of Azerbaijan.</p>
       </>
     ),
-  },
-  dpa: {
-    title: "Data processing agreement",
-    updated: "2026-10-08",
-    body: (
+  dpa: (
       <>
         <p>
           A data processing agreement (DPA) will be signed with every early-access tenant before any personal data is processed. Request the
@@ -71,13 +60,11 @@ const LEGAL: Record<string, { title: string; updated: string; body: ReactNode }>
         </p>
       </>
     ),
-  },
 };
 
 export function Legal() {
   const { doc } = useParams();
-  const page = doc ? LEGAL[doc] : undefined;
-  usePageMeta(page?.title ?? "Page not found", page ? `${page.title}, updated ${page.updated}.` : "The page you asked for does not exist.");
+  const page = doc && legalDocs[doc] && LEGAL_BODY[doc] ? { ...legalDocs[doc], body: LEGAL_BODY[doc] } : undefined;
   if (!page) return <NotFound />;
   return (
     <>

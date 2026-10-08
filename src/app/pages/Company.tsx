@@ -4,7 +4,6 @@ import { Reveal } from "../components/site/Reveal";
 import { InstagramFeed } from "../components/site/InstagramFeed";
 import { EarlyAccessForm } from "../components/site/EarlyAccessForm";
 import { site } from "../data/site";
-import { usePageMeta } from "../components/site/Seo";
 import { Split, SystemLog } from "../components/site/Visuals";
 
 /**
@@ -14,14 +13,12 @@ import { Split, SystemLog } from "../components/site/Visuals";
  */
 
 const BODY = "max-w-[52ch] text-[17px] leading-[1.65] text-ink-2";
-const INLINE_LINK = "text-brand-ink link-line";
+/** Links inside running text: always underlined (not by colour alone, WCAG 1.4.1). */
+const INLINE_LINK =
+  "text-brand-ink underline decoration-[color-mix(in_srgb,currentColor_45%,transparent)] underline-offset-4 transition-colors hover:decoration-current";
 const MAILTO = `mailto:${site.company.email}`;
 
 export function About() {
-  usePageMeta(
-    "About",
-    "Strativu is a software company in Baku. Its first product, Strativu GRC 360, connects risks, controls, policies and compliance in one system."
-  );
   return (
     <>
       <PageHeader
@@ -91,7 +88,6 @@ export function About() {
 }
 
 export function Contact() {
-  usePageMeta("Contact", "Product questions, partnerships, press, or a framework you need. A person from our team replies within two working days.");
   return (
     <>
       <PageHeader
@@ -135,10 +131,6 @@ export function Contact() {
 }
 
 export function EarlyAccess() {
-  usePageMeta(
-    "Early access",
-    "Early access to Strativu GRC 360 opens Q1 2027, for banks, public bodies and growing companies that run risk and compliance work."
-  );
   return (
     <>
       <PageHeader
@@ -151,6 +143,7 @@ export function EarlyAccess() {
           sticky
           head={
             <Rows
+            headingLevel={2}
             items={[
               {
                 title: "Who it is for",
@@ -193,8 +186,21 @@ export function EarlyAccess() {
   );
 }
 
+/** "At a glance" on /trust — only facts that are verified or already stated on this site. Review with every change. */
+const TRUST_REVIEWED = "2026-10-08";
+const TRUST_GLANCE: { k: string; status?: "Yes" | "Not yet" | "Planned"; v?: string }[] = [
+  { k: "Certification (ISO 27001, SOC 2)", status: "Not yet" },
+  { k: "External penetration test", status: "Not yet" },
+  { k: "Data processing agreement", v: "Signed before any personal data is processed. Draft on request." },
+  { k: "Vulnerability disclosure policy", status: "Yes", v: "See below." },
+  { k: "Deletion on request", v: "Tenant data, within 30 days." },
+  { k: "Data export", status: "Yes", v: "CSV export on every register." },
+  { k: "Single sign-on", status: "Yes", v: "SAML, OAuth, LDAP / Active Directory." },
+  { k: "On-premise and air-gapped install", status: "Yes", v: "Docker Compose." },
+  { k: "Public status page", status: "Not yet" },
+];
+
 export function Trust() {
-  usePageMeta("Trust", "How Strativu handles data before it has a certification: architecture, hosting, subprocessors, disclosure policy.");
   return (
     <>
       <PageHeader
@@ -203,8 +209,36 @@ export function Trust() {
         lead="A GRC vendor should model the behaviour it sells. Here is what is true now, what we are pursuing, and when."
       />
       <Section className="pt-0 md:pt-0">
+        <Duo
+          head={
+            <Reveal>
+              <Eyebrow>At a glance</Eyebrow>
+              <h2 className="t-h2 text-ink">Short answers first.</h2>
+              <p className="mt-5 text-[14px] text-ink-3">
+                Last reviewed: <time dateTime={TRUST_REVIEWED}>{TRUST_REVIEWED}</time>
+              </p>
+            </Reveal>
+          }
+        >
+          <Reveal>
+            <dl className="border-t border-line">
+              {TRUST_GLANCE.map((g) => (
+                <div key={g.k} className="grid grid-cols-1 gap-x-8 gap-y-1 border-b border-line py-4 sm:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+                  <dt className="text-[15px] font-medium text-ink">{g.k}</dt>
+                  <dd className="text-[15px] leading-[1.6] text-ink-2">
+                    {g.status && <span className={`mr-2 font-medium ${g.status === "Yes" ? "text-ink" : "text-ink-2"}`}>{g.status}</span>}
+                    {g.v}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </Reveal>
+        </Duo>
+      </Section>
+      <Section className="pt-0 md:pt-0">
         <Split sticky visual={<Reveal><SystemLog /></Reveal>}>
           <Rows
+            headingLevel={2}
             items={[
               {
                 title: "Architecture",

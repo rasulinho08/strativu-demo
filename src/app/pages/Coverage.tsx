@@ -4,7 +4,6 @@ import { Btn, Duo, PageHeader, Section, TextLink } from "../components/site/prim
 import { Reveal } from "../components/site/Reveal";
 import { CoverageGrid } from "../components/site/CoverageGrid";
 import { frameworks, statusLabel, type FrameworkStatus } from "../data/coverage";
-import { usePageMeta } from "../components/site/Seo";
 
 const STATUS_NOTE: Record<FrameworkStatus, string> = {
   package:
@@ -14,10 +13,6 @@ const STATUS_NOTE: Record<FrameworkStatus, string> = {
 };
 
 export function Coverage() {
-  usePageMeta(
-    "Coverage",
-    "Frameworks and regulations Strativu GRC 360 works with, and the status of each: works as a compliance package today, or planned."
-  );
   return (
     <>
       <PageHeader
@@ -39,7 +34,6 @@ export function Coverage() {
 export function FrameworkPage() {
   const { slug } = useParams();
   const f = frameworks.find((x) => x.slug === slug);
-  usePageMeta(f ? f.id : "Page not found", f ? `${f.name}. ${f.summary}` : "The page you asked for does not exist.");
   if (!f) return <NotFound />;
   const i = frameworks.indexOf(f);
   const prev = frameworks[(i - 1 + frameworks.length) % frameworks.length];

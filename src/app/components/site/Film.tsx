@@ -7,7 +7,20 @@ import { Pause, Play, Volume2, VolumeX } from "lucide-react";
  * Sağ aşağıda iki düymə (44px): Pause/Play və səs. Ziyarətçi dayandırıbsa, film yenidən öz-özünə başlamır.
  * "Reduce motion" rejimində avtomatik oynamır — brauzerin öz idarə düymələri görünür.
  */
-export function Film({ src, webm, poster, label }: { src: string; webm?: string; poster: string; label: string }) {
+export function Film({
+  src,
+  webm,
+  poster,
+  label,
+  describedBy,
+}: {
+  src: string;
+  webm?: string;
+  poster: string;
+  label: string;
+  /** id of the text alternative (FilmScenes) */
+  describedBy?: string;
+}) {
   const ref = useRef<HTMLVideoElement>(null);
   const inView = useInView(ref, { margin: "-15% 0px -15% 0px" });
   const reduce = useReducedMotion();
@@ -37,6 +50,7 @@ export function Film({ src, webm, poster, label }: { src: string; webm?: string;
         preload="metadata"
         controls={!!reduce}
         aria-label={label}
+        aria-describedby={describedBy}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         className="block h-auto w-full"
@@ -83,5 +97,41 @@ export function Film({ src, webm, poster, label }: { src: string; webm?: string;
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Filmin mətn alternativi (WCAG 1.2.1 / 1.2.3): səhnələr ardıcıllıqla, kadrlardan yoxlanılıb (grc360-film.mp4, 40 s).
+ * Filmdəki şüarlar burada təkrarlanmır — yalnız ekranda nə göstərildiyi.
+ */
+export const FILM_SCENES = [
+  "Spreadsheets, email threads and sticky notes scattered across a desk, with the line “Managing governance, risk and compliance across multiple systems shouldn’t be this complicated.”",
+  "The GRC 360 logo.",
+  "Command Center: expired, today’s and future tasks above heat maps of asset and business risks.",
+  "Organization Hub and Asset Management: users, departments (the IT department with its 15 asset risks) and an asset record for a customer database.",
+  "Risk Management: a risk record for unauthorised access to the customer database, with its inherent score, the Mitigate treatment, the controls that treat it (multi-factor authentication, quarterly access review), a treatment project and the risk owners.",
+  "Compliance Hub: the compliance packages (Azerbaijan Law on Personal Data, PCI DSS v4.0.1, GDPR, NIST CSF 2.0, SOC 2 Type II, ISO/IEC 27001:2022), the items of the ISO/IEC 27001:2022 package, and a control record showing the risks and packages it is linked to.",
+  "Settings: the sign-in methods (local, OAuth, SAML and LDAP) and the way to the system log.",
+  "A closing card with the module names and strativu.com.",
+];
+
+export function FilmScenes({ id, className = "" }: { id: string; className?: string }) {
+  return (
+    <details className={`group text-[14px] leading-[1.6] text-ink-2 ${className}`}>
+      <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 font-medium text-brand-ink hover:text-brand [&::-webkit-details-marker]:hidden">
+        <span aria-hidden className="inline-block transition-transform duration-200 group-open:rotate-90">
+          ›
+        </span>
+        What the film shows
+      </summary>
+      <div id={id}>
+        <p className="mt-2 text-ink-2">A 40-second walk through the current build, with demo data. The sound is off until you turn it on.</p>
+        <ol className="mt-3 list-decimal space-y-1.5 pl-5">
+          {FILM_SCENES.map((t) => (
+            <li key={t}>{t}</li>
+          ))}
+        </ol>
+      </div>
+    </details>
   );
 }

@@ -28,7 +28,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/|assets/|models/|projects/|brand/|\\.well-known/).*)",
       "destination": "/index.html"
     }
   ],

@@ -27,7 +27,8 @@ export function Split({
       className={`grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-20 ${sticky ? "items-start" : "items-center"} ${className}`}
     >
       <div className="min-w-0">{children}</div>
-      <div className={`min-w-0 ${sticky ? "lg:sticky lg:top-28" : ""}`}>{visual}</div>
+      {/* below lg the panel sits under the text, capped so it does not stretch across a tablet */}
+      <div className={`min-w-0 max-lg:max-w-[560px] ${sticky ? "lg:sticky lg:top-28" : ""}`}>{visual}</div>
     </div>
   );
 }
@@ -165,7 +166,7 @@ export function ControlMap() {
   );
 }
 
-/* ── 3. System log: every change is written with who and when ── */
+/* ── 3. System log: entries appear one by one (illustrative) ── */
 const ENTRIES = [
   { who: "a.mammadov", what: "updated owner of control CTL-014", at: "09:12" },
   { who: "n.aliyeva", what: "accepted risk R-031 as an exception", at: "09:40" },

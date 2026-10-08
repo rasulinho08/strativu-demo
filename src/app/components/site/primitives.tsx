@@ -45,8 +45,8 @@ export function Lane({ children, className = "" }: { children: ReactNode; classN
 }
 
 /**
- * İki tərəfli bölmə: solda başlıq (eyebrow + h2), sağda mətn/siyahı. Masaüstündə səhifəni balanslı doldurur,
- * mobildə üst-üstə düşür. `sticky` → uzun sağ tərəfdə başlıq ekranda qalır.
+ * İki tərəfli bölmə: solda başlıq (eyebrow + h2), sağda mətn/siyahı. Planşet və masaüstündə (md+) səhifəni balanslı
+ * doldurur, telefonda üst-üstə düşür. `sticky` → uzun sağ tərəfdə başlıq ekranda qalır.
  */
 export function Duo({
   head,
@@ -60,9 +60,11 @@ export function Duo({
   sticky?: boolean;
 }) {
   return (
-    <div className={`grid grid-cols-1 gap-x-16 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:gap-x-24 ${className}`}>
+    <div
+      className={`grid grid-cols-1 gap-x-10 gap-y-8 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-x-16 xl:gap-x-24 ${className}`}
+    >
       <div className={`min-w-0 ${sticky ? "lg:sticky lg:top-28 lg:self-start" : ""}`}>{head}</div>
-      <div className="min-w-0 lg:pt-2">{children}</div>
+      <div className="min-w-0 md:pt-2">{children}</div>
     </div>
   );
 }
@@ -82,8 +84,12 @@ export type RowItem = {
   href?: string;
 };
 
-/** Hairline-separated list: the default way to show a set of items (instead of cards). */
-export function Rows({ items, className = "" }: { items: RowItem[]; className?: string }) {
+/**
+ * Hairline-separated list: the default way to show a set of items (instead of cards).
+ * `headingLevel` → titles of rows that are not links become real <h2>/<h3> headings (same look), so screen-reader
+ * users can move between them.
+ */
+export function Rows({ items, className = "", headingLevel }: { items: RowItem[]; className?: string; headingLevel?: 2 | 3 }) {
   return (
     <ul className={`border-t border-line ${className}`}>
       {items.map((it, i) => {
@@ -91,18 +97,23 @@ export function Rows({ items, className = "" }: { items: RowItem[]; className?: 
           it.n ? "grid-cols-[48px_1fr] md:grid-cols-[64px_1fr]" : "grid-cols-1"
         }`;
         const linked = Boolean(it.to || it.href);
+        const Title = !linked && headingLevel ? (`h${headingLevel}` as const) : "span";
         const inner = (
           <>
-            {it.n && <span className="pt-1.5 font-mono text-[13px] text-ink-3">{it.n}</span>}
-            <span className="min-w-0">
-              <span className="flex items-baseline justify-between gap-4">
-                <span className={`t-h3 block text-ink transition-colors duration-300 ${linked ? "group-hover:text-brand" : ""}`}>
-                  {it.title}
-                </span>
-                {it.meta && <span className="shrink-0 text-[13px] text-ink-3">{it.meta}</span>}
+            {it.n && (
+              <span aria-hidden={Title !== "span" || undefined} className="pt-1.5 font-mono text-[13px] text-ink-3">
+                {it.n}
               </span>
-              {it.body && <span className="mt-2 block max-w-[52ch] text-[16px] leading-[1.6] text-ink-2">{it.body}</span>}
-            </span>
+            )}
+            <div className="min-w-0">
+              <div className="flex items-baseline justify-between gap-4">
+                <Title className={`t-h3 block text-ink transition-colors duration-300 ${linked ? "group-hover:text-brand" : ""}`}>
+                  {it.title}
+                </Title>
+                {it.meta && <span className="shrink-0 text-[13px] text-ink-3">{it.meta}</span>}
+              </div>
+              {it.body && <div className="mt-2 max-w-[52ch] text-[16px] leading-[1.6] text-ink-2">{it.body}</div>}
+            </div>
           </>
         );
         return (
@@ -208,7 +219,8 @@ export function TextLink({
   children: ReactNode;
   className?: string;
 }) {
-  const cls = `group inline-flex items-center gap-1.5 text-[14.5px] font-medium text-brand-ink transition-colors hover:text-brand ${className}`;
+  // py-3/-my-3: a 44px tap target without changing the layout
+  const cls = `group -my-3 inline-flex items-center gap-1.5 py-3 text-[14.5px] font-medium text-brand-ink transition-colors hover:text-brand ${className}`;
   const inner = (
     <>
       <span className="link-line">{children}</span>
@@ -219,6 +231,7 @@ export function TextLink({
     return (
       <a href={href} target="_blank" rel="noreferrer" className={cls}>
         {inner}
+        <span className="sr-only"> (opens in a new tab)</span>
       </a>
     );
   return (
@@ -239,17 +252,17 @@ export function PageHeader({
   lead?: ReactNode;
   children?: ReactNode;
 }) {
-  // Masaüstü: başlıq solda, giriş mətni və düymə sağda (aşağıya düzlənib) — səhifə iki tərəfdən balanslıdır.
+  // Planşet və masaüstü (md+): başlıq solda, giriş mətni və düymə sağda (aşağıya düzlənib) — səhifə iki tərəfdən balanslıdır.
   return (
     <header className="relative pb-12 pt-[34svh] motion-reduce:pt-36 md:pb-16 md:pt-48">
       <Container>
-        <div className="grid grid-cols-1 gap-x-16 gap-y-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-end xl:gap-x-24">
+        <div className="grid grid-cols-1 gap-x-10 gap-y-6 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:items-end lg:gap-x-16 xl:gap-x-24">
           <div className="min-w-0">
             <Eyebrow>{eyebrow}</Eyebrow>
             <h1 className="t-h1 text-ink">{title}</h1>
           </div>
           {(lead || children) && (
-            <div className="min-w-0 lg:pb-2">
+            <div className="min-w-0 md:pb-2">
               {lead && <p className="t-lead max-w-[48ch]">{lead}</p>}
               {children && <div className={lead ? "mt-8" : ""}>{children}</div>}
             </div>
