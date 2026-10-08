@@ -33,7 +33,7 @@ export const site = {
     jurisdiction: "Registered in Baku, Azerbaijan",
     /** Qeydiyyat nömrəsi. Real nömrə gələnə qədər null — null olanda saytda göstərilmir. */
     registrationNo: null as string | null,
-    email: "hello@strativu.com",
+    email: "contact@strativu.com",
     address: "Baku, Azerbaijan",
     /**
      * Sosial linklər. Hesab hələ yoxdursa null yazın — null olan link saytda göstərilmir.
