@@ -1,6 +1,6 @@
 # Strativu — website
 
-Marketing site for Strativu: a GRC platform company, first product in development.
+Marketing site for Strativu, a software company in Baku. First product: Strativu GRC 360 (in development).
 Built with React 18, Vite, Tailwind v4, motion, react-router.
 
 ## Run
@@ -8,7 +8,7 @@ Built with React 18, Vite, Tailwind v4, motion, react-router.
 ```
 npm i
 npm run dev        # http://localhost:5173
-npm run build      # production build in dist/
+npm run build      # type check + production build in dist/
 npm run typecheck  # tsc --noEmit
 ```
 
@@ -25,7 +25,7 @@ npm run typecheck  # tsc --noEmit
 | Framework coverage və statuslar | `src/app/data/coverage.ts` |
 | Changelog girişləri | `src/app/data/changelog.ts` |
 | Rəng / şrift / radius tokenləri | `src/styles/theme.css`, `src/styles/fonts.css` |
-| 3D loqonun hərəkəti (açılışda mərkəz → sağ; scroll xoreoqrafiyası), işıq, material | `src/app/components/site/LogoScene.tsx` → `CHOREO`, `INTRO_SCREENS`, `REST_SWAY`, `STUDIO` |
+| 3D loqonun hərəkəti (açılış, scroll xoreoqrafiyası, şəffaflıq, formalarda solma), işıq, material | `src/app/components/site/LogoScene.tsx` → `CHOREO`, `OP_SCREENS`, `INTRO_SCREENS`, `HIDE_RAMP`, `STUDIO` |
 
 ## Routes
 
@@ -38,7 +38,14 @@ Per-route `<title>` / description / Open Graph tags are set with `usePageMeta()`
 
 ## Deploy (Vercel)
 
-`vercel.json` rewrites every path to `index.html`, so deep links such as `/coverage/iso-27001` work on refresh.
+`vercel.json`:
+- rewrites every path to `index.html`, so deep links such as `/coverage/iso-27001` work on refresh;
+- 308 redirects for old paths (`/pricing` → `/early-access`, `/about`, `/contact`, `/company`, `/work`);
+- security headers on every response (nosniff, `X-Frame-Options: DENY`, Referrer-Policy, Permissions-Policy, COOP)
+  and long-lived caching for hashed `/assets/*` (1 week for `/models`, `/projects`, `/brand`, `/og.png`).
+  A Content-Security-Policy is not set yet.
+
+`public/.well-known/security.txt` (RFC 9116) must be renewed before its `Expires` date.
 Keep `package-lock.json` generated on Linux or macOS (`npm install`), or Vercel's Linux build cannot find
 the native rollup/esbuild binaries.
 

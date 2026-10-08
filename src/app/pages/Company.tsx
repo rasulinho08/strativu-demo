@@ -9,7 +9,7 @@ import { Split, SystemLog } from "../components/site/Visuals";
 
 /**
  * About, Contact, Early access and Trust.
- * Everything sits in the left Lane so the 3D logo on the right stays clear.
+ * Two-sided layouts (Duo / Split). Form sections carry `data-logo-hide`, so the 3D logo fades out while a form is on screen.
  * Facts are hairline Rows; no cards, no icon boxes.
  */
 
@@ -18,13 +18,16 @@ const INLINE_LINK = "text-brand-ink link-line";
 const MAILTO = `mailto:${site.company.email}`;
 
 export function About() {
-  usePageMeta("About", "Strativu is a small company in Baku building a GRC platform where the control register is the system of record.");
+  usePageMeta(
+    "About",
+    "Strativu is a software company in Baku. Its first product, Strativu GRC 360, connects risks, controls, policies and compliance in one system."
+  );
   return (
     <>
       <PageHeader
         eyebrow="Company"
         title="We are building the GRC tool we wanted to use ourselves."
-        lead="A small company in Baku, founded by people who have run security and compliance programmes, sat across the table from auditors and built platforms that hold other companies’ data."
+        lead="A small software company in Baku. Our first product, Strativu GRC 360, brings risks, controls, audits and compliance into one system."
       />
 
       <Section>
@@ -38,13 +41,13 @@ export function About() {
         >
             <Reveal delay={0.06} className="space-y-5">
               <p className={BODY}>
-                On both sides of the audit we kept finding tools that automate screenshot collection instead of removing the
-                need for it, with a separate control register for every framework.
+                Risk registers, control lists and audit findings often live in separate spreadsheets, and the links between them
+                are kept by hand until they break.
               </p>
               <p className={BODY}>
-                We start from the model instead: risks, controls, policies and requirements linked as one record set, frameworks loaded as packages,
-                and every change in a log an auditor can read. It is slower to build, and the only version we would trust with our
-                own programme.
+                We start from the model instead: risks, controls, policies and requirements linked as one record set, frameworks
+                loaded as packages, and changes recorded in a system log an auditor can read. It takes longer to build, and it is
+                the version we would want to use ourselves.
               </p>
             </Reveal>
         </Duo>
@@ -58,7 +61,7 @@ export function About() {
           head={
             <Reveal>
               <Eyebrow>Where</Eyebrow>
-              <h2 className="t-h2 text-ink">Baku, building for Europe.</h2>
+              <h2 className="t-h2 text-ink">Baku, building for Azerbaijan and the region.</h2>
             </Reveal>
           }
         >
@@ -68,7 +71,7 @@ export function About() {
                 <dd className="text-[17px] leading-[1.6] text-ink">{`${site.company.legalName}. ${site.company.jurisdiction}.`}</dd>
                 <dt className="mono-label pt-1">Working hours</dt>
                 <dd className="text-[17px] leading-[1.6] text-ink">
-                  09:00–18:00 AZT (UTC+4), covering the European morning and early afternoon.
+                  09:00–18:00 Baku time (UTC+4).
                 </dd>
                 <dt className="mono-label pt-1">Email</dt>
                 <dd className="text-[17px] leading-[1.6] text-ink">
@@ -88,15 +91,15 @@ export function About() {
 }
 
 export function Contact() {
-  usePageMeta("Contact", "Product questions, partnerships, press, or a framework you need mapped. A named person replies within two working days.");
+  usePageMeta("Contact", "Product questions, partnerships, press, or a framework you need. A person from our team replies within two working days.");
   return (
     <>
       <PageHeader
         eyebrow="Company · Contact"
         title="Talk to a person."
-        lead="Product questions, partnerships, press, or a framework you need mapped. A named person replies within two working days."
+        lead="Product questions, partnerships, press, or a framework you need. A person from our team replies within two working days."
       />
-      <Section className="pt-0 md:pt-0">
+      <Section className="pt-0 md:pt-0" logoHide>
         <Duo
           sticky
           head={
@@ -132,15 +135,18 @@ export function Contact() {
 }
 
 export function EarlyAccess() {
-  usePageMeta("Early access", "Early access to GRC 360 for teams that run a compliance programme against a supported framework.");
+  usePageMeta(
+    "Early access",
+    "Early access to Strativu GRC 360 opens Q1 2027, for banks, public bodies and growing companies that run risk and compliance work."
+  );
   return (
     <>
       <PageHeader
         eyebrow={site.status.detail}
         title="Shape the product before it ships."
-        lead="Open to a small number of teams that run a compliance programme against a supported framework."
+        lead="Open to a small number of teams that run risk and compliance work in Azerbaijan and the region."
       />
-      <Section className="pt-0 md:pt-0">
+      <Section className="pt-0 md:pt-0" logoHide>
         <Duo
           sticky
           head={
@@ -150,17 +156,18 @@ export function EarlyAccess() {
                 title: "Who it is for",
                 body: (
                   <>
-                    Security, compliance or platform leads at organisations audited against ISO 27001, SOC 2 or a framework on the{" "}
+                    Security, risk and compliance leads at banks and financial institutions, public bodies and growing companies
+                    preparing for ISO 27001, PCI DSS, Azerbaijan’s Personal Data Law or another framework on our{" "}
                     <Link to="/coverage" className={INLINE_LINK}>
                       coverage list
                     </Link>
-                    . A real audit window matters; team size does not.
+                    . An upcoming audit or regulator review matters; team size does not.
                   </>
                 ),
               },
               {
                 title: "What you get",
-                body: "A tenant on the development build, a direct line to the engineers and mapping priority for your frameworks. No cost during early access.",
+                body: "From Q1 2027: your own workspace on the development version, direct contact with our engineers, and priority for the frameworks you need. No cost during early access.",
               },
               {
                 title: "What we ask",
@@ -168,7 +175,7 @@ export function EarlyAccess() {
               },
               {
                 title: "What happens next",
-                body: "We review requests weekly. A named person replies within five working days, and if it is not a fit yet, we say why.",
+                body: "We review requests weekly. A person from our team replies within five working days, and if it is not a fit yet, we say why.",
               },
             ]}
           />
@@ -192,7 +199,7 @@ export function Trust() {
     <>
       <PageHeader
         eyebrow="Trust"
-        title="How we handle data, before we have a badge to show for it."
+        title="How we handle data, before we are certified."
         lead="A GRC vendor should model the behaviour it sells. Here is what is true now, what we are pursuing, and when."
       />
       <Section className="pt-0 md:pt-0">
@@ -212,7 +219,7 @@ export function Trust() {
               },
               {
                 title: "Hosting",
-                body: "Multi-tenant cloud, or on-premise in your own data centre.",
+                body: "Multi-tenant cloud, or on-premise and air-gapped in your own data centre.",
               },
               {
                 title: "Subprocessors",
@@ -220,9 +227,10 @@ export function Trust() {
               },
               {
                 title: "Certifications",
-                body: "None yet. We are pursuing ISO/IEC 27001:2022 certification and a SOC 2 Type II report, targeted within twelve months of general availability. We run the programme on our own product.",
+                body: "None yet. We are pursuing ISO/IEC 27001:2022 certification and a SOC 2 Type II report, targeted within twelve months of general availability.",
               },
               {
+                id: "vulnerability-disclosure",
                 title: "Vulnerability disclosure",
                 body: (
                   <>
@@ -237,7 +245,7 @@ export function Trust() {
               },
               {
                 title: "Data handling pre-launch",
-                body: "Early-access tenants run on the development build. Tenant data is used only to operate the service and is deleted on request within 30 days.",
+                body: "Early-access tenants will run on the development build. Tenant data will be used only to operate the service and deleted on request within 30 days.",
               },
             ]}
           />

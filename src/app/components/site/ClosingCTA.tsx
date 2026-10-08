@@ -7,12 +7,12 @@ import { site } from "../../data/site";
  * `stage` (home page): a tall, transparent section — the 3D mark flies back to centre above the text.
  */
 export function ClosingCTA({
-  title = "Every claim on this site should survive “can you show me?”",
-  body = "That is the constraint we build under. If you run a security or compliance programme and want to shape what GRC 360 becomes, early access is open to a small number of teams.",
+  title,
+  body,
   stage = false,
 }: {
-  title?: string;
-  body?: string;
+  title: string;
+  body: string;
   stage?: boolean;
 }) {
   const inner = (

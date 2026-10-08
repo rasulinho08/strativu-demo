@@ -10,18 +10,26 @@ export function Reveal({
   className = "",
   as = "div",
   y = 24,
+  id,
 }: {
   children: ReactNode;
   delay?: number;
   className?: string;
   as?: "div" | "li" | "section" | "article";
   y?: number;
+  id?: string;
 }) {
   const reduce = useReducedMotion();
   const Tag = (motion as any)[as] ?? motion.div;
-  if (reduce) return <Tag className={className}>{children}</Tag>;
+  if (reduce)
+    return (
+      <Tag id={id} className={className}>
+        {children}
+      </Tag>
+    );
   return (
     <Tag
+      id={id}
       className={className}
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}

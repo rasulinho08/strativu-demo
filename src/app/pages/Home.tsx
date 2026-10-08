@@ -36,7 +36,7 @@ const STATEMENT = "Software that makes risk visible, compliance routine and audi
 
 const WHAT_WE_DO = [
   { n: "01", title: "Products", line: "We design and build our own software. GRC 360 is the first.", to: "/platform" },
-  { n: "02", title: "Made for the region", line: "Azerbaijani and English, local law, in the cloud or on your servers.", to: "/platform/grc#local" },
+  { n: "02", title: "Made for the region", line: "Azerbaijani and English, Azerbaijani law as a package, in the cloud or on your servers.", to: "/platform/grc#local" },
   { n: "03", title: "Built in the open", line: "What we ship and what is next is public.", to: "/changelog" },
 ];
 
@@ -49,7 +49,7 @@ const BELIEFS = [
   },
   {
     title: "Built where we live.",
-    body: "Our language, our laws and our customers' data centres come first, not as a later localisation.",
+    body: "Azerbaijani language, Azerbaijani law and on-premise installs come first, not as a later localisation.",
   },
   {
     title: "Honest about where we are.",
@@ -60,7 +60,7 @@ const BELIEFS = [
 /** "Who we are" — sağ tərəfdəki qısa şirkət məlumatı. */
 const GLANCE = [
   { k: "Company", v: `${site.company.legalName}, Baku` },
-  { k: "First product", v: "GRC 360" },
+  { k: "First product", v: "Strativu GRC 360" },
   { k: "Status", v: site.status.label },
   { k: "Next", v: site.status.detail },
 ];
@@ -280,13 +280,22 @@ function CountUp({ to }: { to: number }) {
   );
 }
 
+/** Lentdə yalnız bu gün paket kimi işləyən framework-lər göstərilir (planlaşdırılanlar /coverage-dədir). */
+const packageFrameworks = frameworks.filter((f) => f.status === "package");
+
 /* ── Framework names drifting slowly sideways ── */
 function FrameworkMarquee() {
-  const names = frameworks.map((f) => f.id.split(" (")[0]);
+  const base = packageFrameworks.map((f) => f.id.split(" (")[0]);
+  // Qısa siyahı ekranı doldurmur: bir sətirdə iki dəfə təkrarlanır ki, lent boşluqsuz dövr etsin.
+  const names = base.length < 8 ? [...base, ...base] : base;
   const row = (hidden?: boolean) => (
     <ul className="flex shrink-0 items-center" aria-hidden={hidden || undefined}>
-      {names.map((n) => (
-        <li key={n} className="flex items-center gap-10 whitespace-nowrap pr-10 text-[clamp(20px,2.4vw,32px)] tracking-[-0.015em] text-ink-2">
+      {names.map((n, i) => (
+        <li
+          key={`${n}-${i}`}
+          aria-hidden={i >= base.length || undefined}
+          className="flex items-center gap-10 whitespace-nowrap pr-10 text-[clamp(20px,2.4vw,32px)] tracking-[-0.015em] text-ink-2"
+        >
           <span className="h-1.5 w-1.5 rounded-full bg-brand/60" aria-hidden />
           {n}
         </li>
@@ -306,10 +315,7 @@ function FrameworkMarquee() {
 const featured = products.filter((p) => p.featured);
 
 export default function Home() {
-  usePageMeta(
-    null,
-    "Strativu is a software company in Baku building products for governance, risk and compliance. GRC 360 is the first."
-  );
+  usePageMeta(null, site.descriptionShort);
 
   return (
     <>
@@ -392,7 +398,7 @@ export default function Home() {
                 className={`border-b border-line md:border-b-0 ${i > 0 ? "md:border-l md:border-line" : ""}`}
               >
                 <Link to={w.to} className="group flex h-full flex-col py-8 md:px-8 md:py-10 md:first:pl-0">
-                  <span className="font-mono text-[12px] text-brand">{w.n}</span>
+                  <span className="font-mono text-[12px] text-brand-ink">{w.n}</span>
                   <span className="t-h3 mt-6 text-ink transition-colors group-hover:text-brand">{w.title}</span>
                   <span className="mt-3 max-w-[34ch] text-[16px] leading-[1.6] text-ink-2">{w.line}</span>
                   <ArrowRight
@@ -410,6 +416,7 @@ export default function Home() {
       <Beliefs />
 
       {/* ── 05 Our work (from data/products.ts): text on the left, the film on the right ── */}
+      {featured.length > 0 && (
       <section className="py-24 md:py-36">
         <Container>
           <div className="grid grid-cols-1 gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:items-center xl:gap-x-20">
@@ -439,6 +446,7 @@ export default function Home() {
           )}
         </Container>
       </section>
+      )}
 
       {/* ── 06 In numbers (all from the site's own data) ── */}
       <section className="py-24 md:py-36">
@@ -467,7 +475,7 @@ export default function Home() {
       <section className="py-20 md:py-28">
         <Container>
           <Reveal>
-            <p className="eyebrow">Built for</p>
+            <p className="eyebrow">GRC 360 works with</p>
           </Reveal>
         </Container>
         <div className="mt-10">

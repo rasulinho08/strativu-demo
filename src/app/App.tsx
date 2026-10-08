@@ -25,10 +25,11 @@ export default function App() {
           <Route path="/changelog" element={<Changelog />} />
           <Route path="/early-access" element={<EarlyAccess />} />
           <Route path="/legal/:doc" element={<Legal />} />
-          {/* Legacy routes */}
+          {/* Legacy routes (on Vercel these are 308 redirects in vercel.json; these cover client-side navigation) */}
           <Route path="/about" element={<Navigate to="/company/about" replace />} />
           <Route path="/contact" element={<Navigate to="/company/contact" replace />} />
           <Route path="/work" element={<Navigate to="/platform/grc" replace />} />
+          <Route path="/pricing" element={<Navigate to="/early-access" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>

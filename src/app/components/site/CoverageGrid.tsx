@@ -2,16 +2,16 @@ import { frameworks, statusLabel, type FrameworkStatus } from "../../data/covera
 import { Rows } from "./primitives";
 import { Reveal } from "./Reveal";
 
-const ORDER: FrameworkStatus[] = ["supported", "in-progress", "planned"];
+const ORDER: FrameworkStatus[] = ["package", "in-progress", "planned"];
 
 const NOTE: Record<FrameworkStatus, string> = {
-  supported: "Run as compliance packages in the current build.",
+  package: "Work as compliance packages today. You add the requirements or import them from CSV.",
   "in-progress": "A ready-made package is being prepared.",
-  planned: "On the roadmap. Early-access teams set the order.",
+  planned: "On the roadmap. Early-access teams help set the order.",
 };
 
 /**
- * Framework list grouped by status (Supported, Mapping, Planned).
+ * Framework list grouped by status (works as a package, in progress, planned).
  * Hairline rows, no tiles: id as title, full name underneath, each row links to its framework page.
  */
 export function CoverageGrid({ limit }: { limit?: number }) {

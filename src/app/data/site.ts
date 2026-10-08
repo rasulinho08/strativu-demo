@@ -4,7 +4,13 @@
  */
 export const site = {
   name: "Strativu",
-  tagline: "Compliance evidence, engineered.",
+  tagline: "We build software for risk and compliance.",
+  /** Sosial şəbəkə və axtarış üçün tam təsvir (og:description). Yalnız təsdiqlənmiş faktlar. */
+  description:
+    "Strativu is a software company in Baku. Its first product, Strativu GRC 360, brings risks, controls, audits and compliance into one system, in Azerbaijani and English, in the cloud or on your own servers. Early access opens Q1 2027.",
+  /** Qısa təsvir (meta description, ≤160 simvol). */
+  descriptionShort:
+    "Strativu is a software company in Baku. Strativu GRC 360 brings risks, controls, audits and compliance into one system. Early access opens Q1 2027.",
   domain: "https://strativu.com",
   /** Sosial şəbəkə önizləmə şəkli (1200×630). public/og.png */
   ogImage: "/og.png",
@@ -40,7 +46,7 @@ export const site = {
      * Status səhifəsi yalnız həqiqətən işləyən status.strativu.com olanda doldurulmalıdır.
      */
     statusPage: null as string | null,
-    linkedin: "https://www.linkedin.com/company/strativu" as string | null,
+    linkedin: "https://www.linkedin.com/company/strativu-co/" as string | null,
     github: null as string | null,
     instagram: "https://www.instagram.com/strativu/" as string | null,
   },

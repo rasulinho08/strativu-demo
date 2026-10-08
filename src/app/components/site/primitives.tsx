@@ -13,12 +13,15 @@ export function Section({
   className = "",
   id,
   tone = "ground",
+  logoHide = false,
 }: {
   children: ReactNode;
   className?: string;
   id?: string;
   tone?: "ground" | "surface" | "contrast";
   glow?: boolean;
+  /** Bölmə ekranda olanda 3D loqo tam solur (formalar üçün). LogoScene `[data-logo-hide]` axtarır. */
+  logoHide?: boolean;
 }) {
   const tones = {
     ground: "",
@@ -26,16 +29,17 @@ export function Section({
     contrast: "bg-[var(--ink)] text-[var(--ground)]",
   };
   return (
-    <section id={id} className={`relative scroll-mt-24 py-20 md:py-32 ${tones[tone]} ${className}`}>
+    <section
+      id={id}
+      data-logo-hide={logoHide || undefined}
+      className={`relative scroll-mt-24 py-20 md:py-32 ${tones[tone]} ${className}`}
+    >
       <Container>{children}</Container>
     </section>
   );
 }
 
-/**
- * Content lane. On desktop text stays in the left ~56% so the 3D logo on the right is never covered.
- * Use it for every page body; only go wider when a layout genuinely needs it.
- */
+/** Narrow single-column lane (404 and error pages). Page bodies use the two-sided Duo / Split layouts. */
 export function Lane({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <div className={`max-w-[640px] lg:max-w-[56%] ${className}`}>{children}</div>;
 }
@@ -64,6 +68,8 @@ export function Duo({
 }
 
 export type RowItem = {
+  /** Optional anchor id on the row (e.g. "vulnerability-disclosure" → /trust#vulnerability-disclosure). */
+  id?: string;
   /** Small index shown on the left, e.g. "01". */
   n?: string;
   title: ReactNode;
@@ -100,7 +106,7 @@ export function Rows({ items, className = "" }: { items: RowItem[]; className?: 
           </>
         );
         return (
-          <Reveal as="li" key={i} delay={Math.min(i, 4) * 0.06}>
+          <Reveal as="li" key={i} id={it.id} delay={Math.min(i, 4) * 0.06} className={it.id ? "scroll-mt-28" : ""}>
             {it.to ? (
               <Link to={it.to} className={cls}>
                 {inner}

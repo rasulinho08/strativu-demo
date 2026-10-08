@@ -1,7 +1,7 @@
 """
 Strativu mark → 3D (Blender 5.2, background rejimi).
 
-Giriş : mark.json (traced kontur + dairə mərkəzləri), mark-texture.png (orijinal artwork)
+Giriş : mark.json (traced kontur + dairə mərkəzləri), assets/mark-texture.png (orijinal artwork)
 Çıxış : public/models/strativu-mark.glb
 
 Model:
@@ -24,8 +24,9 @@ from mathutils import Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 JSON_PATH = os.path.join(HERE, "mark.json")
-TEXTURE = r"C:\Users\User\Downloads\strativu-site\strativu\public\brand\mark-texture.png"
-OUT_DIR = r"C:\Users\User\Downloads\strativu-site\strativu\public\models"
+REPO = os.path.normpath(os.path.join(HERE, "..", ".."))
+TEXTURE = os.path.join(HERE, "assets", "mark-texture.png")
+OUT_DIR = os.path.join(REPO, "public", "models")
 OUT_GLB = os.path.join(OUT_DIR, "strativu-mark.glb")
 
 DEPTH = 0.13          # gövdə qalınlığı (son ölçüdə, vahid)

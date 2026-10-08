@@ -96,7 +96,7 @@ export const grcStatus = [
     v: "Full sync of the OpenAPI contract, CI/CD, and audits for continuity plans.",
   },
   {
-    k: "Next",
-    v: "Email digests and Jira, custom weights for the risk matrix, incident escalation rules. Early access opens in Q1 2027.",
+    k: "Planned",
+    v: "Email digests and Jira integration, custom weights for the risk matrix, incident escalation rules. Early access opens in Q1 2027.",
   },
 ];

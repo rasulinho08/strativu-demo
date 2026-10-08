@@ -38,7 +38,7 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
     <figure className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-[color-mix(in_srgb,var(--surface)_94%,transparent)] shadow-[var(--e2)] backdrop-blur-md">
       <div className="flex items-center justify-between border-b border-line-soft px-5 py-3">
         <span className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink-3">{title}</span>
-        <span className="font-mono text-[10.5px] text-ink-4">Illustrative</span>
+        <span className="font-mono text-[11.5px] text-ink-3">Illustrative</span>
       </div>
       <div className="p-5">{children}</div>
     </figure>
@@ -107,7 +107,7 @@ export function AlertFeed() {
   );
 }
 
-/* ── 2. One control, many frameworks: lines draw from the control to each framework ── */
+/* ── 2. One control, linked to the requirements it meets: lines draw from the control to each requirement ── */
 const TARGETS = [
   { fw: "ISO 27001", ref: "A.5.17" },
   { fw: "SOC 2", ref: "CC6.1" },
@@ -120,7 +120,7 @@ export function ControlMap() {
   const lit = Math.min(step, TARGETS.length);
   return (
     <div ref={ref}>
-      <Panel title="Control mapping">
+      <Panel title="Linked requirements">
         <div className="relative grid min-h-[268px] grid-cols-[1fr_auto_1fr] items-center gap-3">
           <div className="rounded-[var(--r-md)] border border-brand/40 bg-brand-soft/60 px-4 py-4">
             <p className="font-mono text-[11px] text-ink-3">CTL-014</p>
@@ -242,63 +242,6 @@ export function RiskLinks() {
               );
             })}
           </ul>
-        </div>
-      </Panel>
-    </div>
-  );
-}
-
-/* ── 4. Risk heat map: 5×5 likelihood × impact, risks settle into cells ── */
-const RISKS = [
-  { id: "R-031", l: 4, i: 4 },
-  { id: "R-012", l: 2, i: 5 },
-  { id: "R-044", l: 3, i: 2 },
-  { id: "R-007", l: 5, i: 3 },
-  { id: "R-019", l: 1, i: 2 },
-];
-
-function cellTone(score: number) {
-  if (score >= 15) return "bg-warn/25";
-  if (score >= 8) return "bg-brand/20";
-  return "bg-brand/[0.07]";
-}
-
-export function RiskHeatmap() {
-  const { ref, step, reduce } = useTicker(900, RISKS.length + 2);
-  const placed = reduce ? RISKS.length : Math.min(step, RISKS.length);
-  return (
-    <div ref={ref}>
-      <Panel title="Risk heat map · 5×5">
-        <div className="flex min-h-[268px] gap-3">
-          <span className="self-center font-mono text-[10.5px] text-ink-3 [writing-mode:vertical-rl] rotate-180">Likelihood</span>
-          <div className="flex-1">
-            <div className="grid grid-cols-5 gap-1.5">
-              {Array.from({ length: 25 }, (_, k) => {
-                const l = 5 - Math.floor(k / 5);
-                const i = (k % 5) + 1;
-                const here = RISKS.slice(0, placed).filter((r) => r.l === l && r.i === i);
-                return (
-                  <div key={k} className={`relative flex aspect-square items-center justify-center rounded-[6px] ${cellTone(l * i)}`}>
-                    <AnimatePresence>
-                      {here.map((r) => (
-                        <motion.span
-                          key={r.id}
-                          initial={{ scale: 0, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0, opacity: 0 }}
-                          transition={{ type: "spring", stiffness: 380, damping: 22 }}
-                          className="rounded-full bg-ink px-1.5 py-0.5 font-mono text-[9.5px] text-ground"
-                        >
-                          {r.id}
-                        </motion.span>
-                      ))}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
-            </div>
-            <p className="mt-2 text-center font-mono text-[10.5px] text-ink-3">Impact</p>
-          </div>
         </div>
       </Panel>
     </div>

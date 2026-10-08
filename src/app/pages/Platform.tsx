@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FocusEvent, type PointerEvent, type ReactNode } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { Btn, Container, Duo, Eyebrow, PageHeader, Rows, Section, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
@@ -19,8 +19,9 @@ import { AlertFeed, ControlMap, RiskLinks, Split, SystemLog } from "../component
 
 /**
  * Platform, GRC and Architecture pages.
- * Everything sits in the left Lane so the 3D logo on the right stays clear.
- * Lists are hairline Rows; no cards, no mock UI.
+ * Two-sided layouts (Duo / Split): heading or text on the left, list or illustrative panel on the right.
+ * The 3D logo stays a faint background on these pages (LogoScene → CHOREO.page).
+ * Lists are hairline Rows; no cards.
  */
 
 const BODY = "mt-5 max-w-[52ch] text-[17px] leading-[1.65] text-ink-2";
@@ -28,21 +29,24 @@ const BODY = "mt-5 max-w-[52ch] text-[17px] leading-[1.65] text-ink-2";
 const BODY_R = "max-w-[52ch] text-[17px] leading-[1.65] text-ink-2";
 
 const MODEL = [
-  { n: "01", title: "Registers", body: "Risks, assets, vendors and processing activities." },
-  { n: "02", title: "Controls", body: "One shared control set, mapped across frameworks, with owners and review cycles." },
+  { n: "01", title: "Registers", body: "Risks, assets, vendors and data flows." },
+  { n: "02", title: "Controls", body: "Controls with their audits and maintenance, linked to the requirements they meet." },
   { n: "03", title: "Links", body: "A risk is tied to the controls, policies, assets, projects and requirements that treat it." },
   { n: "04", title: "Workflow", body: "Tasks, reviews, exceptions and alerts before anything expires." },
   { n: "05", title: "Reporting", body: "Heat maps, compliance analysis and a public Trust Center." },
 ];
 
 export function Platform() {
-  usePageMeta("Platform", "One model for governance, risk and compliance: registers, controls, links, workflow and reporting, with every change in the system log.");
+  usePageMeta(
+    "Platform",
+    "One model for governance, risk and compliance: registers, controls, links, workflow and reporting, with changes recorded in a per-tenant system log."
+  );
   return (
     <>
       <PageHeader
         eyebrow="Platform"
         title="One model for governance, risk and compliance."
-        lead="One connected model with every change in the system log, shared by every product we build. GRC 360 is the first."
+        lead="Risks, controls, policies and requirements in one connected model, with changes recorded in a per-tenant system log. Strativu GRC 360 is the first product built on it."
       />
 
       <Section>
@@ -74,23 +78,53 @@ export function Platform() {
   );
 }
 
-/* ── Module explorer: compact grid of names (left), selected module in a panel (right).
-   Advances on its own while on screen until the visitor picks a module. ── */
-function ModuleExplorer() {
+/**
+ * Auto-advance for the gallery and the module explorer (WCAG 2.2.2):
+ *  - only while on screen and without reduced motion;
+ *  - pauses while the mouse is over it or focus is inside it;
+ *  - stops for good after the first click, tap, touch or key press inside it.
+ */
+function useAutoAdvance<T extends HTMLElement>(count: number, ms: number) {
   const [idx, setIdx] = useState(0);
   const [pinned, setPinned] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [held, setHeld] = useState(false);
+  const ref = useRef<T>(null);
   const inView = useInView(ref, { margin: "-20% 0px -20% 0px" });
   const reduce = useReducedMotion();
   useEffect(() => {
-    if (pinned || reduce || !inView) return;
-    const id = window.setInterval(() => setIdx((v) => (v + 1) % grcModules.length), 3200);
+    if (pinned || held || reduce || !inView) return;
+    const id = window.setInterval(() => setIdx((v) => (v + 1) % count), ms);
     return () => window.clearInterval(id);
-  }, [pinned, reduce, inView]);
+  }, [pinned, held, reduce, inView, count, ms]);
+  const bind = {
+    onPointerEnter: (e: PointerEvent) => {
+      if (e.pointerType === "mouse") setHeld(true);
+    },
+    onPointerLeave: (e: PointerEvent) => {
+      if (e.pointerType === "mouse") setHeld(false);
+    },
+    onPointerDown: () => setPinned(true),
+    onKeyDown: () => setPinned(true),
+    onFocus: () => setHeld(true),
+    onBlur: (e: FocusEvent) => {
+      if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHeld(false);
+    },
+  };
+  const select = (i: number) => {
+    setIdx(i);
+    setPinned(true);
+  };
+  return { ref, idx, select, bind, reduce };
+}
+
+/* ── Module explorer: compact grid of names (left), selected module in a panel (right).
+   Advances on its own while on screen until the visitor interacts (see useAutoAdvance). ── */
+function ModuleExplorer() {
+  const { ref, idx, select, bind, reduce } = useAutoAdvance<HTMLDivElement>(grcModules.length, 3200);
   const m = grcModules[idx];
 
   return (
-    <div ref={ref}>
+    <div ref={ref} {...bind}>
       <Split
         sticky
         visual={
@@ -142,10 +176,7 @@ function ModuleExplorer() {
               <li key={mod.name} className="border-b border-line">
                 <button
                   type="button"
-                  onClick={() => {
-                    setIdx(i);
-                    setPinned(true);
-                  }}
+                  onClick={() => select(i)}
                   aria-pressed={on}
                   className="group flex w-full items-baseline gap-3 py-4 text-left"
                 >
@@ -169,21 +200,13 @@ function ModuleExplorer() {
   );
 }
 
-/* ── Screens from the product: tabs on top, the selected screen below. Advances on its own until clicked. ── */
+/* ── Screens from the product: tabs on top, the selected screen below.
+   Advances on its own until the visitor interacts (see useAutoAdvance). ── */
 function ScreenGallery() {
-  const [idx, setIdx] = useState(0);
-  const [pinned, setPinned] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { margin: "-20% 0px -20% 0px" });
-  const reduce = useReducedMotion();
-  useEffect(() => {
-    if (pinned || reduce || !inView) return;
-    const id = window.setInterval(() => setIdx((v) => (v + 1) % grcScreens.length), 4200);
-    return () => window.clearInterval(id);
-  }, [pinned, reduce, inView]);
+  const { ref, idx, select, bind, reduce } = useAutoAdvance<HTMLElement>(grcScreens.length, 4200);
   const sc = grcScreens[idx];
   return (
-    <figure ref={ref}>
+    <figure ref={ref} {...bind}>
       <div role="tablist" aria-label="GRC 360 screens" className="-mx-1 flex gap-1 overflow-x-auto pb-3 [scrollbar-width:none]">
         {grcScreens.map((g, i) => {
           const on = i === idx;
@@ -193,12 +216,9 @@ function ScreenGallery() {
               type="button"
               role="tab"
               aria-selected={on}
-              onClick={() => {
-                setIdx(i);
-                setPinned(true);
-              }}
+              onClick={() => select(i)}
               className={`relative shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
-                on ? "text-ink" : "text-ink-3 hover:text-ink"
+                on ? "text-ink" : "text-ink-2 hover:text-ink"
               }`}
             >
               {on && (
@@ -230,7 +250,7 @@ function ScreenGallery() {
           />
         </AnimatePresence>
       </div>
-      <figcaption className="mt-3 flex items-center justify-between gap-4 font-mono text-[11px] text-ink-3">
+      <figcaption className="mt-3 flex items-center justify-between gap-4 font-mono text-[11px] text-ink-2">
         <span>{sc.label}, current build. Demo data: names and records are made up.</span>
         <span className="hidden sm:inline">
           {String(idx + 1).padStart(2, "0")} / {String(grcScreens.length).padStart(2, "0")}
@@ -248,8 +268,8 @@ function ScreenGallery() {
 
 export function PlatformGRC() {
   usePageMeta(
-    "GRC 360",
-    "GRC 360 brings risks, assets, vendors, controls, audits and incidents into one connected system, in Azerbaijani and English, in the cloud or on your own servers."
+    "Strativu GRC 360",
+    "Strativu GRC 360 brings risks, assets, vendors, controls, audits and incidents into one system, in Azerbaijani and English, in the cloud or on your own servers."
   );
   return (
     <>
@@ -372,7 +392,7 @@ export function PlatformGRC() {
           head={
             <Reveal>
               <Eyebrow>Trust Center</Eyebrow>
-              <h2 className="t-h2 text-ink">Answer security questionnaires before they arrive.</h2>
+              <h2 className="t-h2 text-ink">A public security page your customers can read before they ask.</h2>
             </Reveal>
           }
         >
@@ -423,7 +443,7 @@ export function PlatformGRC() {
           head={
             <Reveal>
               <Eyebrow>Built in Baku</Eyebrow>
-              <h2 className="t-h2 text-ink">In Azerbaijani, with local law built in.</h2>
+              <h2 className="t-h2 text-ink">In Azerbaijani, with Azerbaijani law ready to load as a package.</h2>
             </Reveal>
           }
         >

@@ -11,8 +11,11 @@ import { useLocation } from "react-router";
  *   <main/>, <footer/>  → position: relative; z-index: 10         (səhnənin ÜSTÜNDƏ)
  *
  * Davranış (aşağıdakı CHOREO cədvəli ilə idarə olunur):
- *  - Ana səhifə açılanda loqo böyük və parlaqdır (hero).
- *  - Scroll etdikcə loqo fırlanır, amma həmişə görünür qalır (heç bir bölmənin arxasında itmir).
+ *  - Ana səhifə açılanda loqo böyük və parlaqdır (hero). Scroll etdikcə fırlanır və ~0.2 ekranda (OP_SCREENS)
+ *    solğun "rest" vəziyyətinə keçir ki, başlıq və mətn onun üstündən tam parlaq loqo üzərində keçməsin.
+ *  - Daxili səhifələr: masaüstündə (≥1024px) çox zəif fon (görünən ≈0.06 light, ≈0.04 dark); telefon və planşetdə (<1024px)
+ *    açılış animasiyasından sonra tam solur.
+ *  - Forma olan bölmə (`[data-logo-hide]`) ekranda olanda loqo 0-a enir.
  *  - Fon "sakit işıq"dır: xətt, hissəcik, şüa yoxdur. Loqonun arxasında bir böyük yumşaq işıq, altında
  *    yastı "döşəmə" işığı. Hər ikisi loqonu yavaşca izləyir və demək olar ki hiss olunmadan sürüşür.
  *  - Loqo məhsul fotosu kimi işıqlandırılır: yumşaq studiya işığı, altında kontakt kölgəsi (tündə yer işığı).
@@ -34,7 +37,7 @@ import { useLocation } from "react-router";
 
 const MODEL_URL = "/models/strativu-mark.glb";
 
-/** Loqodan ölçülmüş rənglər (public/brand/mark-texture.png). */
+/** Loqodan ölçülmüş rənglər (tools/logo3d/assets/mark-texture.png). */
 const BRAND_CYAN = "#03C1FD"; // dairələr və yuxarı qanadlar
 const BRAND_DEEP = "#0159C5"; // içəri dağ / aşağı mavi
 
@@ -42,40 +45,52 @@ const BRAND_DEEP = "#0159C5"; // içəri dağ / aşağı mavi
 /**
  * Scroll xoreoqrafiyası (azcon.gov.az üslubu): loqo səhifə boyu "səyahət" edir.
  * Hər poza: x/y → mərkəzdən sürüşmə (ekran eni/hündürlüyünün payı, x sağa, y yuxarı),
- * size → loqonun ölçüsü (ekran hündürlüyünün payı), op → şəffaflıq (0–1).
+ * size → loqonun ölçüsü (ekran hündürlüyünün payı), op → şəffaflıq (0–1), opDark → tünd temada şəffaflıq (yoxdursa op).
+ * "mobile" pozaları <1024px üçündür (telefon və planşet: bu enlərdə layout tək sütunludur).
  *
  *   hero  → səhifə açılanda (scroll = 0)
- *   rest  → bir ekran aşağı scroll edəndən sonra, məzmunun arxasında (solğun)
+ *   rest  → bir ekran aşağı scroll edəndən sonra, məzmunun arxasında (solğun); şəffaflıq OP_SCREENS-də çatır
  *   end   → `data-logo-stage` elementi ekrana gələndə (ana səhifədə closing CTA): mərkəzə qayıdır
  *           və həmin bölmə ilə birlikdə yuxarı qalxır, footer-in üstünə düşmür.
  */
-type Pose = { x: number; y: number; size: number; op: number };
+type Pose = { x: number; y: number; size: number; op: number; opDark?: number };
 type Choreo = { hero: Pose; rest: Pose; end?: Pose };
 
+/*
+ * Qeyd: `op` materialın şəffaflığıdır. Loqonun ön və arxa üzü üst-üstə düşdüyü üçün görünən şəffaflıq təxminən
+ * 1 − (1 − op)² olur (op 0.03 → ~0.06 görünür). "rest" dəyərləri buna görə seçilib: mətn (h1 ≥3:1, adi mətn ≥4.5:1)
+ * loqonun üstündə oxunaqlı qalır.
+ */
 const CHOREO: Record<"home" | "page", { desktop: Choreo; mobile: Choreo }> = {
   home: {
     desktop: {
       hero: { x: 0, y: 0.16, size: 0.44, op: 1 },
-      rest: { x: 0, y: 0.02, size: 0.36, op: 0.14 },
+      rest: { x: 0, y: 0.02, size: 0.36, op: 0.04, opDark: 0.03 },
       end: { x: 0, y: 0.17, size: 0.34, op: 1 },
     },
     mobile: {
       hero: { x: 0, y: 0.17, size: 0.3, op: 1 },
-      rest: { x: 0, y: 0.04, size: 0.26, op: 0.16 },
+      rest: { x: 0, y: 0.04, size: 0.26, op: 0.04, opDark: 0.03 },
       end: { x: 0, y: 0.24, size: 0.22, op: 1 },
     },
   },
   page: {
+    // Daxili səhifələrdə mətn loqonun üstündədir: masaüstündə çox zəif fon (görünən ~0.06 light, ~0.04 dark),
+    // telefon/planşetdə açılışdan sonra 0.
     desktop: {
-      hero: { x: 0, y: 0.04, size: 0.4, op: 0.24 },
-      rest: { x: 0, y: 0.02, size: 0.36, op: 0.16 },
+      hero: { x: 0, y: 0.04, size: 0.4, op: 0.03, opDark: 0.02 },
+      rest: { x: 0, y: 0.02, size: 0.36, op: 0.03, opDark: 0.02 },
     },
     mobile: {
-      hero: { x: 0, y: 0.3, size: 0.17, op: 1 },
-      rest: { x: 0, y: 0.04, size: 0.26, op: 0.16 },
+      hero: { x: 0, y: 0.3, size: 0.17, op: 0 },
+      rest: { x: 0, y: 0.04, size: 0.26, op: 0 },
     },
   },
 };
+/** Şəffaflıq hero → rest keçidini bu qədər ekranda tamamlayır (mövqe/ölçü keçidi INTRO_SCREENS-də qalır). */
+const OP_SCREENS = 0.2;
+/** `[data-logo-hide]` bölməsi ekrana girəndə loqo ekran hündürlüyünün bu payında tam solur. */
+const HIDE_RAMP = 0.2;
 
 /**
  * Fon işıq sahələrinin forması (rənglər theme.css-də: --ql-*). Ölçülər loqonun eninə görə:
@@ -93,6 +108,11 @@ const FIELD = {
   floorFollow: 0.85,
   minSize: 0.3,
 };
+/**
+ * İşıq sahələrinin gücü loqonun görünməsi ilə birlikdə dəyişir: loqo tam parlaq olanda (hero, end, açılış) 1,
+ * loqo solğun və ya gizli olanda FIELD_REST. Beləliklə mətnin arxasındakı mavi işıq kontrastı aşağı salmır.
+ */
+const FIELD_REST = 0.25;
 /** İşıq sahələri loqonu bundan yavaş izləyir (FOLLOW-dan kiçik → işıq bir az gecikir, üzvi görünür). */
 const LIGHT_FOLLOW = 2.2;
 /** Scroll ilə döşəmə işığının yana sürüşməsi (ekran hündürlüyünün payı). */
@@ -222,6 +242,7 @@ const mixPose = (a: Pose, b: Pose, t: number): Pose => ({
   y: mix(a.y, b.y, t),
   size: mix(a.size, b.size, t),
   op: mix(a.op, b.op, t),
+  opDark: mix(a.opDark ?? a.op, b.opDark ?? b.op, t),
 });
 
 /** Kontakt kölgəsi + yer işığı. Premultiplied çıxış: rgb = işıq (əlavə olunur), alpha = kölgə (arxanı qaraldır). */
@@ -270,7 +291,8 @@ export function LogoScene() {
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return;
-    const narrowMq = window.matchMedia("(max-width: 767px)");
+    // <1024px: tək sütunlu layout (telefon və planşet) → "mobile" pozalar.
+    const narrowMq = window.matchMedia("(max-width: 1023px)");
 
     let disposed = false;
     const cleanups: Array<() => void> = [];
@@ -551,7 +573,8 @@ export function LogoScene() {
         tctx.strokeStyle = dark ? TRAILS.colorDark : TRAILS.colorLight;
         tctx.lineCap = "butt"; // yuvarlaq uclar üst-üstə düşüb "muncuq" effekti yaradırdı
         tctx.lineJoin = "round";
-        const strength = TRAILS.opacity * (0.55 + 0.45 * op);
+        // Loqo solğun olanda (rest, daxili səhifələr, formalar) izlər də onunla birlikdə solur; tam parlaq loqoda dəyişmir.
+        const strength = TRAILS.opacity * (0.55 + 0.45 * op) * clamp01(op / 0.14);
         for (const list of trails) {
           for (let j = 1; j < list.length; j++) {
             const a = list[j - 1];
@@ -657,6 +680,10 @@ export function LogoScene() {
 
         const tRest = easeInOut(clamp01(y / (vh * INTRO_SCREENS)));
         let pose = mixPose(c.hero, c.rest, tRest);
+        // Şəffaflıq daha tez solur: başlıq loqonun üstünə çatanda loqo artıq solğundur.
+        const tOp = easeInOut(clamp01(y / (vh * OP_SCREENS)));
+        pose.op = mix(c.hero.op, c.rest.op, tOp);
+        pose.opDark = mix(c.hero.opDark ?? c.hero.op, c.rest.opDark ?? c.rest.op, tOp);
         let tEnd = 0;
         const stage = c.end ? document.querySelector("[data-logo-stage]") : null;
         if (c.end && stage) {
@@ -666,6 +693,16 @@ export function LogoScene() {
           // Bölmə yuxarı keçəndə loqo onunla birlikdə qalxır.
           if (top < 0) pose.y += -top / vh;
         }
+        // Tema üzrə şəffaflıq, sonra forma bölməsi ekrandadırsa tam solma.
+        let op = themeDark ? (pose.opDark ?? pose.op) : pose.op;
+        let hide = 0;
+        document.querySelectorAll("[data-logo-hide]").forEach((el) => {
+          const r = el.getBoundingClientRect();
+          if (r.bottom <= 0 || r.top >= vh) return;
+          hide = Math.max(hide, Math.min(clamp01((vh - r.top) / (vh * HIDE_RAMP)), clamp01(r.bottom / (vh * HIDE_RAMP))));
+        });
+        op *= 1 - hide;
+        pose = { ...pose, op };
 
         // Scroll ilə fırlanma; sonda üzü qabağa (ən yaxın tam dövrə) qayıdır.
         // Ana səhifə: açılışda bir tam, yumşaq dövr (sağa üzü qabağa çatır); sonra yalnız yellənmə.
@@ -758,8 +795,15 @@ export function LogoScene() {
       };
 
       /** Fon sahələri və kölgə: loqonun yavaş izlənən mövqeyindən. */
-      const updateLight = (dt: number) => {
+      let lastFieldOp = NaN;
+      const updateLight = (dt: number, vis: number) => {
         if (!cur) return;
+        const fieldOp = Math.round(mix(FIELD_REST, 1, clamp01(vis)) * 100) / 100;
+        if (fieldOp !== lastFieldOp) {
+          lastFieldOp = fieldOp;
+          keyEl.style.opacity = String(fieldOp);
+          floorEl.style.opacity = String(fieldOp);
+        }
         const kl = 1 - Math.exp(-dt * LIGHT_FOLLOW);
         light.x = mix(light.x, cur.x, kl);
         light.y = mix(light.y, cur.y, kl);
@@ -792,6 +836,8 @@ export function LogoScene() {
       // ── kadr döngəsi ──────────────────────────────────────────────────────
       const t0 = performance.now();
       let last = t0;
+      /** Loqo tam şəffafdır və kadr artıq təmizlənib. */
+      let blank = false;
       const frame = () => {
         if (!visible) return;
         const now = performance.now();
@@ -867,7 +913,23 @@ export function LogoScene() {
           canvas.style.transform = `translate3d(${ox}px, ${oy}px, 0)`;
         }
         syncTheme();
-        updateLight(dt);
+        updateLight(dt, iOp);
+        // Tam şəffaf olanda (açılışdan sonra) WebGL rəsm etmir: bir dəfə təmizlənir, sonra boş qalır.
+        if (introDone && iOp < 0.003) {
+          if (!blank) {
+            renderer.clear();
+            trails.forEach((l) => (l.length = 0));
+            prevTip.fill(null);
+            if (tctx) {
+              tctx.setTransform(1, 0, 0, 1, 0, 0);
+              tctx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+            }
+            trailDirty = false;
+            blank = true;
+          }
+          return;
+        }
+        blank = false;
         updateTrails(now / 1000, iOp);
         if (composer && bloomPass?.enabled) composer.render();
         else renderer.render(scene, camera);

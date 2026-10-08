@@ -19,13 +19,21 @@ function upsertMeta(attr: "name" | "property", key: string, content: string) {
 export function usePageMeta(title: string | null, description: string) {
   const { pathname } = useLocation();
   useEffect(() => {
-    const full = title ? `${title} · ${site.name}` : `${site.name} | ${site.tagline.replace(/\.$/, "")}`;
+    // "Strativu GRC 360" kimi Strativu ilə başlayan başlıqlara " · Strativu" əlavə olunmur.
+    const full = title
+      ? title.startsWith(site.name)
+        ? title
+        : `${title} · ${site.name}`
+      : `${site.name} · ${site.tagline.replace(/\.$/, "")}`;
     const url = `${site.domain}${pathname}`;
+    const image = `${site.domain}${site.ogImage}`;
     document.title = full;
     upsertMeta("name", "description", description);
     upsertMeta("property", "og:title", full);
     upsertMeta("property", "og:description", description);
     upsertMeta("property", "og:url", url);
+    upsertMeta("property", "og:image", image);
+    upsertMeta("name", "twitter:image", image);
     upsertMeta("name", "twitter:title", full);
     upsertMeta("name", "twitter:description", description);
     let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');

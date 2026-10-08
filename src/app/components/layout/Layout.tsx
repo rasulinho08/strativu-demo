@@ -5,16 +5,20 @@ import { Menu, X } from "lucide-react";
 import { Logo } from "../site/Logo";
 import { Btn, Container } from "../site/primitives";
 import { LogoScene } from "../site/LogoScene";
+import { ErrorBoundary } from "../site/ErrorBoundary";
 import { ThemeToggle } from "../theme-toggle";
 import { site } from "../../data/site";
 
+/** `match`: the section this link lights up for (Company → /company/about only, so /company/contact lights up Contact alone). */
 const NAV = [
-  { label: "Platform", to: "/platform" },
-  { label: "Coverage", to: "/coverage" },
-  { label: "Trust", to: "/trust" },
-  { label: "Company", to: "/company/about" },
-  { label: "Changelog", to: "/changelog" },
+  { label: "Platform", to: "/platform", match: "/platform" },
+  { label: "Coverage", to: "/coverage", match: "/coverage" },
+  { label: "Trust", to: "/trust", match: "/trust" },
+  { label: "Company", to: "/company/about", match: "/company/about" },
+  { label: "Changelog", to: "/changelog", match: "/changelog" },
 ];
+const CONTACT = { label: "Contact", to: "/company/contact", match: "/company/contact" };
+const inSection = (pathname: string, match: string) => pathname === match || pathname.startsWith(match + "/");
 
 const FOOTER: { label: string; to?: string; href?: string }[] = [
   { label: "Platform", to: "/platform" },
@@ -29,8 +33,8 @@ const FOOTER: { label: string; to?: string; href?: string }[] = [
   ...(site.company.statusPage ? [{ label: "Status", href: site.company.statusPage }] : []),
 ];
 
-/** Footer-dəki nəhəng sürüşən sözlər. */
-const FOOTER_WORDS = ["Controls", "Evidence", "Audit trail", "Strativu"];
+/** Footer-dəki nəhəng sürüşən sözlər (yalnız sözlər dəyişir; dizayn və animasiya eynidir). */
+const FOOTER_WORDS = ["Risks", "Controls", "Compliance", "Strativu"];
 
 const LEGAL = [
   { label: "Privacy", to: "/legal/privacy" },
@@ -117,21 +121,23 @@ export default function Layout({ children }: { children: ReactNode }) {
           />
           <Logo />
 
+          {/* lg–xl: in the flow between logo and actions (no overlap at 1024–1279px); from xl: centred on the bar. */}
           <nav
             aria-label="Primary"
-            className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex"
+            className="hidden items-center gap-0.5 lg:flex xl:absolute xl:left-1/2 xl:-translate-x-1/2 xl:gap-1"
             onMouseLeave={() => setHovered(null)}
           >
             {NAV.map((n) => {
-              const active = location.pathname === n.to || location.pathname.startsWith(n.to.split("/").slice(0, 2).join("/") + "/");
+              const active = inSection(location.pathname, n.match);
               const lit = hovered ? hovered === n.to : active;
               return (
                 <NavLink
                   key={n.to}
                   to={n.to}
+                  end
                   onMouseEnter={() => setHovered(n.to)}
                   onFocus={() => setHovered(n.to)}
-                  className={`relative isolate rounded-full px-4 py-2 text-[15px] transition-colors duration-200 ${
+                  className={`relative isolate rounded-full px-3 py-2 text-[15px] transition-colors duration-200 xl:px-4 ${
                     lit ? "text-ink" : "text-ink-2 hover:text-ink"
                   }`}
                 >
@@ -152,12 +158,13 @@ export default function Layout({ children }: { children: ReactNode }) {
 
           <div className="hidden items-center gap-2 lg:flex">
             <NavLink
-              to="/company/contact"
-              className={({ isActive }) =>
-                `px-3 text-[15px] transition-colors duration-200 ${isActive ? "text-ink" : "text-ink-2 hover:text-ink"}`
-              }
+              to={CONTACT.to}
+              end
+              className={`px-3 text-[15px] transition-colors duration-200 ${
+                inSection(location.pathname, CONTACT.match) ? "text-ink" : "text-ink-2 hover:text-ink"
+              }`}
             >
-              Contact
+              {CONTACT.label}
             </NavLink>
             <ThemeToggle className="text-ink-2 hover:bg-surface-2 hover:text-ink" />
             <Btn to="/early-access" size="md" className="ml-1">
@@ -196,13 +203,14 @@ export default function Layout({ children }: { children: ReactNode }) {
           >
             <Container className="flex h-full flex-col pt-4">
               <div className="flex flex-col">
-                {NAV.concat([{ label: "Contact", to: "/company/contact" }]).map((n) => (
+                {NAV.concat([CONTACT]).map((n) => (
                   <NavLink
                     key={n.to}
                     to={n.to}
-                    className={({ isActive }) =>
-                      `border-b border-line-soft py-4 text-[20px] ${isActive ? "font-medium text-ink" : "text-ink-2"}`
-                    }
+                    end
+                    className={`border-b border-line-soft py-4 text-[20px] ${
+                      inSection(location.pathname, n.match) ? "font-medium text-ink" : "text-ink-2"
+                    }`}
                   >
                     {n.label}
                   </NavLink>
@@ -222,7 +230,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       </AnimatePresence>
 
       <main id="main" className="relative z-10 flex-1">
-        {children}
+        <ErrorBoundary resetKey={location.pathname}>{children}</ErrorBoundary>
       </main>
 
       {/* ─── Footer: minimal ─── */}
@@ -263,7 +271,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         </Container>
 
         {/* Nəhəng, yavaş sürüşən söz lenti (heyo.is footer-i kimi). Sözləri FOOTER_WORDS-dən dəyişin. */}
-        <div aria-hidden className="marquee-mask -mb-[0.18em] select-none overflow-hidden pb-2">
+        <div aria-hidden className="marquee marquee-mask -mb-[0.18em] select-none overflow-hidden pb-2">
           <div className="marquee-track" style={{ ["--marquee-duration" as string]: "70s" }}>
             {[0, 1].map((k) => (
               <span

@@ -5,12 +5,15 @@ Strativu loqosunu JPEG-dən vektor konturlara çevirir.
 """
 import json
 import math
+import os
 import numpy as np
 from PIL import Image, ImageDraw
 
-SRC = r"C:\Users\User\Downloads\strativu-site\strativu\public\brand\logo-source.jpeg"
-OUT_JSON = r"C:\Users\User\AppData\Local\Temp\claude\C--Users-User-Downloads-strativu-site\e65fa17d-1faf-47a2-a05c-16b4108e9cd6\scratchpad\mark.json"
-OUT_PNG = r"C:\Users\User\AppData\Local\Temp\claude\C--Users-User-Downloads-strativu-site\e65fa17d-1faf-47a2-a05c-16b4108e9cd6\scratchpad\trace-check.png"
+HERE = os.path.dirname(os.path.abspath(__file__))
+SRC = os.path.join(HERE, "assets", "logo-source.jpeg")
+OUT_JSON = os.path.join(HERE, "mark.json")
+OUT_PNG = os.path.join(HERE, "trace-check.png")
+OUT_TEXTURE = os.path.join(HERE, "assets", "mark-texture.png")
 
 # ─────────────────────────── yükləmə və kəsim ───────────────────────────
 im = Image.open(SRC).convert("RGB")
@@ -240,9 +243,7 @@ lab_l, comps_l = components(lines, min_area=300)
 line_polys = [to_poly(outer_contour(lab_l == cid), eps=1.0) for cid, _ in comps_l]
 
 # ── tekstura üçün dəqiq kəsim (mesh koordinatları ilə eyni sistem) ──
-Image.fromarray(crop.astype(np.uint8)).save(
-    r"C:\Users\User\Downloads\strativu-site\strativu\public\brand\mark-texture.png"
-)
+Image.fromarray(crop.astype(np.uint8)).save(OUT_TEXTURE)
 
 data = {
     "size": [W, H],

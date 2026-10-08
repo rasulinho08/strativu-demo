@@ -1,0 +1,5 @@
+Contact: mailto:contact@strativu.com
+Expires: 2027-10-07T23:59:59.000Z
+Policy: https://strativu.com/trust#vulnerability-disclosure
+Preferred-Languages: en, az
+Canonical: https://strativu.com/.well-known/security.txt

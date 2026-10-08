@@ -1,14 +1,17 @@
 """Qara fonlu JPEG loqodan şəffaf PNG-lər: tam loqo + yalnız mark.
 Mark daxilindəki qara xətlər itməsin deyə alfa kimi traced siluet istifadə olunur."""
 import json
+import os
 import numpy as np
 from PIL import Image
 
-SRC = r"C:\Users\User\Downloads\strativu-site\strativu\public\brand\logo-source.jpeg"
-OUT_FULL = r"C:\Users\User\Downloads\strativu-site\strativu\public\brand\logo-full.png"
-OUT_MARK = r"C:\Users\User\Downloads\strativu-site\strativu\public\brand\logo-mark.png"
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.normpath(os.path.join(HERE, "..", ".."))
+SRC = os.path.join(HERE, "assets", "logo-source.jpeg")
+OUT_FULL = os.path.join(REPO, "public", "brand", "logo-full.png")
+OUT_MARK = os.path.join(REPO, "public", "brand", "logo-mark.png")
 
-data = json.load(open("mark.json", encoding="utf-8"))
+data = json.load(open(os.path.join(HERE, "mark.json"), encoding="utf-8"))
 cx0, cy0, cx1, cy1 = data["crop"]
 body = data["body"]
 

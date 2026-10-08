@@ -7,19 +7,23 @@ import { frameworks, statusLabel, type FrameworkStatus } from "../data/coverage"
 import { usePageMeta } from "../components/site/Seo";
 
 const STATUS_NOTE: Record<FrameworkStatus, string> = {
-  supported: "Runs as a compliance package in the current build. Requirements are added in the product or imported from CSV; a bundled catalogue is not included yet.",
+  package:
+    "Works as a compliance package in the current build. You add the requirements in the product or import them from CSV; a ready-made catalogue is not included yet.",
   "in-progress": "A ready-made package is being prepared.",
-  planned: "On the roadmap. Priority is set by early-access participants.",
+  planned: "On the roadmap. Early-access teams help set the order.",
 };
 
 export function Coverage() {
-  usePageMeta("Coverage", "Frameworks and regulations GRC 360 works with, with an honest status for each: supported or planned.");
+  usePageMeta(
+    "Coverage",
+    "Frameworks and regulations Strativu GRC 360 works with, and the status of each: works as a compliance package today, or planned."
+  );
   return (
     <>
       <PageHeader
         eyebrow="Coverage"
-        title="Frameworks and regulations we map to."
-        lead="Each standard is a compliance package, linked to the same controls."
+        title="Frameworks and regulations GRC 360 works with."
+        lead="Each one is a compliance package linked to your controls. You add the requirements in the product or import them from CSV; a ready-made catalogue is not included yet."
       />
 
       <Section className="pt-0 md:pt-0">
@@ -45,9 +49,13 @@ export function FrameworkPage() {
       <PageHeader eyebrow={`Coverage · ${f.body}`} title={f.id} lead={f.name}>
         <p className="chapter">
           <b className="whitespace-nowrap">{statusLabel[f.status]}</b>
-          {f.controls.split(" · ").map((seg) => (
+        </p>
+        {/* Standartın öz ölçüsü — statusun yanında yox, ayrıca sətirdə (xəritələnmiş kontrol sayı kimi oxunmasın). */}
+        <p className="mt-3 text-[14px] leading-[1.6] text-ink-3">
+          The standard:{" "}
+          {f.scope.split(" · ").map((seg, i) => (
             <span key={seg}>
-              {" · "}
+              {i > 0 && " · "}
               <span className="whitespace-nowrap">{seg}</span>
             </span>
           ))}

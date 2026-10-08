@@ -45,11 +45,12 @@ const LEGAL: Record<string, { title: string; updated: string; body: ReactNode }>
   },
   terms: {
     title: "Terms of use",
-    updated: "2026-09-01",
+    updated: "2026-10-08",
     body: (
       <>
         <h2>Scope</h2>
         <p>These terms govern use of this website. Use of the Strativu product during early access is governed by a separate early-access agreement.</p>
+        <p>Request the early-access agreement at <a href={`mailto:${site.company.email}`}>{site.company.email}</a>.</p>
         <h2>Content</h2>
         <p>Content on this site describes a product in development. Framework coverage and status are stated as accurately as we can at the time of writing and may change.</p>
         <h2>Liability</h2>
@@ -61,11 +62,13 @@ const LEGAL: Record<string, { title: string; updated: string; body: ReactNode }>
   },
   dpa: {
     title: "Data processing agreement",
-    updated: "2026-09-01",
+    updated: "2026-10-08",
     body: (
       <>
-        <p>A data processing agreement is provided to every early-access tenant before any personal data is processed. It covers subject matter and duration, nature and purpose of processing, categories of data and data subjects, subprocessors, security measures, audit rights, and deletion on termination.</p>
-        <p>Request a copy at <a href={`mailto:${site.company.email}`}>{site.company.email}</a>.</p>
+        <p>
+          A data processing agreement (DPA) will be signed with every early-access tenant before any personal data is processed. Request the
+          draft at <a href={`mailto:${site.company.email}`}>{site.company.email}</a>.
+        </p>
       </>
     ),
   },
