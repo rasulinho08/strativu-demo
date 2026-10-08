@@ -96,12 +96,19 @@ export default function Layout({ children }: { children: ReactNode }) {
       firstPath.current = false;
       return;
     }
-    const id = requestAnimationFrame(() => {
+    let id = 0;
+    let tries = 0;
+    const focusHeading = () => {
       const h1 = document.querySelector<HTMLElement>("main h1");
-      if (!h1) return;
+      if (!h1) {
+        // a page loaded on demand may need a few more frames
+        if (++tries < 60) id = requestAnimationFrame(focusHeading);
+        return;
+      }
       if (!h1.hasAttribute("tabindex")) h1.setAttribute("tabindex", "-1");
       h1.focus({ preventScroll: true });
-    });
+    };
+    id = requestAnimationFrame(focusHeading);
     return () => cancelAnimationFrame(id);
   }, [location.pathname]);
 

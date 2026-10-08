@@ -68,9 +68,19 @@ function setMeta(html: string, attr: "name" | "property", key: string, value: st
  *  - writes dist/sitemap.xml from the same route list, with today's date as lastmod;
  *  - fails the build if a page route in App.tsx has no meta.
  */
+/** Which page file serves which route (for <link rel="modulepreload"> on the route's static HTML). */
+const PAGE_FOR_ROUTE: [RegExp, string][] = [
+  [/^\/platform(\/|$)/, "src/app/pages/Platform.tsx"],
+  [/^\/coverage(\/|$)/, "src/app/pages/Coverage.tsx"],
+  [/^\/(company\/|trust$|early-access$)/, "src/app/pages/Company.tsx"],
+  [/^\/(changelog$|legal\/)/, "src/app/pages/Misc.tsx"],
+];
+
 function strativuSite(): Plugin {
   let outDir = "dist";
   let root = process.cwd();
+  /** page file (relative to root) → its chunk and the chunks it imports */
+  const pageChunks = new Map<string, string[]>();
   return {
     name: "strativu-site",
     apply: "build",
@@ -90,6 +100,13 @@ function strativuSite(): Plugin {
           `</title>\n    <link rel="preload" href="/${font.fileName}" as="font" type="font/woff2" crossorigin />`
         );
       },
+    },
+    generateBundle(_options, bundle) {
+      for (const chunk of Object.values(bundle)) {
+        if (chunk.type !== "chunk" || !chunk.facadeModuleId || !chunk.isDynamicEntry) continue;
+        const rel = path.relative(root, chunk.facadeModuleId).split(path.sep).join("/");
+        pageChunks.set(rel, [chunk.fileName, ...chunk.imports]);
+      }
     },
     closeBundle() {
       // every page route declared in App.tsx must have meta
@@ -117,6 +134,16 @@ function strativuSite(): Plugin {
           /(<meta name="description" content="[^"]*" \/>)/,
           `$1\n    <link rel="canonical" href="${url}" />\n    <meta property="og:url" content="${url}" />`
         );
+        const page = PAGE_FOR_ROUTE.find(([re]) => re.test(route))?.[1];
+        const preload = page ? pageChunks.get(page) : undefined;
+        if (page && !preload) throw new Error(`[strativu-site] no chunk found for ${page}`);
+        if (preload) {
+          const links = preload
+            .filter((f) => !template.includes(`/${f}"`))
+            .map((f) => `<link rel="modulepreload" crossorigin href="/${f}">`)
+            .join("\n    ");
+          if (links) html = html.replace("</head>", `    ${links}\n  </head>`);
+        }
         const ld = jsonLd(route);
         if (ld.length) {
           const scripts = ld.map((o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, "\\u003c")}</script>`);
