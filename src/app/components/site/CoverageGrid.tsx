@@ -1,4 +1,5 @@
 import { frameworks, statusLabel, type FrameworkStatus } from "../../data/coverage";
+import { frameworkPath } from "../../data/grc360";
 import { Rows } from "./primitives";
 import { Reveal } from "./Reveal";
 
@@ -28,7 +29,7 @@ export function CoverageGrid({ limit }: { limit?: number }) {
               <p className="mt-4 text-[clamp(44px,5vw,72px)] font-semibold leading-none tracking-[-0.04em] text-ink">{group.length}</p>
               <p className="mt-3 max-w-[32ch] text-[15px] leading-[1.6] text-ink-3">{NOTE[status]}</p>
             </Reveal>
-            <Rows items={group.map((f) => ({ title: f.id, body: f.name, to: `/coverage/${f.slug}` }))} />
+            <Rows items={group.map((f) => ({ title: f.id, body: f.name, to: frameworkPath(f.slug) }))} />
           </div>
         );
       })}

@@ -175,7 +175,7 @@ export function Btn({
     lg: "h-13 px-7 text-[15.5px]",
   };
   const variants = {
-    primary: "bg-brand text-on-brand hover:bg-brand-ink",
+    primary: "bg-brand text-on-brand hover:bg-brand-hover",
     secondary: "border border-line-strong text-ink hover:border-ink-3",
     ghost: "text-ink-2 hover:text-ink hover:bg-surface-2",
     invert: "bg-[var(--ground)] text-[var(--ink)] hover:bg-[var(--surface-2)]",
@@ -246,16 +246,20 @@ export function PageHeader({
   title,
   lead,
   children,
+  top,
 }: {
   eyebrow: ReactNode;
   title: ReactNode;
   lead?: ReactNode;
   children?: ReactNode;
+  /** Başlığın üstündə (məs. məhsul səhifələrində "Products / GRC360 by Strativu" naviqasiyası). */
+  top?: ReactNode;
 }) {
   // Planşet və masaüstü (md+): başlıq solda, giriş mətni və düymə sağda (aşağıya düzlənib) — səhifə iki tərəfdən balanslıdır.
   return (
     <header className="relative pb-12 pt-[34svh] motion-reduce:pt-36 md:pb-16 md:pt-48">
       <Container>
+        {top && <div className="mb-12 md:mb-16">{top}</div>}
         <div className="grid grid-cols-1 gap-x-10 gap-y-6 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:items-end lg:gap-x-16 xl:gap-x-24">
           <div className="min-w-0">
             <Eyebrow>{eyebrow}</Eyebrow>

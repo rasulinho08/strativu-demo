@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 
 /**
- * Sağ sütun üçün kiçik, sakit animasiyalı məhsul vizualları (GRC 360 necə işləyir).
+ * Sağ sütun üçün kiçik, sakit animasiyalı məhsul vizualları (GRC360 necə işləyir).
  * Hamısı nümunədir ("Illustrative"), real müştəri datası deyil.
  * Yalnız ekranda görünəndə hərəkət edir; "reduce motion" rejimində statik qalır.
  */

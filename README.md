@@ -1,6 +1,8 @@
 # Strativu — website
 
-Marketing site for Strativu, a software company in Baku. First product: Strativu GRC 360 (in development).
+Corporate site for Strativu — an ecosystem of products, each built to solve a real problem in its market
+("Technology is the tool. Value is the point."). Content, structure and design follow the *Strativu Website Blueprint v2*:
+Home · Products · About Us · Contact, monochrome, products presented as "[Product] by Strativu".
 Built with React 18, Vite, Tailwind v4, motion, react-router.
 
 ## Run
@@ -16,30 +18,36 @@ npm run typecheck  # tsc --noEmit
 
 | What | File |
 | --- | --- |
-| Logo, status line, company details, social links (null = hidden), Formspree ID | `src/app/data/site.ts` |
+| Manifest, definition, promise, company details, social links (null = hidden), Formspree ID | `src/app/data/site.ts` |
 | Logo files | `public/brand/logo-full.png` (light), `public/brand/logo-mark.png` (dark: mark + CSS wordmark). Optional `logo.darkSrc` in `site.ts` |
 | Social preview image | `public/og.png` (1200×630) |
-| Products (Platform list, home "Our work") — add a new product here | `src/app/data/products.ts` |
-| GRC 360 modules, figures, status | `src/app/data/grc360.ts` |
-| GRC 360 screenshots and logo (gallery on /platform/grc, home "Our work") | `public/projects/grc360/` + list in `src/app/data/grc360.ts` |
-| Framework coverage və statuslar | `src/app/data/coverage.ts` |
+| **Products** (cards on `/products` and Home): add a product = one object. `to` → page on this site (same tab, "Learn more →"); `href` → the product's own site (new tab, "Visit … ↗") — switching GRC360 to its own site is a one-line change. `color` → the product's colour, shown only on its card | `src/app/data/products.ts` |
+| GRC360 pages: paths, modules, figures, status, film, screenshots list | `src/app/data/grc360.ts` |
+| GRC360 screenshots and logo | `public/projects/grc360/` + list in `src/app/data/grc360.ts` |
+| GRC360 framework coverage və statuslar | `src/app/data/coverage.ts` |
+| GRC360 changelog girişləri | `src/app/data/changelog.ts` |
 | Səhifə başlıqları (`<title>`) və description-lar (≤160 simvol), hüquqi səhifələrin tarixləri | `src/app/data/meta.ts` |
-| Changelog girişləri | `src/app/data/changelog.ts` |
-| Rəng / şrift / radius tokenləri | `src/styles/theme.css`, `src/styles/fonts.css` |
+| Rəng / şrift / radius tokenləri (monoxrom palitra; məhsul rəngləri burada deyil) | `src/styles/theme.css`, `src/styles/fonts.css` |
 | 3D loqonun hərəkəti (açılış, scroll xoreoqrafiyası, şəffaflıq, formalarda solma), işıq, material | `src/app/components/site/LogoScene.tsx` → `CHOREO`, `OP_SCREENS`, `INTRO_SCREENS`, `HIDE_RAMP`, `STUDIO` |
 
 ## Routes
 
-`/` · `/platform` · `/platform/grc` · `/platform/architecture` · `/coverage` · `/coverage/:slug` ·
-`/company/about` · `/company/contact` · `/trust` · `/changelog` · `/early-access` · `/legal/privacy|terms|dpa` ·
-anything else → 404 page
+Main nav: `/` · `/products` · `/about` · `/contact`. Footer: `/privacy` · `/terms` · `/trust` (Security; `security.txt` points here).
+System: `/contact/thank-you` (after a sent message, noindex) · anything else → 404 page.
+
+GRC360 by Strativu — interim product site until GRC360 has its own (not in the main nav; reached from its product card):
+`/products/grc360` · `/products/grc360/architecture` · `/products/grc360/frameworks` · `/products/grc360/frameworks/:slug` ·
+`/products/grc360/changelog` · `/products/grc360/early-access`.
+
+URLs carry no language prefix, so Azerbaijani can be added later under `/az/...`.
 
 Per-route `<title>`, description, canonical and Open Graph tags come from `src/app/data/meta.ts`:
 - in the browser, `useRouteMeta()` (`src/app/components/site/Seo.tsx`, called in Layout) sets them on every navigation
   (unknown paths get `noindex` and no canonical);
 - at build time the `strativu-site` plugin in `vite.config.ts` writes `dist/<route>/index.html` for every route with its own
-  head (plus JSON-LD on `/` and `/platform/grc`), and `dist/sitemap.xml` with the build date. The build fails if a page
-  route in `App.tsx` has no entry in `meta.ts`.
+  head (plus JSON-LD on `/` and `/products/grc360`; noindex pages get `robots: noindex` and no canonical), and
+  `dist/sitemap.xml` (indexable pages) with the build date. The build fails if a page route in `App.tsx` has no entry in
+  `meta.ts`, or if a route has no page file in `PAGE_FOR_ROUTE` (used for the per-route `modulepreload` links).
 
 ## Screenshots
 
@@ -56,13 +64,18 @@ scroll, pointer, resize, theme or route changes.
 ## Dependencies
 
 `.github/dependabot.yml` opens grouped update pull requests weekly. Forms post to Formspree with a plain `fetch`
-(`src/app/lib/formspree.ts`); there is no Formspree package.
+(`src/app/lib/formspree.ts`); there is no Formspree package. The contact form (`ContactForm.tsx`) sends name, email,
+company, topic, message and consent (`/contact?topic=Other` pre-selects a topic); spam protection is a honeypot field.
+Captcha (Cloudflare Turnstile) and a rate limit need an account and keys and are not set up yet.
 
 ## Deploy (Vercel)
 
 `vercel.json`:
-- rewrites every path to `index.html`, so deep links such as `/coverage/iso-27001` work on refresh;
-- 308 redirects for old paths (`/pricing` → `/early-access`, `/about`, `/contact`, `/company`, `/work`);
+- rewrites every path to `index.html`, so deep links such as `/products/grc360/frameworks/iso-27001` work on refresh;
+- 308 redirects for old paths (`/company/*` → `/about`, `/contact`; `/platform`, `/work` → `/products`; `/platform/grc`,
+  `/platform/architecture`, `/coverage[/:slug]`, `/changelog`, `/early-access`, `/pricing` → `/products/grc360/...`;
+  `/legal/privacy|terms` → `/privacy`, `/terms`; `/legal/dpa` → `/terms`). `App.tsx` has the same redirects as `<Navigate>`
+  routes for client-side navigation — keep both lists in step;
 - security headers on every response (nosniff, `X-Frame-Options: DENY`, Referrer-Policy, Permissions-Policy, COOP)
   and long-lived caching for hashed `/assets/*` (1 week for `/models`, `/projects`, `/brand`, `/og.png`).
   A Content-Security-Policy is not set yet.

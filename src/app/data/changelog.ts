@@ -1,6 +1,6 @@
 /**
  * Public build log. Yeni giriş əlavə edəndə siyahının əvvəlinə yazın (ən yeni yuxarıda).
- * Ana səhifədə ilk 4 giriş göstərilir. Tarix formatı: YYYY-MM-DD.
+ * GRC360-ın build log-u (/products/grc360/changelog). Tarix formatı: YYYY-MM-DD.
  */
 export type ChangelogEntry = {
   date: string;
@@ -30,7 +30,7 @@ export const changelog: ChangelogEntry[] = [
   },
   {
     date: "2026-09-04",
-    title: "GRC 360 front end 0.1.0",
+    title: "GRC360 front end 0.1.0",
     body: "First versioned release of the web application: twelve modules, thirty-one screens, fully in Azerbaijani and English.",
     tag: "product",
   },

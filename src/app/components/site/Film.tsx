@@ -106,7 +106,7 @@ export function Film({
  */
 export const FILM_SCENES = [
   "Spreadsheets, email threads and sticky notes scattered across a desk, with the line “Managing governance, risk and compliance across multiple systems shouldn’t be this complicated.”",
-  "The GRC 360 logo.",
+  "The GRC360 logo.",
   "Command Center: expired, today’s and future tasks above heat maps of asset and business risks.",
   "Organization Hub and Asset Management: users, departments (the IT department with its 15 asset risks) and an asset record for a customer database.",
   "Risk Management: a risk record for unauthorised access to the customer database, with its inherent score, the Mitigate treatment, the controls that treat it (multi-factor authentication, quarterly access review), a treatment project and the risk owners.",

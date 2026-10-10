@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState, type FocusEvent, type PointerEvent, type ReactNode } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
+import { Link } from "react-router";
 import { Btn, Container, Duo, Eyebrow, PageHeader, Rows, Section, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
-import { site } from "../data/site";
-import { products } from "../data/products";
+import { Grc360Nav } from "../components/site/Grc360Nav";
+import { ChangelogList } from "../components/site/ChangelogList";
+import { EarlyAccessForm } from "../components/site/EarlyAccessForm";
 import {
+  GRC,
   GRC_SCREEN_SIZE,
   SCREEN_SIZES,
   grcAudience,
@@ -15,6 +18,8 @@ import {
   grcOnboarding,
   grcScreens,
   grcStack,
+  grcFilm,
+  grcRelease,
   grcStatus,
   screenSrcSet,
 } from "../data/grc360";
@@ -22,7 +27,9 @@ import { Film, FilmScenes } from "../components/site/Film";
 import { AlertFeed, ControlMap, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
 
 /**
- * Platform, GRC and Architecture pages.
+ * GRC360 by Strativu — the interim product site under /products/grc360 (until GRC360 has its own site):
+ * overview, architecture, changelog and early access (frameworks: Coverage.tsx).
+ * Not in the main nav; every page carries the GRC360 product bar (Grc360Nav) with the way back to Products.
  * Two-sided layouts (Duo / Split): heading or text on the left, list or illustrative panel on the right.
  * The 3D logo stays a faint background on these pages (LogoScene → CHOREO.page).
  * Lists are hairline Rows; no cards.
@@ -31,52 +38,9 @@ import { AlertFeed, ControlMap, RiskLinks, Split, SystemLog } from "../component
 const BODY = "mt-5 max-w-[52ch] text-[17px] leading-[1.65] text-ink-2";
 /** Duo-nun sağ sütununda ilk abzas (yuxarı boşluq lazım deyil). */
 const BODY_R = "max-w-[52ch] text-[17px] leading-[1.65] text-ink-2";
-
-const MODEL = [
-  { n: "01", title: "Registers", body: "Risks, assets, vendors and data flows." },
-  { n: "02", title: "Controls", body: "Controls with their audits and maintenance, linked to the requirements they meet." },
-  { n: "03", title: "Links", body: "A risk is tied to the controls, policies, assets, projects and requirements that treat it." },
-  { n: "04", title: "Workflow", body: "Tasks, reviews, exceptions and alerts before anything expires." },
-  { n: "05", title: "Reporting", body: "Heat maps, compliance analysis and a public Trust Center." },
-];
-
-export function Platform() {
-  return (
-    <>
-      <PageHeader
-        eyebrow="Platform"
-        title="One model for governance, risk and compliance."
-        lead="Risks, controls, policies and requirements in one connected model, with changes recorded in a per-tenant system log. Strativu GRC 360 is the first product built on it."
-      />
-
-      <Section>
-        <Split visual={<Reveal><ControlMap /></Reveal>}>
-          <Reveal>
-            <Eyebrow>The model</Eyebrow>
-            <h2 className="t-h2 text-ink">Five parts, one model.</h2>
-          </Reveal>
-          <Rows className="mt-12" items={MODEL} />
-        </Split>
-      </Section>
-
-      <Section className="pt-0 md:pt-0">
-        <Duo
-          head={
-            <Reveal>
-              <Eyebrow>Products</Eyebrow>
-              <h2 className="t-h2 text-ink">What we have built on it.</h2>
-              <div className="mt-8">
-                <TextLink to="/platform/architecture">How the platform is built</TextLink>
-              </div>
-            </Reveal>
-          }
-        >
-          <Rows items={products.map((pr) => ({ title: pr.name, body: pr.summary, meta: pr.status, to: pr.to, href: pr.href }))} />
-        </Duo>
-      </Section>
-    </>
-  );
-}
+/** Links inside running text: always underlined (not by colour alone, WCAG 1.4.1). */
+const INLINE_LINK =
+  "text-brand-ink underline decoration-[color-mix(in_srgb,currentColor_45%,transparent)] underline-offset-4 transition-colors hover:decoration-current";
 
 /**
  * Auto-advance for the gallery and the module explorer (WCAG 2.2.2):
@@ -218,7 +182,7 @@ function ScreenGallery() {
   };
   return (
     <figure ref={ref} {...bind}>
-      <div role="tablist" aria-label="GRC 360 screens" className="-mx-1 flex gap-1 overflow-x-auto pb-3 [scrollbar-width:none]">
+      <div role="tablist" aria-label="GRC360 screens" className="-mx-1 flex gap-1 overflow-x-auto pb-3 [scrollbar-width:none]">
         {grcScreens.map((g, i) => {
           const on = i === idx;
           return (
@@ -274,26 +238,20 @@ function ScreenGallery() {
   );
 }
 
-const GRC_FILM = products.find((p) => p.to === "/platform/grc")?.video;
-
-export function PlatformGRC() {
+export function Grc360() {
   return (
     <>
       <PageHeader
-        eyebrow={
-          <span className="inline-flex items-center gap-2.5">
-            <img src="/projects/grc360/grc360-mark-40.webp" width={20} height={20} alt="" className="h-5 w-5" />
-            {`Strativu GRC 360 · ${site.status.label}`}
-          </span>
-        }
+        top={<Grc360Nav />}
+        eyebrow={`${grcRelease.label} · ${grcRelease.detail}`}
         title="Governance, risk and compliance. All of it, in one place."
-        lead="Twelve connected modules in Azerbaijani and English. Run it in our cloud or on your own servers, air-gapped if you need to."
+        lead="GRC360 by Strativu: twelve connected modules in Azerbaijani and English. Run it in our cloud or on your own servers, air-gapped if you need to."
       >
         <div className="flex flex-wrap items-center gap-x-7 gap-y-4">
-          <Btn to="/early-access" size="lg">
+          <Btn to={GRC.earlyAccess} size="lg">
             Request early access
           </Btn>
-          {GRC_FILM && <TextLink to="/platform/grc#film">Watch the film</TextLink>}
+          <TextLink to={`${GRC.base}#film`}>Watch the film</TextLink>
         </div>
       </PageHeader>
 
@@ -356,29 +314,27 @@ export function PlatformGRC() {
         </Duo>
       </Section>
 
-      {GRC_FILM && (
-        <Section id="film" className="pt-0 md:pt-0">
-          <div className="grid grid-cols-1 gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:items-start xl:gap-x-20">
-            <Reveal>
-              <Eyebrow>The film</Eyebrow>
-              <h2 className="t-h2 text-ink">GRC 360 in 40 seconds.</h2>
-              <p className={BODY}>Real screens from the current build, with demo data.</p>
-            </Reveal>
-            <div>
-              <div className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-surface shadow-[var(--e3)]">
-                <Film
-                  src={GRC_FILM.src}
-                  webm={GRC_FILM.webm}
-                  poster={GRC_FILM.poster}
-                  label="GRC 360 product film"
-                  describedBy="grc-film-scenes"
-                />
-              </div>
-              <FilmScenes id="grc-film-scenes" className="mt-3" />
+      <Section id="film" className="pt-0 md:pt-0">
+        <div className="grid grid-cols-1 gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:items-start xl:gap-x-20">
+          <Reveal>
+            <Eyebrow>The film</Eyebrow>
+            <h2 className="t-h2 text-ink">GRC360 in 40 seconds.</h2>
+            <p className={BODY}>Real screens from the current build, with demo data.</p>
+          </Reveal>
+          <div>
+            <div className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-surface shadow-[var(--e3)]">
+              <Film
+                src={grcFilm.src}
+                webm={grcFilm.webm}
+                poster={grcFilm.poster}
+                label="GRC360 product film"
+                describedBy="grc-film-scenes"
+              />
             </div>
+            <FilmScenes id="grc-film-scenes" className="mt-3" />
           </div>
-        </Section>
-      )}
+        </div>
+      </Section>
 
       {/* Figures — only numbers verified in the product */}
       <Section className="pt-0 md:pt-0">
@@ -451,7 +407,7 @@ export function PlatformGRC() {
               Packages in the demo build: {grcFrameworkPackages.join(" · ")}
             </p>
             <div className="mt-8">
-              <TextLink to="/coverage">Frameworks we work with</TextLink>
+              <TextLink to={GRC.frameworks}>Frameworks we work with</TextLink>
             </div>
           </Reveal>
         </Split>
@@ -522,10 +478,10 @@ export function PlatformGRC() {
               <Eyebrow>Where it stands</Eyebrow>
               <h2 className="t-h2 text-ink">Built in the open.</h2>
               <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
-                <Btn to="/early-access" size="lg">
+                <Btn to={GRC.earlyAccess} size="lg">
                   Request early access
                 </Btn>
-                <TextLink to="/changelog">Build log</TextLink>
+                <TextLink to={GRC.changelog}>Build log</TextLink>
               </div>
             </Reveal>
           }
@@ -541,7 +497,7 @@ const ARCH: { h: string; p: ReactNode[] }[] = [
   {
     h: "Deployment",
     p: [
-      "Multi-tenant SaaS, or on-premise and air-gapped for customers who keep data in their own data centre.",
+      "Multi-tenant SaaS, or on-premise and air-gapped for organisations that keep data in their own data centre.",
       `The on-premise build is a Docker Compose stack: ${grcStack.join(", ")}.`,
     ],
   },
@@ -577,8 +533,9 @@ export function Architecture() {
   return (
     <>
       <PageHeader
-        eyebrow="Platform · Architecture"
-        title="How GRC 360 is built."
+        top={<Grc360Nav />}
+        eyebrow="Architecture"
+        title="How GRC360 is built."
         lead="Written for the engineer doing the vendor review. Until we have a SOC 2 report, this is what we can show."
       />
 
@@ -606,6 +563,74 @@ export function Architecture() {
           </Reveal>
         </Container>
       </div>
+    </>
+  );
+}
+
+export function Changelog() {
+  return (
+    <>
+      <PageHeader top={<Grc360Nav />} eyebrow="Changelog" title="Public build log." lead="What changed in GRC360 and why, with real dates." />
+      <Section className="pt-0 md:pt-0">
+        <ChangelogList />
+      </Section>
+    </>
+  );
+}
+
+export function EarlyAccess() {
+  return (
+    <>
+      <PageHeader
+        top={<Grc360Nav />}
+        eyebrow={`Early access · ${grcRelease.detail}`}
+        title="Shape the product before it ships."
+        lead="GRC360 early access is open to a small number of teams that run risk and compliance work in Azerbaijan and the region."
+      />
+      <Section className="pt-0 md:pt-0" logoHide>
+        <Duo
+          sticky
+          head={
+            <Rows
+              headingLevel={2}
+              items={[
+                {
+                  title: "Who it is for",
+                  body: (
+                    <>
+                      Security, risk and compliance leads at banks and financial institutions, public bodies and growing companies
+                      preparing for ISO 27001, PCI DSS, Azerbaijan’s Personal Data Law or another framework on our{" "}
+                      <Link to={GRC.frameworks} className={INLINE_LINK}>
+                        frameworks list
+                      </Link>
+                      . An upcoming audit or regulator review matters; team size does not.
+                    </>
+                  ),
+                },
+                {
+                  title: "What you get",
+                  body: "From Q1 2027: your own workspace on the development version, direct contact with our engineers, and priority for the frameworks you need. No cost during early access.",
+                },
+                {
+                  title: "What we ask",
+                  body: "One 45-minute call a month, honest feedback on what breaks, and permission to use what we learn (never your data) to shape the product.",
+                },
+                {
+                  title: "What happens next",
+                  body: "We review requests weekly. A person from our team replies within five working days, and if it is not a fit yet, we say why.",
+                },
+              ]}
+            />
+          }
+        >
+          <Reveal>
+            <Eyebrow>Request access</Eyebrow>
+          </Reveal>
+          <Reveal delay={0.06} className="mt-8">
+            <EarlyAccessForm />
+          </Reveal>
+        </Duo>
+      </Section>
     </>
   );
 }

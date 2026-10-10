@@ -1,22 +1,18 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router";
+import { Check } from "lucide-react";
 import { useFormspree } from "../../lib/formspree";
 import { Btn } from "./primitives";
 import { site } from "../../data/site";
-import { Check } from "lucide-react";
+import { errorCls, fieldCls, labelCls, smallLinkCls, textareaCls } from "./formStyles";
 
-/* Minimal fields: a single hairline underline (own --field-line token, ≥3:1) that turns brand on focus (inset, so nothing shifts). */
-const base =
-  "block w-full appearance-none rounded-none border-b border-field-line bg-transparent px-0 text-[16px] text-ink placeholder:text-ink-3 transition-[border-color,box-shadow] duration-200 focus:outline-none focus:border-brand focus:[box-shadow:inset_0_-1px_0_var(--brand)] aria-[invalid=true]:border-warn";
-const field = `${base} h-12`;
-const label = "block text-[13px] font-medium text-ink-2";
 const optional = <span className="font-normal text-ink-3"> · optional</span>;
-const errorCls = "mt-2 text-[13px] text-warn";
 
 type FieldName = "name" | "email" | "company" | "role" | "frameworks" | "message";
 const FIELDS: FieldName[] = ["name", "email", "company", "role", "frameworks", "message"];
 
-export function EarlyAccessForm({ kind = "early-access" }: { kind?: "early-access" | "contact" }) {
+/** GRC360 early-access request (/products/grc360/early-access). Posts to Formspree with form=early-access. */
+export function EarlyAccessForm() {
   const [state, handleSubmit] = useFormspree(site.formspreeId);
   const doneRef = useRef<HTMLParagraphElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -58,9 +54,7 @@ export function EarlyAccessForm({ kind = "early-access" }: { kind?: "early-acces
           <Check className="h-5 w-5 text-brand" strokeWidth={2} aria-hidden /> Received.
         </p>
         <p className="mt-3 max-w-[48ch] text-[16px] leading-[1.6] text-ink-2">
-          {kind === "early-access"
-            ? "We review requests weekly. A person from our team, not an automated email, replies within five working days."
-            : "A person from our team replies within two working days."}
+          We review requests weekly. A person from our team, not an automated email, replies within five working days.
         </p>
       </div>
     );
@@ -68,19 +62,19 @@ export function EarlyAccessForm({ kind = "early-access" }: { kind?: "early-acces
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-9">
-      <input type="hidden" name="form" value={kind} />
+      <input type="hidden" name="form" value="early-access" />
       {/* Spam honeypot: hidden from people, filled in by bots; Formspree drops submissions that fill it. */}
       <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
       <div className="grid grid-cols-1 gap-x-10 gap-y-9 sm:grid-cols-2">
         <div>
-          <label htmlFor="name" className={label}>
+          <label htmlFor="name" className={labelCls}>
             Name
           </label>
-          <input id="name" name="name" required autoComplete="name" className={field} placeholder="Full name" {...a11y("name")} />
+          <input id="name" name="name" required autoComplete="name" className={fieldCls} placeholder="Full name" {...a11y("name")} />
           {err("name")}
         </div>
         <div>
-          <label htmlFor="email" className={label}>
+          <label htmlFor="email" className={labelCls}>
             Work email
           </label>
           <input
@@ -89,14 +83,14 @@ export function EarlyAccessForm({ kind = "early-access" }: { kind?: "early-acces
             type="email"
             required
             autoComplete="email"
-            className={field}
+            className={fieldCls}
             placeholder="you@company.com"
             {...a11y("email")}
           />
           {err("email")}
         </div>
         <div>
-          <label htmlFor="company" className={label}>
+          <label htmlFor="company" className={labelCls}>
             Company
           </label>
           <input
@@ -104,53 +98,44 @@ export function EarlyAccessForm({ kind = "early-access" }: { kind?: "early-acces
             name="company"
             required
             autoComplete="organization"
-            className={field}
+            className={fieldCls}
             placeholder="Company name"
             {...a11y("company")}
           />
           {err("company")}
         </div>
         <div>
-          <label htmlFor="role" className={label}>
+          <label htmlFor="role" className={labelCls}>
             Role{optional}
           </label>
           <input
             id="role"
             name="role"
             autoComplete="organization-title"
-            className={field}
+            className={fieldCls}
             placeholder="e.g. Head of Security"
             {...a11y("role")}
           />
           {err("role")}
         </div>
       </div>
-      {kind === "early-access" && (
-        <div>
-          <label htmlFor="frameworks" className={label}>
-            Frameworks you are audited against{optional}
-          </label>
-          <input
-            id="frameworks"
-            name="frameworks"
-            className={field}
-            placeholder="Law 998-IIIQ, PCI DSS, ISO 27001, …"
-            {...a11y("frameworks")}
-          />
-          {err("frameworks")}
-        </div>
-      )}
       <div>
-        <label htmlFor="message" className={label}>
-          {kind === "early-access" ? <>Your compliance programme today{optional}</> : "Message"}
+        <label htmlFor="frameworks" className={labelCls}>
+          Frameworks you are audited against{optional}
+        </label>
+        <input id="frameworks" name="frameworks" className={fieldCls} placeholder="Law 998-IIIQ, PCI DSS, ISO 27001, …" {...a11y("frameworks")} />
+        {err("frameworks")}
+      </div>
+      <div>
+        <label htmlFor="message" className={labelCls}>
+          Your compliance programme today{optional}
         </label>
         <textarea
           id="message"
           name="message"
-          required={kind === "contact"}
           rows={4}
-          className={`${base} min-h-[120px] resize-y py-3 leading-[1.6]`}
-          placeholder={kind === "early-access" ? "Team size, tools you use today, your next audit or regulator review." : "How can we help?"}
+          className={textareaCls}
+          placeholder="Team size, tools you use today, your next audit or regulator review."
           {...a11y("message")}
         />
         {err("message")}
@@ -166,15 +151,12 @@ export function EarlyAccessForm({ kind = "early-access" }: { kind?: "early-acces
       )}
       <div className="flex flex-col gap-4 pt-3 sm:items-start">
         <Btn type="submit" size="lg" disabled={state.submitting}>
-          {state.submitting ? "Sending…" : kind === "early-access" ? "Request early access" : "Send message"}
+          {state.submitting ? "Sending…" : "Request early access"}
         </Btn>
         <p className="text-[13px] leading-[1.6] text-ink-3">
           No mailing list. We use these details only to reply to you.{" "}
-          <Link
-            to="/legal/privacy"
-            className="underline decoration-[color-mix(in_srgb,currentColor_45%,transparent)] underline-offset-4 transition-colors hover:text-ink hover:decoration-current"
-          >
-            Privacy policy
+          <Link to="/privacy" className={smallLinkCls}>
+            Privacy Policy
           </Link>
           .
         </p>

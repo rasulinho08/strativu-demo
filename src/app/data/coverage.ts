@@ -1,10 +1,10 @@
 /**
  * Framework coverage. Status dəyişmək bir sətirdir:
- *   "package"     → GRC 360-da compliance paketi kimi işləyir (demo build-də var). Saytda: "Works as a package".
+ *   "package"     → GRC360-da compliance paketi kimi işləyir (demo build-də var). Saytda: "Works as a package".
  *   "in-progress" → hazır paket hazırlanır
  *   "planned"     → planlaşdırılıb
  * Diqqət: hazır kataloq yoxdur — tələblər istifadəçi tərəfindən yaradılır və ya CSV ilə import olunur.
- * "scope" standartın öz ölçüsüdür (saytda "The standard: …" kimi göstərilir), GRC 360-da xəritələnmiş kontrol sayı DEYİL.
+ * "scope" standartın öz ölçüsüdür (saytda "The standard: …" kimi göstərilir), GRC360-da xəritələnmiş kontrol sayı DEYİL.
  * "summary" və "detail" bəndlərində standartın özünü təsvir edin; məhsulda olmayan funksiyanı yazmayın.
  * Sıra: əvvəl paket kimi işləyənlər (998-IIIQ, PCI DSS, ISO 27001, SOC 2, GDPR, NIST CSF), sonra planlaşdırılanlar.
  */
@@ -23,8 +23,8 @@ export type Framework = {
 };
 
 /** Paket kimi işləyən framework-lər üçün ortaq, təsdiqlənmiş sətirlər. */
-const IN_GRC_PKG = "In GRC 360 it is a compliance package you build or import from CSV.";
-const IN_GRC = "In GRC 360 it is a compliance package you build or import from CSV, with each requirement linked to the controls that meet it.";
+const IN_GRC_PKG = "In GRC360 it is a compliance package you build or import from CSV.";
+const IN_GRC = "In GRC360 it is a compliance package you build or import from CSV, with each requirement linked to the controls that meet it.";
 
 export const frameworks: Framework[] = [
   {
@@ -59,7 +59,7 @@ export const frameworks: Framework[] = [
     status: "package",
     scope: "93 Annex A controls · 4 themes",
     summary:
-      "The 2022 revision restructured Annex A into four themes: organisational, people, physical and technological. In GRC 360 each requirement links to the controls that meet it.",
+      "The 2022 revision restructured Annex A into four themes: organisational, people, physical and technological. In GRC360 each requirement links to the controls that meet it.",
     detail: [
       "93 Annex A controls in four themes: organisational, people, physical and technological.",
       "Clauses 4–10 set the management-system requirements: context, leadership, planning, support, operation, evaluation and improvement.",
@@ -73,7 +73,7 @@ export const frameworks: Framework[] = [
     body: "AICPA",
     status: "package",
     scope: "5 trust categories · CC1–CC9",
-    summary: "SOC 2 auditors test controls against the Trust Services Criteria. In GRC 360 each criterion links to the controls that meet it.",
+    summary: "SOC 2 auditors test controls against the Trust Services Criteria. In GRC360 each criterion links to the controls that meet it.",
     detail: [
       "Security (common criteria CC1–CC9) plus Availability, Processing Integrity, Confidentiality and Privacy.",
       "Type I looks at control design at a point in time; Type II at operation over an observation period.",
@@ -88,7 +88,7 @@ export const frameworks: Framework[] = [
     status: "package",
     scope: "Art. 5–49 · 99 articles",
     summary:
-      "GDPR obligations are organisational as much as technical. In GRC 360 the asset register carries data flows and GDPR questions alongside security controls.",
+      "GDPR obligations are organisational as much as technical. In GRC360 the asset register carries data flows and GDPR questions alongside security controls.",
     detail: [
       "Data flows and GDPR questions per asset in Asset Management.",
       "Legal and contractual obligations tracked in the Obligations register.",

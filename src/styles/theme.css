@@ -1,56 +1,62 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  Strativu design tokens — v2 "engineered editorial".
+  Strativu design tokens — v3 "monochrome ecosystem" (Website Blueprint v2).
   Light is the primary theme. Dark is a full peer, not an afterthought.
 
-  One brand hue with a cyan lift for gradients, a cool neutral ramp, three
-  semantic colours, a four-step radius scale and three elevations. Texture comes
-  from grain + a hairline grid + one ambient light source, never from shadows alone.
+  One neutral palette for the corporate site (white / very light ground, black ink, grey ramp), two
+  semantic colours for form states, a four-step radius scale and three elevations. Product colours are
+  not tokens: they live on the product (products.ts) and show only on its card and its own pages.
 */
 :root {
   --font-size: 16.5px;
 
-  /* ── surfaces ── */
-  --ground: #FAFBFD;
-  --ground-2: #F2F5F9;
+  /* ── surfaces (one neutral palette: white / very light ground, black ink) ── */
+  --ground: #FAFAFA;
+  --ground-2: #F4F4F4;
   --surface: #FFFFFF;
-  --surface-2: #F3F6FA;
-  --surface-3: #E9EEF5;
-  --line: #E2E7EF;
-  --line-soft: #EDF1F6;
-  --line-strong: #CFD7E2;
+  --surface-2: #F3F3F3;
+  --surface-3: #EAEAEA;
+  --line: #E3E3E3;
+  --line-soft: #EDEDED;
+  --line-strong: #CFCFCF;
 
   /* ── ink ── */
-  --ink: #0A0E16;
-  --ink-2: #4B566A;
-  --ink-3: #646E81; /* ≥4.5:1 on ground, surface and surface-2 (WCAG 1.4.3) */
-  --ink-4: #AEB7C4; /* decoration only, never text */
-  --field-line: #7B8698; /* form field underline, ≥3:1 (WCAG 1.4.11) */
+  --ink: #0A0A0A;
+  --ink-2: #474747;
+  --ink-3: #666666; /* ≥4.5:1 on ground, surface and surface-2 (WCAG 1.4.3) */
+  --ink-4: #B3B3B3; /* decoration only, never text */
+  --field-line: #7A7A7A; /* form field underline, ≥3:1 (WCAG 1.4.11) */
 
-  /* ── brand ── */
-  --brand: #0A6FE0;
-  --brand-ink: #0159C5;
-  --brand-lift: #3FD2FF;
-  --brand-soft: #E8F0FE;
-  --brand-line: #BDD4FC;
+  /*
+    ── accent ──
+    The corporate site is monochrome: the "brand" tokens are ink, not a hue. Primary buttons are near-black with
+    white text; links, eyebrows, the active nav, the progress line and the focus ring are ink.
+    Product colours (e.g. GRC360) appear only on that product's card and its own pages (products.ts → color).
+  */
+  --brand: #161616;
+  --brand-ink: #161616;
+  --brand-hover: #3A3A3A;
+  --brand-lift: #5C5C5C;
+  --brand-soft: #EDEDED;
+  --brand-line: #CFCFCF;
   --on-brand: #FFFFFF;
-  --brand-grad: linear-gradient(120deg, #03C1FD 0%, #0A8BEB 45%, #0159C5 100%);
-  --brand-grad-soft: linear-gradient(135deg, rgba(63, 210, 255, 0.16) 0%, rgba(21, 87, 240, 0.14) 100%);
+  --brand-grad: linear-gradient(120deg, #3A3A3A 0%, #161616 100%);
+  --brand-grad-soft: linear-gradient(135deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.06) 100%);
 
   /* ── semantic ── */
   --ok: #17845C;
   --ok-soft: #E2F5EC;
   --warn: #B4442F;
   --warn-soft: #FBEAE5;
-  --info: #6B5BD2;
+  --info: #5E5E5E;
 
   /* ── ambience ── */
-  --glow-1: rgba(10, 111, 224, 0.10);
-  --glow-2: rgba(10, 111, 224, 0.08);
-  --glow-3: rgba(107, 91, 210, 0.14);
+  --glow-1: rgba(0, 0, 0, 0.05);
+  --glow-2: rgba(0, 0, 0, 0.04);
+  --glow-3: rgba(0, 0, 0, 0.06);
   --grain-opacity: 0.030;
-  --grid-line: rgba(10, 14, 22, 0.045);
+  --grid-line: rgba(10, 10, 10, 0.045);
   --sheen: rgba(255, 255, 255, 0.85);
 
   /* ── shape ── */
@@ -62,10 +68,10 @@
   --r-xl: 18px;
 
   /* ── elevation ── */
-  --e1: 0 1px 2px rgba(10, 14, 22, 0.05), 0 1px 1px rgba(10, 14, 22, 0.03);
-  --e2: 0 1px 2px rgba(10, 14, 22, 0.05), 0 8px 20px -12px rgba(10, 14, 22, 0.18);
-  --e3: 0 1px 3px rgba(10, 14, 22, 0.06), 0 28px 60px -32px rgba(10, 14, 22, 0.30), 0 2px 8px -4px rgba(21, 87, 240, 0.10);
-  --e-brand: 0 1px 2px rgba(18, 64, 216, 0.30), 0 12px 28px -14px rgba(21, 87, 240, 0.55);
+  --e1: 0 1px 2px rgba(10, 10, 10, 0.05), 0 1px 1px rgba(10, 10, 10, 0.03);
+  --e2: 0 1px 2px rgba(10, 10, 10, 0.05), 0 8px 20px -12px rgba(10, 10, 10, 0.18);
+  --e3: 0 1px 3px rgba(10, 10, 10, 0.06), 0 28px 60px -32px rgba(10, 10, 10, 0.30), 0 2px 8px -4px rgba(10, 10, 10, 0.08);
+  --e-brand: 0 1px 2px rgba(10, 10, 10, 0.30), 0 12px 28px -14px rgba(10, 10, 10, 0.45);
 
   /* shadcn-compatible aliases (ui/* keeps compiling) */
   --background: var(--ground);
@@ -88,7 +94,7 @@
   --input: var(--surface);
   --input-background: var(--surface);
   --switch-background: var(--line);
-  --ring: rgba(21, 87, 240, 0.40);
+  --ring: rgba(10, 10, 10, 0.40);
   --shadow: var(--e2);
 
   --font-sans: "Manrope Variable", "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -101,49 +107,50 @@
 }
 
 .dark {
-  --ground: #03060D;
-  --ground-2: #060B16;
-  --surface: #0A1120;
-  --surface-2: #101A2C;
-  --surface-3: #16223A;
-  --line: #1A2740;
-  --line-soft: #132036;
-  --line-strong: #27395A;
+  --ground: #0A0A0A;
+  --ground-2: #0F0F0F;
+  --surface: #141414;
+  --surface-2: #1A1A1A;
+  --surface-3: #222222;
+  --line: #262626;
+  --line-soft: #1C1C1C;
+  --line-strong: #3A3A3A;
 
-  --ink: #EAEFF6;
-  --ink-2: #A0ABBC;
-  --ink-3: #7F8B9D;
-  --ink-4: #566171;
-  --field-line: #55678A;
+  --ink: #EDEDED;
+  --ink-2: #ABABAB;
+  --ink-3: #8F8F8F;
+  --ink-4: #555555;
+  --field-line: #6E6E6E;
 
-  --brand: #6E97EA;
-  --brand-ink: #A9C1F2;
-  --brand-lift: #8FAEEE;
-  --brand-soft: #0E1F37;
-  --brand-line: #1E3A63;
-  --on-brand: #04070D;
-  --brand-grad: linear-gradient(120deg, #8FAEEE 0%, #6E97EA 100%);
-  --brand-grad-soft: linear-gradient(135deg, rgba(110, 151, 234, 0.08) 0%, rgba(110, 151, 234, 0.06) 100%);
+  --brand: #EDEDED;
+  --brand-ink: #EDEDED;
+  --brand-hover: #C8C8C8;
+  --brand-lift: #A8A8A8;
+  --brand-soft: #262626;
+  --brand-line: #3A3A3A;
+  --on-brand: #0A0A0A;
+  --brand-grad: linear-gradient(120deg, #FFFFFF 0%, #C8C8C8 100%);
+  --brand-grad-soft: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.06) 100%);
 
   --ok: #4FBF8E;
   --ok-soft: #0D2219;
   --warn: #E8927C;
   --warn-soft: #2A1512;
-  --info: #A99BFF;
+  --info: #A8A8A8;
 
-  --glow-1: rgba(110, 151, 234, 0.10);
-  --glow-2: rgba(110, 151, 234, 0.08);
-  --glow-3: rgba(140, 110, 255, 0.16);
+  --glow-1: rgba(255, 255, 255, 0.05);
+  --glow-2: rgba(255, 255, 255, 0.04);
+  --glow-3: rgba(255, 255, 255, 0.06);
   --grain-opacity: 0.045;
   --grid-line: rgba(255, 255, 255, 0.045);
   --sheen: rgba(255, 255, 255, 0.10);
 
   --e1: 0 1px 2px rgba(0, 0, 0, 0.5);
   --e2: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 24px -14px rgba(0, 0, 0, 0.9);
-  --e3: 0 1px 3px rgba(0, 0, 0, 0.6), 0 32px 70px -36px rgba(0, 0, 0, 1), 0 2px 10px -4px rgba(63, 178, 255, 0.14);
+  --e3: 0 1px 3px rgba(0, 0, 0, 0.6), 0 32px 70px -36px rgba(0, 0, 0, 1), 0 2px 10px -4px rgba(255, 255, 255, 0.06);
   --e-brand: 0 1px 2px rgba(0, 0, 0, 0.6), 0 10px 24px -16px rgba(0, 0, 0, 0.8);
 
-  --ring: rgba(91, 156, 255, 0.45);
+  --ring: rgba(237, 237, 237, 0.45);
 }
 
 @theme inline {
@@ -184,6 +191,7 @@
   --color-field-line: var(--field-line);
   --color-brand: var(--brand);
   --color-brand-ink: var(--brand-ink);
+  --color-brand-hover: var(--brand-hover);
   --color-brand-lift: var(--brand-lift);
   --color-brand-soft: var(--brand-soft);
   --color-brand-line: var(--brand-line);
@@ -241,7 +249,7 @@
     text-wrap: balance;
   }
   :focus-visible {
-    outline: 2px solid var(--brand);
+    outline: 2px solid var(--ink);
     outline-offset: 3px;
     border-radius: 4px;
   }
@@ -394,22 +402,22 @@
 /* ── background concept ── */
 /*
   "Quiet light" — the backdrop behind LogoScene's canvas. Two very large, very soft
-  light fields (Gaussian falloff) in low-saturation brand blues, a dark-mode vignette
+  light fields (Gaussian falloff) in neutral grey (monochrome site), a dark-mode vignette
   (no grain). LogoScene moves the fields with `transform` (compositor
   only) and re-sizes them only when the logo size changes by >3%, so each gradient is
   drawn at its real size and never magnified (no banding). Drift: 70–90 s CSS animation.
 */
 :root {
-  --ql-key: 206 226 252;
-  --ql-key-a: 0.88;
-  --ql-floor: 221 231 247;
-  --ql-floor-a: 0.85;
+  --ql-key: 226 226 226;
+  --ql-key-a: 0.7;
+  --ql-floor: 232 232 232;
+  --ql-floor-a: 0.7;
   --ql-vignette: 0;
 }
 .dark {
-  --ql-key: 20 34 60;
+  --ql-key: 34 34 34;
   --ql-key-a: 0.6;
-  --ql-floor: 14 24 42;
+  --ql-floor: 26 26 26;
   --ql-floor-a: 0.6;
   --ql-vignette: 0.42;
 }

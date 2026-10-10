@@ -1,28 +1,78 @@
 {
   "redirects": [
     {
-      "source": "/pricing",
-      "destination": "/early-access",
+      "source": "/company/about",
+      "destination": "/about",
       "permanent": true
     },
     {
-      "source": "/about",
-      "destination": "/company/about",
-      "permanent": true
-    },
-    {
-      "source": "/contact",
-      "destination": "/company/contact",
+      "source": "/company/contact",
+      "destination": "/contact",
       "permanent": true
     },
     {
       "source": "/company",
-      "destination": "/company/about",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/platform",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/platform/grc",
+      "destination": "/products/grc360",
+      "permanent": true
+    },
+    {
+      "source": "/platform/architecture",
+      "destination": "/products/grc360/architecture",
+      "permanent": true
+    },
+    {
+      "source": "/coverage",
+      "destination": "/products/grc360/frameworks",
+      "permanent": true
+    },
+    {
+      "source": "/coverage/:slug",
+      "destination": "/products/grc360/frameworks/:slug",
+      "permanent": true
+    },
+    {
+      "source": "/changelog",
+      "destination": "/products/grc360/changelog",
+      "permanent": true
+    },
+    {
+      "source": "/early-access",
+      "destination": "/products/grc360/early-access",
+      "permanent": true
+    },
+    {
+      "source": "/pricing",
+      "destination": "/products/grc360/early-access",
       "permanent": true
     },
     {
       "source": "/work",
-      "destination": "/platform/grc",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/legal/privacy",
+      "destination": "/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/legal/terms",
+      "destination": "/terms",
+      "permanent": true
+    },
+    {
+      "source": "/legal/dpa",
+      "destination": "/terms",
       "permanent": true
     }
   ],

@@ -9,8 +9,8 @@ export function NotFound() {
           <h1 className="t-h1 text-ink">Page not found.</h1>
           <p className="t-lead mt-6 max-w-[44ch]">The address may have changed, or it never existed.</p>
           <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
-            <Btn to="/">Back to the start</Btn>
-            <TextLink to="/company/contact">Contact</TextLink>
+            <Btn to="/">Back to Home</Btn>
+            <TextLink to="/contact">Contact</TextLink>
           </div>
         </Lane>
       </Container>

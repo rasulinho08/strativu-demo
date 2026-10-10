@@ -5,7 +5,7 @@ import { ThemeProvider as NextThemesProvider, useTheme, type ThemeProviderProps 
 function ThemeColorSync() {
   const { resolvedTheme } = useTheme();
   useEffect(() => {
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", resolvedTheme === "dark" ? "#03060D" : "#FAFBFD");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", resolvedTheme === "dark" ? "#0A0A0A" : "#FAFAFA");
   }, [resolvedTheme]);
   return null;
 }

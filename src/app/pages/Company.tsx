@@ -2,14 +2,14 @@ import { Link } from "react-router";
 import { Duo, Eyebrow, PageHeader, Rows, Section, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
 import { InstagramFeed } from "../components/site/InstagramFeed";
-import { EarlyAccessForm } from "../components/site/EarlyAccessForm";
 import { site } from "../data/site";
+import { GRC } from "../data/grc360";
 import { Split, SystemLog } from "../components/site/Visuals";
 
 /**
- * About, Contact, Early access and Trust.
- * Two-sided layouts (Duo / Split). Form sections carry `data-logo-hide`, so the 3D logo fades out while a form is on screen.
- * Facts are hairline Rows; no cards, no icon boxes.
+ * About Us (/about) and Security (/trust).
+ * About: Story, Mission · Vision, Principles — copy from the Website Blueprint v2, verbatim. No team section.
+ * Two-sided layouts (Duo / Split). Facts are hairline Rows; no cards, no icon boxes.
  */
 
 const BODY = "max-w-[52ch] text-[17px] leading-[1.65] text-ink-2";
@@ -18,170 +18,80 @@ const INLINE_LINK =
   "text-brand-ink underline decoration-[color-mix(in_srgb,currentColor_45%,transparent)] underline-offset-4 transition-colors hover:decoration-current";
 const MAILTO = `mailto:${site.company.email}`;
 
+/** Mission · Vision and Principles (Website Blueprint v2 → 05 About Us). */
+const MISSION_VISION = [
+  { k: "Mission", v: "To find meaningful problems across markets and build products that create real, measurable value." },
+  {
+    k: "Vision",
+    v: "A trusted ecosystem of products, each solving one problem well, together improving how people and businesses work.",
+  },
+];
+
+const PRINCIPLES = [
+  { n: "01", title: "Problem first", body: "We start with the problem, never the technology." },
+  { n: "02", title: "Value is measured", body: "If we can't show the value, we're not done." },
+  { n: "03", title: "Simplicity", body: "We handle the complexity so users don't have to." },
+  { n: "04", title: "Trust", body: "We build responsibly and say what's ready and what isn't." },
+];
+
 export function About() {
   return (
     <>
       <PageHeader
-        eyebrow="Company"
-        title="We are building the GRC tool we wanted to use ourselves."
-        lead="A small software company in Baku. Our first product, Strativu GRC 360, brings risks, controls, audits and compliance into one system."
+        eyebrow="About Us"
+        title="Why Strativu exists"
+        lead="Strativu is built on one belief: technology only matters when it creates value. Too many products start with what technology can do. We start with what people and businesses need."
       />
 
       <Section>
         <Duo
           head={
             <Reveal>
-              <Eyebrow>Why we exist</Eyebrow>
-              <h2 className="t-h2 text-ink">The category is full. The problem is still there.</h2>
+              <Eyebrow>Story</Eyebrow>
+              <h2 className="t-h2 text-ink">Why an ecosystem</h2>
             </Reveal>
           }
         >
-            <Reveal delay={0.06} className="space-y-5">
-              <p className={BODY}>
-                Risk registers, control lists and audit findings often live in separate spreadsheets, and the links between them
-                are kept by hand until they break.
-              </p>
-              <p className={BODY}>
-                We start from the model instead: risks, controls, policies and requirements linked as one record set, frameworks
-                loaded as packages, and changes recorded in a system log an auditor can read. It takes longer to build, and it is
-                the version we would want to use ourselves.
-              </p>
+          <Reveal delay={0.06}>
+            <p className={BODY}>
+              That's why Strativu is an ecosystem, not a single product or a single industry. Wherever we find a meaningful problem,
+              we build a focused product to solve it. Today our products serve organisations in governance and digital security.
+              Tomorrow, they may serve entirely different markets.
+            </p>
+          </Reveal>
+        </Duo>
+      </Section>
+
+      <Section className="pt-0 md:pt-0">
+        <Reveal>
+          <h2 className="eyebrow">Mission · Vision</h2>
+        </Reveal>
+        <dl className="mt-10 grid grid-cols-1 border-t border-line md:grid-cols-2">
+          {MISSION_VISION.map((m, i) => (
+            <Reveal key={m.k} delay={i * 0.08} className={`border-b border-line py-10 md:border-b-0 md:py-12 ${i ? "md:border-l md:pl-12" : "md:pr-12"}`}>
+              <dt className="mono-label">{m.k}</dt>
+              <dd className="mt-5 max-w-[30ch] text-[clamp(22px,2.3vw,30px)] font-medium leading-[1.3] tracking-[-0.015em] text-ink">{m.v}</dd>
             </Reveal>
+          ))}
+        </dl>
+      </Section>
+
+      <Section className="pt-0 md:pt-0">
+        <Duo
+          sticky
+          head={
+            <Reveal>
+              <Eyebrow>Principles</Eyebrow>
+              <h2 className="t-h2 text-ink">How we work</h2>
+            </Reveal>
+          }
+        >
+          <Rows headingLevel={3} items={PRINCIPLES} />
         </Duo>
       </Section>
 
       {/* Instagram postları — token yoxdursa bu bölmə görünmür (bax: api/instagram.ts) */}
       <InstagramFeed />
-
-      <Section className="pt-0 md:pt-0">
-        <Duo
-          head={
-            <Reveal>
-              <Eyebrow>Where</Eyebrow>
-              <h2 className="t-h2 text-ink">Baku, building for Azerbaijan and the region.</h2>
-            </Reveal>
-          }
-        >
-            <Reveal>
-              <dl className="grid gap-x-8 gap-y-5 border-t border-line pt-8 md:grid-cols-[180px_1fr]">
-                <dt className="mono-label pt-1">Company</dt>
-                <dd className="text-[17px] leading-[1.6] text-ink">{`${site.company.legalName}. ${site.company.jurisdiction}.`}</dd>
-                <dt className="mono-label pt-1">Working hours</dt>
-                <dd className="text-[17px] leading-[1.6] text-ink">
-                  09:00–18:00 Baku time (UTC+4).
-                </dd>
-                <dt className="mono-label pt-1">Email</dt>
-                <dd className="text-[17px] leading-[1.6] text-ink">
-                  <a href={MAILTO} className={INLINE_LINK}>
-                    {site.company.email}
-                  </a>
-                </dd>
-              </dl>
-            </Reveal>
-            <Reveal className="mt-10">
-              <TextLink to="/company/contact">Get in touch</TextLink>
-            </Reveal>
-        </Duo>
-      </Section>
-    </>
-  );
-}
-
-export function Contact() {
-  return (
-    <>
-      <PageHeader
-        eyebrow="Company · Contact"
-        title="Talk to a person."
-        lead="Product questions, partnerships, press, or a framework you need. A person from our team replies within two working days."
-      />
-      <Section className="pt-0 md:pt-0" logoHide>
-        <Duo
-          sticky
-          head={
-            <Reveal>
-              <dl className="border-t border-line">
-                <div className="border-b border-line py-5">
-                  <dt className="mono-label">Email</dt>
-                  <dd className="mt-2 text-[16px]">
-                    <a href={MAILTO} className="text-ink link-line">
-                      {site.company.email}
-                    </a>
-                  </dd>
-                </div>
-                <div className="border-b border-line py-5">
-                  <dt className="mono-label">Office</dt>
-                  <dd className="mt-2 text-[16px] text-ink">{site.company.address}</dd>
-                </div>
-                <div className="border-b border-line py-5">
-                  <dt className="mono-label">Reply time</dt>
-                  <dd className="mt-2 text-[16px] text-ink">Within two working days</dd>
-                </div>
-              </dl>
-            </Reveal>
-          }
-        >
-          <Reveal>
-            <EarlyAccessForm kind="contact" />
-          </Reveal>
-        </Duo>
-      </Section>
-    </>
-  );
-}
-
-export function EarlyAccess() {
-  return (
-    <>
-      <PageHeader
-        eyebrow={site.status.detail}
-        title="Shape the product before it ships."
-        lead="Open to a small number of teams that run risk and compliance work in Azerbaijan and the region."
-      />
-      <Section className="pt-0 md:pt-0" logoHide>
-        <Duo
-          sticky
-          head={
-            <Rows
-            headingLevel={2}
-            items={[
-              {
-                title: "Who it is for",
-                body: (
-                  <>
-                    Security, risk and compliance leads at banks and financial institutions, public bodies and growing companies
-                    preparing for ISO 27001, PCI DSS, Azerbaijan’s Personal Data Law or another framework on our{" "}
-                    <Link to="/coverage" className={INLINE_LINK}>
-                      coverage list
-                    </Link>
-                    . An upcoming audit or regulator review matters; team size does not.
-                  </>
-                ),
-              },
-              {
-                title: "What you get",
-                body: "From Q1 2027: your own workspace on the development version, direct contact with our engineers, and priority for the frameworks you need. No cost during early access.",
-              },
-              {
-                title: "What we ask",
-                body: "One 45-minute call a month, honest feedback on what breaks, and permission to use what we learn (never your data) to shape the product.",
-              },
-              {
-                title: "What happens next",
-                body: "We review requests weekly. A person from our team replies within five working days, and if it is not a fit yet, we say why.",
-              },
-            ]}
-          />
-          }
-        >
-          <Reveal>
-            <Eyebrow>Request access</Eyebrow>
-          </Reveal>
-          <Reveal delay={0.06} className="mt-8">
-            <EarlyAccessForm kind="early-access" />
-          </Reveal>
-        </Duo>
-      </Section>
     </>
   );
 }
@@ -204,9 +114,9 @@ export function Trust() {
   return (
     <>
       <PageHeader
-        eyebrow="Trust"
+        eyebrow="Security"
         title="How we handle data, before we are certified."
-        lead="A GRC vendor should model the behaviour it sells. Here is what is true now, what we are pursuing, and when."
+        lead="Our products serve organisations in governance and digital security, so we should model the behaviour we build for. Here is what is true now, what we are pursuing, and when."
       />
       <Section className="pt-0 md:pt-0">
         <Duo
@@ -217,6 +127,7 @@ export function Trust() {
               <p className="mt-5 text-[14px] text-ink-3">
                 Last reviewed: <time dateTime={TRUST_REVIEWED}>{TRUST_REVIEWED}</time>
               </p>
+              <p className="mt-2 max-w-[40ch] text-[14px] leading-[1.6] text-ink-3">Product rows refer to GRC360 by Strativu.</p>
             </Reveal>
           }
         >
@@ -245,7 +156,7 @@ export function Trust() {
                 body: (
                   <>
                     Tenant isolation at the query level, covered by regression tests; permissions per module and action, checked on the server; and a per-tenant system log.{" "}
-                    <Link to="/platform/architecture" className={INLINE_LINK}>
+                    <Link to={GRC.architecture} className={INLINE_LINK}>
                       Architecture notes
                     </Link>
                   </>
@@ -284,7 +195,7 @@ export function Trust() {
             ]}
           />
           <Reveal className="mt-10">
-            <TextLink to="/company/contact">Ask a security question</TextLink>
+            <TextLink to="/contact?topic=Other">Ask a security question</TextLink>
           </Reveal>
         </Split>
       </Section>

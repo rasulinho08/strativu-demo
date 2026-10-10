@@ -4,22 +4,21 @@
  */
 export const site = {
   name: "Strativu",
-  tagline: "We build software for risk and compliance.",
+  /** Manifest (Website Blueprint v2): hero başlığı, footer, brauzer başlığı, sosial önizləmə. */
+  tagline: "Technology is the tool. Value is the point.",
+  /** Tərif: Strativu nədir (JSON-LD Organization description, meta). */
+  definition: "Strativu is an ecosystem of products, each built to solve a real problem in its market.",
+  /** Ekosistem vədi. */
+  promise: "Different markets. Different problems. One way of creating value.",
   /** Sosial şəbəkə və axtarış üçün tam təsvir (og:description). Yalnız təsdiqlənmiş faktlar. */
   description:
-    "Strativu is a software company in Baku. Its first product, Strativu GRC 360, brings risks, controls, audits and compliance into one system, in Azerbaijani and English, in the cloud or on your own servers. Early access opens Q1 2027.",
+    "Strativu is an ecosystem of products, each built to solve a real problem in its market. Different markets. Different problems. One way of creating value.",
   /** Qısa təsvir (meta description, ≤160 simvol). */
   descriptionShort:
-    "Strativu is a software company in Baku. Strativu GRC 360 brings risks, controls, audits and compliance into one system. Early access opens Q1 2027.",
+    "Strativu is an ecosystem of products, each built to solve a real problem in its market. Different markets. Different problems. One way of creating value.",
   domain: "https://strativu.com",
   /** Sosial şəbəkə önizləmə şəkli (1200×630). public/og.png */
   ogImage: "/og.png",
-
-  /** Hero-da və CTA yanında görünən status sətri. */
-  status: {
-    label: "In development",
-    detail: "Early access opening Q1 2027",
-  },
 
   logo: {
     /** Tam loqo (işarə + yazı). Açıq temada göstərilir. */
@@ -31,7 +30,7 @@ export const site = {
     height: 28,
   },
 
-  /** Formspree form ID-si (Contact və Early access formları). */
+  /** Formspree form ID-si (Contact və GRC360 early access formları). */
   formspreeId: "xvzjezqa",
 
   company: {

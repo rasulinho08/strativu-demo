@@ -4,7 +4,7 @@ import { Reveal } from "./Reveal";
 const M = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /** Fixed "03 Jul 2026" format: three-letter months throughout, no locale or timezone dependency. */
-export function formatLogDate(d: string) {
+function formatLogDate(d: string) {
   const [y, m, day] = d.split("-");
   return `${day} ${M[+m - 1]} ${y}`;
 }

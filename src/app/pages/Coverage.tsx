@@ -3,7 +3,11 @@ import { NotFound } from "./NotFound";
 import { Btn, Duo, PageHeader, Section, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
 import { CoverageGrid } from "../components/site/CoverageGrid";
+import { Grc360Nav } from "../components/site/Grc360Nav";
 import { frameworks, statusLabel, type FrameworkStatus } from "../data/coverage";
+import { GRC, frameworkPath } from "../data/grc360";
+
+/** GRC360 frameworks (/products/grc360/frameworks) and one page per framework. Part of the interim GRC360 site. */
 
 const STATUS_NOTE: Record<FrameworkStatus, string> = {
   package:
@@ -16,15 +20,16 @@ export function Coverage() {
   return (
     <>
       <PageHeader
-        eyebrow="Coverage"
-        title="Frameworks and regulations GRC 360 works with."
+        top={<Grc360Nav />}
+        eyebrow="Frameworks"
+        title="Frameworks and regulations GRC360 works with."
         lead="Each one is a compliance package linked to your controls. You add the requirements in the product or import them from CSV; a ready-made catalogue is not included yet."
       />
 
       <Section className="pt-0 md:pt-0">
         <CoverageGrid />
         <Reveal className="mt-16">
-          <TextLink to="/company/contact">Missing a framework? Tell us</TextLink>
+          <TextLink to="/contact?topic=Product%20inquiry">Missing a framework? Tell us</TextLink>
         </Reveal>
       </Section>
     </>
@@ -40,7 +45,7 @@ export function FrameworkPage() {
   const next = frameworks[(i + 1) % frameworks.length];
   return (
     <>
-      <PageHeader eyebrow={`Coverage · ${f.body}`} title={f.id} lead={f.name}>
+      <PageHeader top={<Grc360Nav />} eyebrow={`Frameworks · ${f.body}`} title={f.id} lead={f.name}>
         <p className="chapter">
           <b className="whitespace-nowrap">{statusLabel[f.status]}</b>
         </p>
@@ -64,7 +69,7 @@ export function FrameworkPage() {
               <p className="max-w-[46ch] text-[17px] leading-[1.65] text-ink-2">{f.summary}</p>
               <p className="mt-8 max-w-[46ch] text-[15px] leading-[1.6] text-ink-3">{STATUS_NOTE[f.status]}</p>
               <div className="mt-6">
-                <Btn to="/early-access">Request early access</Btn>
+                <Btn to={GRC.earlyAccess}>Request early access</Btn>
               </div>
             </Reveal>
           }
@@ -81,11 +86,11 @@ export function FrameworkPage() {
           </Reveal>
 
           <nav aria-label="Other frameworks" className="mt-20 flex justify-between gap-6 border-t border-line pt-6">
-            <Link to={`/coverage/${prev.slug}`} className="group min-w-0 max-w-[48%]">
+            <Link to={frameworkPath(prev.slug)} className="group min-w-0 max-w-[48%]">
               <span className="mono-label block">← Previous</span>
               <span className="mt-1.5 block text-[15px] text-ink transition-colors group-hover:text-brand">{prev.id.split(" (")[0]}</span>
             </Link>
-            <Link to={`/coverage/${next.slug}`} className="group min-w-0 max-w-[48%] text-right">
+            <Link to={frameworkPath(next.slug)} className="group min-w-0 max-w-[48%] text-right">
               <span className="mono-label block">Next →</span>
               <span className="mt-1.5 block text-[15px] text-ink transition-colors group-hover:text-brand">{next.id.split(" (")[0]}</span>
             </Link>

@@ -1,11 +1,33 @@
 /**
- * GRC 360 — məhsul məlumatları (/platform/grc səhifəsi).
+ * GRC360 by Strativu — məhsul məlumatları (/products/grc360 və alt səhifələri).
+ * GRC360-ın öz marketinq saytı hazır olana qədər məhsul səhifələri burada, /products/grc360 altında yaşayır
+ * (əsas naviqasiyada deyil; Products səhifəsindəki kartdan açılır).
  * Mənbə: Strativuco/GRC_Frontend_Code (main) və GRC_Backend_Code (develop), 2026-10-04 —
- * "GRC 360: sayt üçün materiallar" sənədi. Yalnız kodda yoxlanılmış rəqəmlər yazın.
+ * "GRC360: sayt üçün materiallar" sənədi. Yalnız kodda yoxlanılmış rəqəmlər yazın.
  *
  * Yazmayın (hələ doğru deyil): "X kontrol xəritələnib", "N framework hazır gəlir",
- * AWS/GitHub evidence kollektorları, hash-zəncirli audit jurnalı, Jira inteqrasiyası.
+ * AWS/GitHub kollektorları, hash-zəncirli jurnal, Jira inteqrasiyası, AI funksiyaları.
  */
+
+/** GRC360 səhifələrinin ünvanları (bir yerdə; App.tsx, linklər və meta.ts bunu istifadə edir). */
+export const GRC = {
+  base: "/products/grc360",
+  architecture: "/products/grc360/architecture",
+  frameworks: "/products/grc360/frameworks",
+  changelog: "/products/grc360/changelog",
+  earlyAccess: "/products/grc360/early-access",
+} as const;
+export const frameworkPath = (slug: string) => `${GRC.frameworks}/${slug}`;
+
+/** Status sətri (GRC360 səhifələrində). products.ts-dəki GRC360 kartı ilə uyğun saxlayın. */
+export const grcRelease = { label: "Early access", detail: "Opens Q1 2027" };
+
+/** 40 saniyəlik məhsul filmi (GRC360 səhifəsində). */
+export const grcFilm = {
+  src: "/projects/grc360/grc360-film.mp4",
+  webm: "/projects/grc360/grc360-film.webm",
+  poster: "/projects/grc360/grc360-film-poster.webp",
+};
 
 export type GrcModule = { name: string; does: string; screens: string[] };
 
@@ -118,13 +140,13 @@ export const screenSrcSet = (src: string) =>
 export const SCREEN_SIZES = "(min-width: 1200px) 1134px, (min-width: 768px) calc(100vw - 66px), calc(100vw - 41px)";
 
 export const grcScreens = [
-  { key: "command-center", label: "Command Center", src: "/projects/grc360/01-command-center.webp", alt: "GRC 360 Command Center: overdue, today and upcoming tasks above an asset-risk heat map." },
-  { key: "asset-risks", label: "Asset Risks", src: "/projects/grc360/02-asset-risks.webp", alt: "GRC 360 asset-risk register with reviews, risk contacts and next review dates." },
-  { key: "controls", label: "Controls", src: "/projects/grc360/03-controls.webp", alt: "GRC 360 control list." },
-  { key: "packages", label: "Compliance Packages", src: "/projects/grc360/04-compliance-packages.webp", alt: "GRC 360 compliance packages: AZ Law on Personal Data, PCI DSS, GDPR, NIST CSF 2.0, SOC 2 Type II, ISO/IEC 27001:2022." },
-  { key: "audit-findings", label: "Audit Findings", src: "/projects/grc360/05-audit-findings.webp", alt: "GRC 360 external audit findings with owners and due dates." },
-  { key: "trust-center", label: "Trust Center", src: "/projects/grc360/06-trust-center.webp", alt: "GRC 360 public Trust Center page." },
-  { key: "policies", label: "Policies", src: "/projects/grc360/07-policies-standards.webp", alt: "GRC 360 policies and standards with versions and review dates." },
+  { key: "command-center", label: "Command Center", src: "/projects/grc360/01-command-center.webp", alt: "GRC360 Command Center: overdue, today and upcoming tasks above an asset-risk heat map." },
+  { key: "asset-risks", label: "Asset Risks", src: "/projects/grc360/02-asset-risks.webp", alt: "GRC360 asset-risk register with reviews, risk contacts and next review dates." },
+  { key: "controls", label: "Controls", src: "/projects/grc360/03-controls.webp", alt: "GRC360 control list." },
+  { key: "packages", label: "Compliance Packages", src: "/projects/grc360/04-compliance-packages.webp", alt: "GRC360 compliance packages: AZ Law on Personal Data, PCI DSS, GDPR, NIST CSF 2.0, SOC 2 Type II, ISO/IEC 27001:2022." },
+  { key: "audit-findings", label: "Audit Findings", src: "/projects/grc360/05-audit-findings.webp", alt: "GRC360 external audit findings with owners and due dates." },
+  { key: "trust-center", label: "Trust Center", src: "/projects/grc360/06-trust-center.webp", alt: "GRC360 public Trust Center page." },
+  { key: "policies", label: "Policies", src: "/projects/grc360/07-policies-standards.webp", alt: "GRC360 policies and standards with versions and review dates." },
 ];
 export const GRC_SCREEN_SIZE = { width: 2000, height: 1250 };
 

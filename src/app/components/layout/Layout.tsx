@@ -3,45 +3,52 @@ import { Link, NavLink, useLocation } from "react-router";
 import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { Logo } from "../site/Logo";
-import { Btn, Container } from "../site/primitives";
+import { Container } from "../site/primitives";
 import { LogoScene } from "../site/LogoScene";
 import { ErrorBoundary } from "../site/ErrorBoundary";
 import { useRouteMeta } from "../site/Seo";
 import { ThemeToggle } from "../theme-toggle";
 import { site } from "../../data/site";
 
-/** `match`: the section this link lights up for (Company → /company/about only, so /company/contact lights up Contact alone). */
+/**
+ * Main nav (Website Blueprint v2): Home · Products · About Us · Contact.
+ * `match`: the section the link lights up for — /products/* (incl. the GRC360 pages) marks Products, /contact/* marks Contact.
+ */
 const NAV = [
-  { label: "Platform", to: "/platform", match: "/platform" },
-  { label: "Coverage", to: "/coverage", match: "/coverage" },
-  { label: "Trust", to: "/trust", match: "/trust" },
-  { label: "Company", to: "/company/about", match: "/company/about" },
-  { label: "Changelog", to: "/changelog", match: "/changelog" },
+  { label: "Home", to: "/", match: "/" },
+  { label: "Products", to: "/products", match: "/products" },
+  { label: "About Us", to: "/about", match: "/about" },
+  { label: "Contact", to: "/contact", match: "/contact" },
 ];
-const CONTACT = { label: "Contact", to: "/company/contact", match: "/company/contact" };
-const inSection = (pathname: string, match: string) => pathname === match || pathname.startsWith(match + "/");
+const inSection = (pathname: string, match: string) =>
+  match === "/" ? pathname === "/" : pathname === match || pathname.startsWith(match + "/");
 
-const FOOTER: { label: string; to?: string; href?: string }[] = [
-  { label: "Platform", to: "/platform" },
-  { label: "Coverage", to: "/coverage" },
-  { label: "Trust", to: "/trust" },
-  { label: "About", to: "/company/about" },
-  { label: "Contact", to: "/company/contact" },
-  { label: "Changelog", to: "/changelog" },
-  ...(site.company.linkedin ? [{ label: "LinkedIn", href: site.company.linkedin }] : []),
-  ...(site.company.instagram ? [{ label: "Instagram", href: site.company.instagram }] : []),
-  ...(site.company.github ? [{ label: "GitHub", href: site.company.github }] : []),
-  ...(site.company.statusPage ? [{ label: "Status", href: site.company.statusPage }] : []),
+type FooterLink = { label: string; to?: string; href?: string };
+/** Footer qrupları (blueprint → 07 Footer). "Security" (/trust) blueprint-ə yeganə əlavədir (security.txt oraya baxır). */
+const FOOTER_GROUPS: { title: string; links: FooterLink[] }[] = [
+  { title: "Pages", links: NAV.map((n) => ({ label: n.label, to: n.to })) },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy Policy", to: "/privacy" },
+      { label: "Terms of Use", to: "/terms" },
+      { label: "Security", to: "/trust" },
+    ],
+  },
+  {
+    title: "Contact",
+    links: [
+      { label: site.company.email, href: `mailto:${site.company.email}` },
+      ...(site.company.linkedin ? [{ label: "LinkedIn", href: site.company.linkedin }] : []),
+      ...(site.company.instagram ? [{ label: "Instagram", href: site.company.instagram }] : []),
+      ...(site.company.github ? [{ label: "GitHub", href: site.company.github }] : []),
+      ...(site.company.statusPage ? [{ label: "Status", href: site.company.statusPage }] : []),
+    ],
+  },
 ];
 
-/** Footer-dəki nəhəng sürüşən sözlər (yalnız sözlər dəyişir; dizayn və animasiya eynidir). */
-const FOOTER_WORDS = ["Risks", "Controls", "Compliance", "Strativu"];
-
-const LEGAL = [
-  { label: "Privacy", to: "/legal/privacy" },
-  { label: "Terms", to: "/legal/terms" },
-  { label: "DPA", to: "/legal/dpa" },
-];
+/** Footer-dəki nəhəng sürüşən sətir: manifest (yalnız mətn dəyişir; dizayn və animasiya eynidir). */
+const FOOTER_LINE = site.tagline;
 
 export default function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -155,7 +162,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         Skip to content
       </a>
 
-      {/* ─── Header: floating rounded bar. Logo left · pages centre · Contact, theme, Early access right ─── */}
+      {/* ─── Header: floating rounded bar. Logo left · pages centre · theme toggle right ─── */}
       <header
         ref={headerRef}
         onFocusCapture={() => setHidden(false)}
@@ -180,10 +187,10 @@ export default function Layout({ children }: { children: ReactNode }) {
           />
           <Logo />
 
-          {/* lg–xl: in the flow between logo and actions (no overlap at 1024–1279px); from xl: centred on the bar. */}
+          {/* md–lg: in the flow between logo and toggle; from lg: centred on the bar. */}
           <nav
             aria-label="Primary"
-            className="hidden items-center gap-0.5 lg:flex xl:absolute xl:left-1/2 xl:-translate-x-1/2 xl:gap-1"
+            className="hidden items-center gap-0.5 md:flex lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:gap-1"
             onMouseLeave={() => setHovered(null)}
           >
             {NAV.map((n) => {
@@ -193,10 +200,11 @@ export default function Layout({ children }: { children: ReactNode }) {
                 <NavLink
                   key={n.to}
                   to={n.to}
-                  end
+                  end={n.to === "/"}
+                  aria-current={active ? "page" : undefined}
                   onMouseEnter={() => setHovered(n.to)}
                   onFocus={() => setHovered(n.to)}
-                  className={`relative isolate rounded-full px-3 py-2 text-[15px] transition-colors duration-200 xl:px-4 ${
+                  className={`relative isolate rounded-full px-3 py-2 text-[15px] transition-colors duration-200 lg:px-4 ${
                     lit ? "text-ink" : "text-ink-2 hover:text-ink"
                   }`}
                 >
@@ -215,27 +223,12 @@ export default function Layout({ children }: { children: ReactNode }) {
             })}
           </nav>
 
-          <div className="hidden items-center gap-2 lg:flex">
-            <NavLink
-              to={CONTACT.to}
-              end
-              className={`px-3 text-[15px] transition-colors duration-200 ${
-                inSection(location.pathname, CONTACT.match) ? "text-ink" : "text-ink-2 hover:text-ink"
-              }`}
-            >
-              {CONTACT.label}
-            </NavLink>
+          <div className="hidden items-center md:flex">
             <ThemeToggle className="text-ink-2 hover:bg-surface-2 hover:text-ink" />
-            <Btn to="/early-access" size="md" className="ml-1">
-              Early access
-            </Btn>
           </div>
 
-          {/* phones and tablets: the main action stays in the bar; the theme toggle lives in the menu */}
-          <div className="flex items-center gap-1.5 lg:hidden">
-            <Btn to="/early-access" size="sm" className="h-11 px-4 text-[14px] max-[349px]:hidden">
-              Early access
-            </Btn>
+          {/* phones: the menu button; the theme toggle lives in the menu */}
+          <div className="flex items-center md:hidden">
             <button
               ref={toggleRef}
               className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink transition-colors hover:bg-surface-2"
@@ -265,15 +258,16 @@ export default function Layout({ children }: { children: ReactNode }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-ground pt-24 lg:hidden"
+            className="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-ground pt-24 md:hidden"
           >
             <Container className="flex h-full flex-col pt-4">
               <nav aria-label="Mobile" className="flex flex-col">
-                {NAV.concat([CONTACT]).map((n) => (
+                {NAV.map((n) => (
                   <NavLink
                     key={n.to}
                     to={n.to}
-                    end
+                    end={n.to === "/"}
+                    aria-current={inSection(location.pathname, n.match) ? "page" : undefined}
                     className={`border-b border-line-soft py-4 text-[20px] ${
                       inSection(location.pathname, n.match) ? "font-medium text-ink" : "text-ink-2"
                     }`}
@@ -282,16 +276,11 @@ export default function Layout({ children }: { children: ReactNode }) {
                   </NavLink>
                 ))}
               </nav>
-              <div className="mt-8">
-                <Btn to="/early-access" size="lg" className="w-full">
-                  Early access
-                </Btn>
-                <div className="mt-4 flex items-center justify-between gap-4">
-                  <p className="text-[13px] text-ink-3">
-                    {site.status.label} · {site.status.detail}
-                  </p>
-                  <ThemeToggle className="shrink-0 text-ink-2 hover:bg-surface-2 hover:text-ink" />
-                </div>
+              <div className="mt-8 flex items-center justify-between gap-4">
+                <a href={`mailto:${site.company.email}`} className="-my-3 py-3 text-[15px] text-ink-2">
+                  {site.company.email}
+                </a>
+                <ThemeToggle className="shrink-0 text-ink-2 hover:bg-surface-2 hover:text-ink" />
               </div>
             </Container>
           </motion.div>
@@ -305,48 +294,59 @@ export default function Layout({ children }: { children: ReactNode }) {
       {/* ─── Footer: minimal ─── */}
       <footer ref={footerRef} className="relative z-10 border-t border-line bg-[color-mix(in_srgb,var(--ground)_85%,transparent)] backdrop-blur-xl">
         <Container className="py-12 md:py-14">
-          <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
-            <Logo />
-            <nav aria-label="Footer" className="flex flex-wrap gap-x-7 gap-y-3">
-              {FOOTER.map((l) =>
-                l.to ? (
-                  <Link key={l.label} to={l.to} className="-my-3 inline-block py-3 text-[14px] text-ink-3 transition-colors hover:text-ink">
-                    {l.label}
-                  </Link>
-                ) : (
-                  <a
-                    key={l.label}
-                    href={l.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="-my-3 inline-block py-3 text-[14px] text-ink-3 transition-colors hover:text-ink"
-                  >
-                    {l.label}
-                    <span className="sr-only"> (opens in a new tab)</span>
-                  </a>
-                )
-              )}
-            </nav>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-[minmax(0,5fr)_repeat(3,minmax(0,2fr))] md:gap-x-10">
+            <div className="col-span-2 md:col-span-1">
+              <Logo />
+              <p className="mt-5 text-[15px] leading-[1.6] text-ink-2">
+                {/* manifest: one sentence per line */}
+                {site.tagline.split(/(?<=\.)\s+/).map((line) => (
+                  <span key={line} className="block">
+                    {line}
+                  </span>
+                ))}
+              </p>
+            </div>
+            {FOOTER_GROUPS.map((g) => (
+              <nav key={g.title} aria-label={`Footer ${g.title}`} className={g.title === "Contact" ? "col-span-2 sm:col-span-1" : ""}>
+                <h2 className="mono-label">{g.title}</h2>
+                <ul className="mt-4 space-y-2.5">
+                  {g.links.map((l) => (
+                    <li key={l.label}>
+                      {l.to ? (
+                        <Link to={l.to} className="-my-1.5 inline-block py-1.5 text-[14px] text-ink-2 transition-colors hover:text-ink">
+                          {l.label}
+                        </Link>
+                      ) : l.href?.startsWith("mailto:") ? (
+                        <a href={l.href} className="-my-1.5 inline-block break-all py-1.5 text-[14px] text-ink-2 transition-colors hover:text-ink">
+                          {l.label}
+                        </a>
+                      ) : (
+                        <a
+                          href={l.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="-my-1.5 inline-block py-1.5 text-[14px] text-ink-2 transition-colors hover:text-ink"
+                        >
+                          {l.label}
+                          <span aria-hidden> ↗</span>
+                          <span className="sr-only"> (opens in a new tab)</span>
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            ))}
           </div>
-          <div className="mt-10 flex flex-col gap-3 border-t border-line-soft pt-6 text-[13px] text-ink-3 md:flex-row md:items-center md:justify-between">
+          <div className="mt-12 border-t border-line-soft pt-6 text-[13px] text-ink-3">
             <p>
-              © {new Date().getFullYear()} {site.company.legalName} · {site.company.jurisdiction}
-              {site.company.registrationNo && ` · ${site.company.registrationNo}`}
-            </p>
-            <p className="flex flex-wrap gap-x-6 gap-y-2">
-              <a href={`mailto:${site.company.email}`} className="-my-3 inline-block py-3 transition-colors hover:text-ink">
-                {site.company.email}
-              </a>
-              {LEGAL.map((l) => (
-                <Link key={l.label} to={l.to} className="-my-3 inline-block py-3 transition-colors hover:text-ink">
-                  {l.label}
-                </Link>
-              ))}
+              © {new Date().getFullYear()} {site.name}. All rights reserved.
+              {site.company.registrationNo && ` · ${site.company.legalName} · ${site.company.registrationNo}`}
             </p>
           </div>
         </Container>
 
-        {/* Nəhəng, yavaş sürüşən söz lenti (heyo.is footer-i kimi). Sözləri FOOTER_WORDS-dən dəyişin. */}
+        {/* Nəhəng, yavaş sürüşən söz lenti (heyo.is footer-i kimi). Mətn: FOOTER_LINE (manifest). */}
         <div aria-hidden className="marquee marquee-mask -mb-[0.18em] select-none overflow-hidden pb-2">
           <div className="marquee-track" style={{ ["--marquee-duration" as string]: "70s" }}>
             {[0, 1].map((k) => (
@@ -354,7 +354,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 key={k}
                 className="shrink-0 whitespace-nowrap pr-[0.4em] text-[clamp(72px,13vw,210px)] font-semibold leading-[1] tracking-[-0.035em] text-ink-4/60"
               >
-                {FOOTER_WORDS.join(".")}.
+                {FOOTER_LINE}
               </span>
             ))}
           </div>

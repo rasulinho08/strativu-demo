@@ -3,8 +3,9 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import fs from "node:fs";
 import path from "node:path";
-import { ROUTES, STATIC_META, fullTitle, metaFor } from "./src/app/data/meta";
+import { ROUTES, SITEMAP_ROUTES, STATIC_META, fullTitle, metaFor } from "./src/app/data/meta";
 import { site } from "./src/app/data/site";
+import { GRC } from "./src/app/data/grc360";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -18,6 +19,8 @@ function jsonLd(route: string): object[] {
     legalName: site.company.legalName,
     url: `${site.domain}/`,
     logo: `${site.domain}${site.logo.src}`,
+    description: site.definition,
+    slogan: site.tagline,
     email: site.company.email,
     sameAs: [site.company.linkedin, site.company.instagram, site.company.github].filter(Boolean),
   };
@@ -35,18 +38,19 @@ function jsonLd(route: string): object[] {
       },
     ];
   }
-  if (route === "/platform/grc") {
+  if (route === GRC.base) {
     return [
       {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
-        name: "Strativu GRC 360",
+        name: "GRC360",
+        alternateName: "GRC360 by Strativu",
         applicationCategory: "BusinessApplication",
         applicationSubCategory: "Governance, risk and compliance (GRC)",
         operatingSystem: "Web browser",
         inLanguage: ["az", "en"],
-        description: STATIC_META["/platform/grc"].description,
-        url: `${site.domain}/platform/grc`,
+        description: STATIC_META[GRC.base].description,
+        url: `${site.domain}${GRC.base}`,
         publisher: { "@type": "Organization", name: site.name, url: `${site.domain}/` },
       },
     ];
@@ -64,16 +68,19 @@ function setMeta(html: string, attr: "name" | "property", key: string, value: st
  * Build-time SEO from src/app/data/meta.ts (the same data the app uses at runtime):
  *  - preloads the Manrope latin font file;
  *  - writes dist/<route>/index.html for every route with its own title, description, canonical, og:* and twitter:* tags
- *    (+ JSON-LD on / and /platform/grc, + a short <noscript> text);
- *  - writes dist/sitemap.xml from the same route list, with today's date as lastmod;
+ *    (+ JSON-LD on / and /products/grc360, + a short <noscript> text); noindex routes (/contact/thank-you) get
+ *    robots "noindex" and no canonical;
+ *  - writes dist/sitemap.xml from the indexable routes, with today's date as lastmod;
  *  - fails the build if a page route in App.tsx has no meta.
  */
 /** Which page file serves which route (for <link rel="modulepreload"> on the route's static HTML). */
 const PAGE_FOR_ROUTE: [RegExp, string][] = [
-  [/^\/platform(\/|$)/, "src/app/pages/Platform.tsx"],
-  [/^\/coverage(\/|$)/, "src/app/pages/Coverage.tsx"],
-  [/^\/(company\/|trust$|early-access$)/, "src/app/pages/Company.tsx"],
-  [/^\/(changelog$|legal\/)/, "src/app/pages/Misc.tsx"],
+  [/^\/products\/grc360\/frameworks(\/|$)/, "src/app/pages/Coverage.tsx"],
+  [/^\/products\/grc360(\/|$)/, "src/app/pages/Grc360.tsx"],
+  [/^\/products$/, "src/app/pages/Products.tsx"],
+  [/^\/(about|trust)$/, "src/app/pages/Company.tsx"],
+  [/^\/contact(\/|$)/, "src/app/pages/Contact.tsx"],
+  [/^\/(privacy|terms)$/, "src/app/pages/Legal.tsx"],
 ];
 
 function strativuSite(): Plugin {
@@ -130,11 +137,14 @@ function strativuSite(): Plugin {
         html = setMeta(html, "property", "og:description", meta.ogDescription ?? meta.description);
         html = setMeta(html, "name", "twitter:title", title);
         html = setMeta(html, "name", "twitter:description", meta.description);
-        html = html.replace(
-          /(<meta name="description" content="[^"]*" \/>)/,
-          `$1\n    <link rel="canonical" href="${url}" />\n    <meta property="og:url" content="${url}" />`
-        );
+        if (meta.noindex) html = setMeta(html, "name", "robots", "noindex");
+        else
+          html = html.replace(
+            /(<meta name="description" content="[^"]*" \/>)/,
+            `$1\n    <link rel="canonical" href="${url}" />\n    <meta property="og:url" content="${url}" />`
+          );
         const page = PAGE_FOR_ROUTE.find(([re]) => re.test(route))?.[1];
+        if (route !== "/" && !page) throw new Error(`[strativu-site] no page file in PAGE_FOR_ROUTE for ${route}`);
         const preload = page ? pageChunks.get(page) : undefined;
         if (page && !preload) throw new Error(`[strativu-site] no chunk found for ${page}`);
         if (preload) {
@@ -161,7 +171,7 @@ function strativuSite(): Plugin {
       }
 
       const today = new Date().toISOString().slice(0, 10);
-      const urls = ROUTES.map((r) => `  <url><loc>${site.domain}${r}</loc><lastmod>${today}</lastmod></url>`).join("\n");
+      const urls = SITEMAP_ROUTES.map((r) => `  <url><loc>${site.domain}${r}</loc><lastmod>${today}</lastmod></url>`).join("\n");
       fs.writeFileSync(
         path.join(outDir, "sitemap.xml"),
         `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`
