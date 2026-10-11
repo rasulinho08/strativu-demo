@@ -200,3 +200,51 @@ export function RiskLinks() {
     </div>
   );
 }
+
+/* ── 4. Where it runs: our cloud or your servers, the on-premise stack and the two languages ── */
+export function DeployPanel({ stack }: { stack: readonly string[] }) {
+  const { ref, step, reduce } = useTicker(450, stack.length + 3);
+  const lit = reduce ? stack.length : Math.min(step, stack.length);
+  return (
+    <div ref={ref}>
+      <Panel title="Deployment">
+        <div className="min-h-[268px] space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { k: "SaaS", v: "A tenant in our cloud" },
+              { k: "On-premise", v: "Your servers, air-gapped" },
+            ].map((d) => (
+              <div key={d.k} className="rounded-[var(--r-md)] border border-line-soft px-4 py-3">
+                <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-3">{d.k}</p>
+                <p className="mt-1 text-[14px] font-medium leading-[1.35] text-ink">{d.v}</p>
+              </div>
+            ))}
+          </div>
+          <div className="rounded-[var(--r-md)] border border-brand/40 bg-brand-soft/60 px-4 py-3">
+            <p className="font-mono text-[11px] text-ink-3">docker compose up</p>
+            <ul className="mt-2.5 flex flex-wrap gap-1.5">
+              {stack.map((s, i) => (
+                <motion.li
+                  key={s}
+                  animate={{ opacity: i < lit ? 1 : 0.3 }}
+                  transition={{ duration: 0.3, ease: EASE }}
+                  className="rounded-full border border-line bg-surface px-2.5 py-0.5 font-mono text-[11.5px] text-ink-2"
+                >
+                  {s}
+                </motion.li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex items-center gap-2">
+            {["AZ", "EN"].map((l) => (
+              <span key={l} className="rounded-full border border-line px-3 py-1 font-mono text-[12px] text-ink-2">
+                {l}
+              </span>
+            ))}
+            <span className="text-[13px] text-ink-3">Interface and packages, incl. Law 998-IIIQ</span>
+          </div>
+        </div>
+      </Panel>
+    </div>
+  );
+}

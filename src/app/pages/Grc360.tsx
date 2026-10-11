@@ -10,10 +10,7 @@ import {
   GRC,
   GRC_SCREEN_SIZE,
   SCREEN_SIZES,
-  grcAudience,
-  grcConnections,
   grcFigures,
-  grcFrameworkPackages,
   grcModules,
   grcScreens,
   grcStack,
@@ -23,7 +20,7 @@ import {
   screenSrcSet,
 } from "../data/grc360";
 import { Film, FilmScenes } from "../components/site/Film";
-import { ControlMap, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
+import { ControlMap, DeployPanel, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
 
 /**
  * GRC360 by Strativu — the interim product site under /products/grc360 (until GRC360 has its own site):
@@ -154,6 +151,103 @@ function ModuleExplorer() {
                     {mod.name}
                   </span>
                 </button>
+              </li>
+            );
+          })}
+        </ul>
+      </Split>
+    </div>
+  );
+}
+
+/* ── Why GRC360: four points on the left (the open one shows its text), its illustration on the right.
+   Advances on its own while on screen until the visitor interacts (see useAutoAdvance). ── */
+const WHY = [
+  {
+    key: "links",
+    title: "Everything is linked",
+    body: "A risk is tied to the controls, policies, assets and requirements that treat it, scored 5×5 against your own risk appetite. No links kept by hand.",
+    visual: <RiskLinks />,
+  },
+  {
+    key: "frameworks",
+    title: "Any framework, as a package",
+    body: "Build a package in the product or import it from CSV. Compliance Analysis shows the gaps per requirement.",
+    visual: <ControlMap />,
+    link: { to: GRC.frameworks, label: "Frameworks we work with" },
+  },
+  {
+    key: "access",
+    title: "Your directory, a system log",
+    body: "Sign in with LDAP, Active Directory, OAuth or SAML. Permissions per module and action, checked on the server, and every change in a per-tenant log.",
+    visual: <SystemLog />,
+  },
+  {
+    key: "deploy",
+    title: "Our cloud or your servers",
+    body: "On-premise and air-gapped for banks and public bodies, or a tenant in our cloud. In Azerbaijani and English, with the Personal Data Law (998-IIIQ) as a package.",
+    visual: <DeployPanel stack={grcStack} />,
+  },
+];
+
+function WhyTabs() {
+  const { ref, idx, select, bind, reduce } = useAutoAdvance<HTMLDivElement>(WHY.length, 6000);
+  const w = WHY[idx];
+  return (
+    <div ref={ref} {...bind}>
+      <Split
+        sticky
+        visual={
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={w.key}
+              initial={reduce ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {w.visual}
+            </motion.div>
+          </AnimatePresence>
+        }
+      >
+        <ul className="border-t border-line">
+          {WHY.map((item, i) => {
+            const on = i === idx;
+            return (
+              <li key={item.key} className="relative border-b border-line">
+                {on && <motion.span layoutId="why-bar" aria-hidden className="absolute -top-px left-0 h-[2px] w-full bg-brand" />}
+                <button
+                  type="button"
+                  onClick={() => select(i)}
+                  aria-expanded={on}
+                  className="group flex w-full items-baseline gap-4 py-5 text-left"
+                >
+                  <span className={`font-mono text-[12px] transition-colors ${on ? "text-brand" : "text-ink-3"}`}>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className={`t-h3 transition-colors ${on ? "text-ink" : "text-ink-2 group-hover:text-ink"}`}>{item.title}</span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {on && (
+                    <motion.div
+                      initial={reduce ? false : { height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pb-6 pl-9">
+                        <p className="max-w-[48ch] text-[16px] leading-[1.6] text-ink-2">{item.body}</p>
+                        {item.link && (
+                          <div className="mt-4">
+                            <TextLink to={item.link.to}>{item.link.label}</TextLink>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </li>
             );
           })}
@@ -307,24 +401,6 @@ export function Grc360() {
         </div>
       </Section>
 
-      <Section id="who" className="pt-0 md:pt-0">
-        <Duo
-          head={
-            <Reveal>
-              <Eyebrow>Who it’s for</Eyebrow>
-              <h2 className="t-h2 text-ink">Teams that answer to regulators and auditors.</h2>
-              <p className={BODY}>
-                In our cloud or on your own servers, air-gapped if you need to. The whole interface is in Azerbaijani and English, and
-                Azerbaijan’s Personal Data Law (998-IIIQ) loads as its own package, next to GDPR.
-              </p>
-              <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">On-premise: {grcStack.join(" · ")}</p>
-            </Reveal>
-          }
-        >
-          <Rows headingLevel={3} items={grcAudience.map((a) => ({ title: a.title, body: a.body }))} />
-        </Duo>
-      </Section>
-
       {/* Modules */}
       <Section id="modules" className="pt-0 md:pt-0">
         <Duo
@@ -344,54 +420,15 @@ export function Grc360() {
         </Reveal>
       </Section>
 
-      <Section id="links" className="pt-0 md:pt-0">
-        <Split visual={<Reveal><RiskLinks /></Reveal>}>
-          <Reveal>
-            <Eyebrow>Everything is linked</Eyebrow>
-            <h2 className="t-h2 text-ink">No more links kept by hand.</h2>
-            <p className={BODY}>
-              A risk is tied directly to the controls, policies, assets, projects and framework requirements that treat it. In a
-              spreadsheet those links are kept by hand and break; here they are part of the record.
-            </p>
-            <p className={BODY}>
-              Scoring is 5×5, likelihood by impact, against your own risk-appetite thresholds, and the residual risk is calculated
-              for you.
-            </p>
-          </Reveal>
-        </Split>
-      </Section>
-
-      <Section id="mapping" className="pt-0 md:pt-0">
-        <Split visual={<Reveal><ControlMap /></Reveal>}>
-          <Reveal>
-            <Eyebrow>Frameworks</Eyebrow>
-            <h2 className="t-h2 text-ink">Any framework, as a package.</h2>
-            <p className={BODY}>
-              A framework is a compliance package: its requirements, linked to the controls that meet them. Packages are built in the
-              product or imported from CSV, and Compliance Analysis shows the gaps per requirement.
-            </p>
-            <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">
-              Packages in the demo build: {grcFrameworkPackages.join(" · ")}
-            </p>
-            <div className="mt-8">
-              <TextLink to={GRC.frameworks}>Frameworks we work with</TextLink>
-            </div>
-          </Reveal>
-        </Split>
-      </Section>
-
-      <Section id="access" className="pt-0 md:pt-0">
-        <Split visual={<Reveal><SystemLog /></Reveal>}>
-          <Reveal>
-            <Eyebrow>Access and log</Eyebrow>
-            <h2 className="t-h2 text-ink">Your directory, your permissions, a system log.</h2>
-            <p className={BODY}>
-              Sign in with LDAP or Active Directory, OAuth or SAML single sign-on. Permissions are set per module and per action, and
-              checked on the server. Creates, updates, deletes, sign-ins and permission changes go to a per-tenant system log.
-            </p>
-            <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">{grcConnections.join(" · ")}</p>
-          </Reveal>
-        </Split>
+      {/* Why GRC360: four points as tabs, each with its own illustration */}
+      <Section id="why" className="pt-0 md:pt-0">
+        <Reveal>
+          <Eyebrow>Why GRC360</Eyebrow>
+          <h2 className="t-h2 max-w-[20ch] text-ink">Built for teams that answer to auditors.</h2>
+        </Reveal>
+        <Reveal className="mt-12">
+          <WhyTabs />
+        </Reveal>
       </Section>
 
       <Section id="status" className="pt-0 md:pt-0">
