@@ -15,6 +15,7 @@ const coverage = () => import("./pages/Coverage");
 const company = () => import("./pages/Company");
 const contact = () => import("./pages/Contact");
 const legal = () => import("./pages/Legal");
+const cipher = () => import("./pages/Cipher");
 const Products = lazy(() => productsPage().then((m) => ({ default: m.Products })));
 const Grc360 = lazy(() => grc360().then((m) => ({ default: m.Grc360 })));
 const Architecture = lazy(() => grc360().then((m) => ({ default: m.Architecture })));
@@ -28,6 +29,7 @@ const Contact = lazy(() => contact().then((m) => ({ default: m.Contact })));
 const ContactThanks = lazy(() => contact().then((m) => ({ default: m.ContactThanks })));
 const Privacy = lazy(() => legal().then((m) => ({ default: m.Privacy })));
 const Terms = lazy(() => legal().then((m) => ({ default: m.Terms })));
+const Cipher = lazy(() => cipher().then((m) => ({ default: m.Cipher })));
 
 /** /coverage/:slug → /products/grc360/frameworks/:slug (client-side twin of the vercel.json redirect). */
 function LegacyFramework() {
@@ -51,6 +53,7 @@ export default function App() {
           <Route path="/products/grc360/frameworks/:slug" element={<FrameworkPage />} />
           <Route path="/products/grc360/changelog" element={<Changelog />} />
           <Route path="/products/grc360/early-access" element={<EarlyAccess />} />
+          <Route path="/products/cipher" element={<Cipher />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/contact/thank-you" element={<ContactThanks />} />

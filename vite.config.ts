@@ -78,6 +78,7 @@ const PAGE_FOR_ROUTE: [RegExp, string][] = [
   [/^\/products\/grc360\/frameworks(\/|$)/, "src/app/pages/Coverage.tsx"],
   [/^\/products\/grc360(\/|$)/, "src/app/pages/Grc360.tsx"],
   [/^\/products$/, "src/app/pages/Products.tsx"],
+  [/^\/products\/cipher$/, "src/app/pages/Cipher.tsx"],
   [/^\/(about|trust)$/, "src/app/pages/Company.tsx"],
   [/^\/contact(\/|$)/, "src/app/pages/Contact.tsx"],
   [/^\/(privacy|terms)$/, "src/app/pages/Legal.tsx"],

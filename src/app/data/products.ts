@@ -56,13 +56,13 @@ export const products: Product[] = [
     facts: ["12 modules", "Azerbaijani and English", "Cloud or on-premise"],
   },
   {
-    name: "AI Proxy",
-    status: "Planned",
-    summary: "Secure and controlled access to AI services for organisations.",
-    // Saytı hazır olana qədər: Contact formuna, mövzu "Product inquiry" seçilmiş halda.
-    to: "/contact?topic=Product%20inquiry",
-    linkLabel: "Coming soon",
-    arrow: false,
+    name: "Cipher",
+    status: "Coming soon",
+    summary: "Use AI at work, keep your data in: secure and controlled access to AI for organisations.",
+    // "Coming soon" səhifəsi (src/app/pages/Cipher.tsx). Mənbə: Strativuco/cipher.
+    to: "/products/cipher",
+    mark: { src: "/projects/cipher/cipher-mark.svg", width: 40, height: 40 },
+    color: "#5A5AF0",
   },
 ];
 

@@ -43,7 +43,7 @@ export const STATIC_META: Record<string, PageMeta> = {
   "/products": {
     title: "Products",
     description:
-      "Every product in the Strativu ecosystem starts with a real problem. GRC360 for governance, risk and compliance; AI Proxy is planned.",
+      "Every Strativu product starts with a real problem. GRC360 for governance, risk and compliance; Cipher, for safe use of AI at work, is coming soon.",
   },
   "/about": {
     title: "About Us",
@@ -59,6 +59,11 @@ export const STATIC_META: Record<string, PageMeta> = {
     title: "Message sent",
     description: "Thanks. We've received your message and will reply soon.",
     noindex: true,
+  },
+  "/products/cipher": {
+    title: "Cipher by Strativu: use AI at work, keep your data in",
+    description:
+      "Cipher by Strativu, coming soon: a security layer between your company and AI that keeps sensitive data in and protects your own AI from prompt attacks.",
   },
   [GRC.base]: {
     title: "GRC360 by Strativu: governance, risk and compliance",

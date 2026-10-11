@@ -2,7 +2,7 @@ import { motion, useReducedMotion } from "motion/react";
 
 /**
  * "What Strativu is" — a monochrome line illustration of the ecosystem: Strativu at the centre, thin lines to the
- * products (GRC360, AI Proxy) and to the next one (dashed: not built yet). No product UI, no colours.
+ * products (GRC360, Cipher) and to the next one (dashed: not built yet). No product UI, no colours.
  * Motion: the lines draw in once when the figure scrolls into view, then a small dot travels slowly along each line.
  * With reduced motion it is a still drawing.
  */
@@ -15,7 +15,7 @@ const ORBIT = 168;
 const at = (deg: number) => ({ x: C.x + ORBIT * Math.cos((deg * Math.PI) / 180), y: C.y + ORBIT * Math.sin((deg * Math.PI) / 180) });
 const NODES: Node[] = [
   { ...at(-42), label: "GRC360", sub: "Early access" },
-  { ...at(34), label: "AI Proxy", sub: "Planned" },
+  { ...at(34), label: "Cipher", sub: "Coming soon" },
   { ...at(196), label: "Next", sub: "Any market", future: true },
 ];
 const R_CENTRE = 60;
@@ -42,7 +42,7 @@ export function EcosystemDiagram({ className = "" }: { className?: string }) {
         className="block h-auto w-full overflow-visible"
       >
         <title id="ecosystem-title">
-          The Strativu ecosystem: Strativu at the centre, connected to GRC360, AI Proxy and the next product.
+          The Strativu ecosystem: Strativu at the centre, connected to GRC360, Cipher and the next product.
         </title>
         {/* faint orbit */}
         <circle cx={C.x} cy={C.y} r={ORBIT} fill="none" stroke="var(--line)" strokeWidth={1} strokeDasharray="2 6" />
