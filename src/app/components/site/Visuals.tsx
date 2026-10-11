@@ -60,55 +60,7 @@ function useTicker(ms: number, max: number) {
   return { ref, step, reduce };
 }
 
-const Dot = ({ tone }: { tone: "ok" | "warn" | "brand" }) => (
-  <span
-    aria-hidden
-    className={`inline-block h-2 w-2 shrink-0 rounded-full ${tone === "ok" ? "bg-ok" : tone === "warn" ? "bg-warn" : "bg-brand"}`}
-  />
-);
-
-/* ── 1. Scheduled alerts: expiries and due dates arrive one by one ── */
-const ALERTS = [
-  { src: "Third Parties", what: "Service agreement with CloudHost expires in 2 weeks", warn: true },
-  { src: "Governance", what: "Objective audit due: Access reviews", warn: false },
-  { src: "Risk Management", what: "Risk exception R-031 expires on 30 Oct", warn: true },
-  { src: "Governance", what: "Target overdue: Policy review cycle", warn: true },
-];
-
-export function AlertFeed() {
-  const { ref, step } = useTicker(1300, ALERTS.length + 1);
-  const shown = ALERTS.slice(0, Math.min(step, ALERTS.length));
-  return (
-    <div ref={ref}>
-      <Panel title="Notifications">
-        <ul className="min-h-[268px] space-y-2.5">
-          <AnimatePresence initial={false}>
-            {shown.map((c) => (
-              <motion.li
-                key={c.src + c.what}
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.45, ease: EASE }}
-                className="rounded-[var(--r-md)] border border-line-soft px-4 py-3"
-              >
-                <div className="flex items-center gap-3">
-                  <Dot tone={c.warn ? "warn" : "brand"} />
-                  <span className="font-mono text-[12px] text-ink-3">{c.src}</span>
-                  <span className="ml-auto font-mono text-[11px] text-ink-3">{c.warn ? "action" : "scheduled"}</span>
-                </div>
-                <p className="mt-1.5 text-[14px] text-ink">{c.what}</p>
-              </motion.li>
-            ))}
-          </AnimatePresence>
-        </ul>
-      </Panel>
-    </div>
-  );
-}
-
-/* ── 2. One control, linked to the requirements it meets: lines draw from the control to each requirement ── */
+/* ── 1. One control, linked to the requirements it meets: lines draw from the control to each requirement ── */
 const TARGETS = [
   { fw: "ISO 27001", ref: "A.5.17" },
   { fw: "SOC 2", ref: "CC6.1" },
@@ -166,7 +118,7 @@ export function ControlMap() {
   );
 }
 
-/* ── 3. System log: entries appear one by one (illustrative) ── */
+/* ── 2. System log: entries appear one by one (illustrative) ── */
 const ENTRIES = [
   { who: "a.mammadov", what: "updated owner of control CTL-014", at: "09:12" },
   { who: "n.aliyeva", what: "accepted risk R-031 as an exception", at: "09:40" },

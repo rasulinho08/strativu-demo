@@ -102,23 +102,6 @@ export const grcAudience = [
   },
 ];
 
-/** Başlanğıc addımları — müddət yazılmır. */
-export const grcOnboarding = [
-  { n: "01", title: "Set up", body: "A tenant in our cloud, or an install on your own servers with Docker Compose." },
-  { n: "02", title: "Connect sign-in", body: "LDAP or Active Directory, OAuth or SAML single sign-on, or email and password." },
-  { n: "03", title: "Bring in your registers", body: "Import the risks, assets and vendors you keep in spreadsheets today from CSV." },
-  {
-    n: "04",
-    title: "Load your frameworks",
-    body: "Build compliance packages or import them from CSV. Azerbaijan’s Personal Data Law (998-IIIQ) loads as a package.",
-  },
-  {
-    n: "05",
-    title: "Score your first risks",
-    body: "5×5 likelihood by impact against your own risk-appetite thresholds, with the residual risk calculated for you.",
-  },
-];
-
 /** Demo build-də yüklənmiş paket nümunələri (screenshot 04). Kataloq hazır gəlmir: paketlər yaradılır və ya CSV ilə import olunur. */
 export const grcFrameworkPackages = ["ISO/IEC 27001:2022", "SOC 2 Type II", "NIST CSF 2.0", "GDPR", "PCI DSS v4.0.1", "AZ Law on Personal Data"];
 

@@ -15,7 +15,10 @@
  *   linkLabel  → link mətni (yoxdursa: to → "Learn more", href → "Visit <name>")
  *   arrow      → false: link mətnindən sonra ox göstərilmir (məs. "Coming soon")
  *   mark       → məhsulun loqosu (public/ qovluğunda), kartda göstərilir (istəyə görə)
- *   color      → məhsulun öz rəngi. Korporativ sayt monoxromdur: bu rəng YALNIZ məhsulun kartında görünür.
+ *   color      → məhsulun öz rəngi (kartın üst xətti və status nöqtəsi)
+ *   featured   → true: böyük kart, tam endə, ekran görüntüsü ilə (siyahıda birinci göstərilir)
+ *   image      → böyük kartdakı ekran görüntüsü (public/ qovluğunda, 800/1200/1600w WebP variantları ilə)
+ *   facts      → böyük kartda qısa faktlar (yalnız yoxlanılmış faktlar)
  */
 export type Product = {
   name: string;
@@ -28,6 +31,9 @@ export type Product = {
   arrow?: boolean;
   mark?: { src: string; width: number; height: number };
   color?: string;
+  featured?: boolean;
+  image?: { src: string; alt: string; width: number; height: number };
+  facts?: string[];
 };
 
 export const products: Product[] = [
@@ -40,6 +46,14 @@ export const products: Product[] = [
     to: "/products/grc360",
     mark: { src: "/projects/grc360/grc360-mark-40.webp", width: 40, height: 40 },
     color: "#1A93AE",
+    featured: true,
+    image: {
+      src: "/projects/grc360/01-command-center.webp",
+      alt: "GRC360 Command Center: overdue, today and upcoming tasks above an asset-risk heat map.",
+      width: 2000,
+      height: 1250,
+    },
+    facts: ["12 modules", "Azerbaijani and English", "Cloud or on-premise"],
   },
   {
     name: "AI Proxy",

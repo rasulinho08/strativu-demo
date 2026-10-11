@@ -15,7 +15,6 @@ import {
   grcFigures,
   grcFrameworkPackages,
   grcModules,
-  grcOnboarding,
   grcScreens,
   grcStack,
   grcFilm,
@@ -24,7 +23,7 @@ import {
   screenSrcSet,
 } from "../data/grc360";
 import { Film, FilmScenes } from "../components/site/Film";
-import { AlertFeed, ControlMap, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
+import { ControlMap, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
 
 /**
  * GRC360 by Strativu — the interim product site under /products/grc360 (until GRC360 has its own site):
@@ -264,57 +263,7 @@ export function Grc360() {
         </Container>
       </div>
 
-      <Section id="deployment">
-        <Duo
-          head={
-            <Reveal>
-              <Eyebrow>Deployment</Eyebrow>
-              <h2 className="t-h2 text-ink">In our cloud or on your servers.</h2>
-            </Reveal>
-          }
-        >
-          <Reveal>
-            <p className={BODY_R}>
-              Multi-tenant SaaS, or an on-premise and air-gapped install for banks, government and critical infrastructure. The
-              on-premise build ships with Docker Compose.
-            </p>
-            <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">{grcStack.join(" · ")}</p>
-          </Reveal>
-        </Duo>
-      </Section>
-
-      <Section id="local" className="pt-0 md:pt-0">
-        <Duo
-          head={
-            <Reveal>
-              <Eyebrow>Built in Baku</Eyebrow>
-              <h2 className="t-h2 text-ink">In Azerbaijani, with Azerbaijani law ready to load as a package.</h2>
-            </Reveal>
-          }
-        >
-          <Reveal>
-            <p className={BODY_R}>
-              The whole interface is in Azerbaijani and English. The Law of the Republic of Azerbaijan on Personal Data (No. 998-IIIQ)
-              loads as its own package, next to GDPR.
-            </p>
-          </Reveal>
-        </Duo>
-      </Section>
-
-      <Section id="who" className="pt-0 md:pt-0">
-        <Duo
-          head={
-            <Reveal>
-              <Eyebrow>Who it’s for</Eyebrow>
-              <h2 className="t-h2 text-ink">Teams that answer to regulators and auditors.</h2>
-            </Reveal>
-          }
-        >
-          <Rows headingLevel={3} items={grcAudience.map((a) => ({ title: a.title, body: a.body }))} />
-        </Duo>
-      </Section>
-
-      <Section id="film" className="pt-0 md:pt-0">
+      <Section id="film">
         <div className="grid grid-cols-1 gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:items-start xl:gap-x-20">
           <Reveal>
             <Eyebrow>The film</Eyebrow>
@@ -356,6 +305,24 @@ export function Grc360() {
             ))}
           </dl>
         </div>
+      </Section>
+
+      <Section id="who" className="pt-0 md:pt-0">
+        <Duo
+          head={
+            <Reveal>
+              <Eyebrow>Who it’s for</Eyebrow>
+              <h2 className="t-h2 text-ink">Teams that answer to regulators and auditors.</h2>
+              <p className={BODY}>
+                In our cloud or on your own servers, air-gapped if you need to. The whole interface is in Azerbaijani and English, and
+                Azerbaijan’s Personal Data Law (998-IIIQ) loads as its own package, next to GDPR.
+              </p>
+              <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">On-premise: {grcStack.join(" · ")}</p>
+            </Reveal>
+          }
+        >
+          <Rows headingLevel={3} items={grcAudience.map((a) => ({ title: a.title, body: a.body }))} />
+        </Duo>
       </Section>
 
       {/* Modules */}
@@ -413,37 +380,6 @@ export function Grc360() {
         </Split>
       </Section>
 
-      <Section id="alerts" className="pt-0 md:pt-0">
-        <Split visual={<Reveal><AlertFeed /></Reveal>}>
-          <Reveal>
-            <Eyebrow>Alerts</Eyebrow>
-            <h2 className="t-h2 text-ink">Nothing expires quietly.</h2>
-            <p className={BODY}>
-              Scheduled checks watch the dates: contracts that end in weeks, objective audits that are due, overdue targets and
-              exceptions about to lapse. Owners are told before it becomes an audit finding.
-            </p>
-          </Reveal>
-        </Split>
-      </Section>
-
-      <Section id="trust-center" className="pt-0 md:pt-0">
-        <Duo
-          head={
-            <Reveal>
-              <Eyebrow>Trust Center</Eyebrow>
-              <h2 className="t-h2 text-ink">A public security page your customers can read before they ask.</h2>
-            </Reveal>
-          }
-        >
-          <Reveal>
-            <p className={BODY_R}>
-              A public security page for your customers: the practices you apply, how their data is handled, and an honest view of
-              your certification roadmap.
-            </p>
-          </Reveal>
-        </Duo>
-      </Section>
-
       <Section id="access" className="pt-0 md:pt-0">
         <Split visual={<Reveal><SystemLog /></Reveal>}>
           <Reveal>
@@ -456,19 +392,6 @@ export function Grc360() {
             <p className="mt-6 font-mono text-[12px] leading-[1.7] text-ink-3">{grcConnections.join(" · ")}</p>
           </Reveal>
         </Split>
-      </Section>
-
-      <Section id="getting-started" className="pt-0 md:pt-0">
-        <Duo
-          head={
-            <Reveal>
-              <Eyebrow>Getting started</Eyebrow>
-              <h2 className="t-h2 text-ink">From spreadsheets to one system.</h2>
-            </Reveal>
-          }
-        >
-          <Rows headingLevel={3} items={grcOnboarding} />
-        </Duo>
       </Section>
 
       <Section id="status" className="pt-0 md:pt-0">
