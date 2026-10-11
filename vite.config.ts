@@ -154,6 +154,9 @@ function strativuSite(): Plugin {
             .join("\n    ");
           if (links) html = html.replace("</head>", `    ${links}\n  </head>`);
         }
+        // Home: the 3D mark is the hero, so its model starts downloading with the page (LogoScene fetches the same URL).
+        if (route === "/")
+          html = html.replace("</head>", `    <link rel="preload" href="/models/strativu-mark.glb" as="fetch" crossorigin />\n  </head>`);
         const ld = jsonLd(route);
         if (ld.length) {
           const scripts = ld.map((o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, "\\u003c")}</script>`);

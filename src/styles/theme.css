@@ -481,6 +481,9 @@
   Save-Data, low memory). Then the static mark is shown in its place and the closing section drops the space it kept for the logo.
 */
 .logo-fallback { display: none; }
+/* Home hero: the static mark shows from the first paint and fades out as the 3D mark arrives (LogoScene sets data-logo3d="on"). */
+.logo-intro { transition: opacity 0.6s ease, transform 0.6s ease; }
+html[data-logo3d="on"] .logo-intro { opacity: 0; transform: scale(0.96); }
 html[data-logo3d="off"] .logo-fallback { display: block; }
 .stage-pad { padding-top: 48svh; }
 html[data-logo3d="off"] .stage-pad { padding-top: 7rem; min-height: 0; }

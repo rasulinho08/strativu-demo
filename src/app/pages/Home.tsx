@@ -25,14 +25,17 @@ export default function Home() {
       {/* ── Hero: the 3D mark is centred above this; the manifest sits below it ── */}
       <section className="relative flex min-h-[100svh] flex-col items-center justify-end pb-[7svh] text-center sm:pb-[12svh] md:pb-[9svh]">
         <Container>
-          {/* 3D səhnə qurulmayanda (reduce motion, WebGL yoxdur, zəif cihaz) yerində sadə loqo göstərilir (theme.css → .logo-fallback). */}
+          {/* Statik loqo ilk kadrdan görünür (telefonda 3D yüklənənə qədər boş yer qalmasın); 3D loqo ekrana gələndə
+              yavaşca solur. 3D qurulmayanda (reduce motion, WebGL yoxdur, zəif cihaz) yerində qalır (theme.css → .logo-intro). */}
           <img
             src={site.logo.mark}
             alt=""
             aria-hidden
             width={207}
             height={144}
-            className="logo-fallback mx-auto mb-14 h-auto w-[min(56vw,300px)]"
+            fetchPriority="high"
+            decoding="async"
+            className="logo-intro mx-auto mb-14 h-auto w-[min(56vw,300px)]"
           />
           {/* Not faded in: the headline is painted at once (LCP); it only rises into place. */}
           <Stagger fade={false}>

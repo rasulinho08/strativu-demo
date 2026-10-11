@@ -331,20 +331,9 @@ export function LogoScene() {
     let disposed = false;
     const cleanups: Array<() => void> = [];
 
-    /** First paint, then the fonts, then an idle slot — so the 3D download never competes with the text. */
-    const whenReady = async () => {
-      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
-      await Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise((r) => setTimeout(r, 2000))]);
-      await new Promise<void>((resolve) => {
-        if (typeof window.requestIdleCallback === "function") {
-          const id = window.requestIdleCallback(() => resolve(), { timeout: 1500 });
-          cleanups.push(() => window.cancelIdleCallback(id));
-        } else {
-          const t = window.setTimeout(resolve, 300);
-          cleanups.push(() => window.clearTimeout(t));
-        }
-      });
-    };
+    /** Start right after the first paint: the text is already on screen, and on phones waiting for fonts and an
+        idle slot made the logo arrive seconds late. The model is usually already in the cache (preloaded on "/"). */
+    const whenReady = () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
 
     (async () => {
       await whenReady();
