@@ -5,6 +5,11 @@
 export const fieldBase =
   "block w-full appearance-none rounded-none border-b border-field-line bg-transparent px-0 text-[16px] text-ink placeholder:text-ink-3 transition-[border-color,box-shadow] duration-200 focus:outline-none focus:border-brand focus:[box-shadow:inset_0_-1px_0_var(--brand)] aria-[invalid=true]:border-warn";
 export const fieldCls = `${fieldBase} h-12`;
+/**
+ * Select: the open list is drawn by the browser and inherits the field's text colour, so in dark mode it showed light
+ * text on a white list. Give the options their own colours and the field the theme's colour scheme.
+ */
+export const selectCls = `${fieldCls} cursor-pointer pr-8 [color-scheme:light] dark:[color-scheme:dark] [&_option]:bg-surface [&_option]:text-ink [&_option:disabled]:text-ink-3`;
 export const textareaCls = `${fieldBase} min-h-[120px] resize-y py-3 leading-[1.6]`;
 export const labelCls = "block text-[13px] font-medium text-ink-2";
 export const errorCls = "mt-2 text-[13px] text-warn";

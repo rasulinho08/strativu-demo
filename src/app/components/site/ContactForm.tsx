@@ -4,7 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { useFormspree } from "../../lib/formspree";
 import { Btn } from "./primitives";
 import { site } from "../../data/site";
-import { errorCls, fieldCls, labelCls, smallLinkCls, textareaCls } from "./formStyles";
+import { errorCls, fieldCls, labelCls, selectCls, smallLinkCls, textareaCls } from "./formStyles";
 
 /** Topic options (Website Blueprint v2). `/contact?topic=Other` pre-selects one. */
 const TOPICS = ["Product inquiry", "Partnership", "Investment", "Other"] as const;
@@ -160,7 +160,7 @@ export function ContactForm() {
                 setTopic(e.target.value);
                 recheck(e);
               }}
-              className={`${fieldCls} cursor-pointer pr-8 ${topic ? "" : "text-ink-3"}`}
+              className={`${selectCls} ${topic ? "" : "text-ink-3"}`}
               {...a11y("topic")}
             >
               <option value="" disabled>
