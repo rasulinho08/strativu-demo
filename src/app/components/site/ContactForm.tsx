@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
-import { ChevronDown } from "lucide-react";
 import { useFormspree } from "../../lib/formspree";
 import { Btn } from "./primitives";
+import { Select } from "./Select";
 import { site } from "../../data/site";
-import { errorCls, fieldCls, labelCls, selectCls, smallLinkCls, textareaCls } from "./formStyles";
+import { errorCls, fieldCls, labelCls, smallLinkCls, textareaCls } from "./formStyles";
 
 /** Topic options (Website Blueprint v2). `/contact?topic=Other` pre-selects one. */
 const TOPICS = ["Product inquiry", "Partnership", "Investment", "Other"] as const;
@@ -97,7 +97,7 @@ export function ContactForm() {
   };
 
   /** Once a field has been flagged, re-check it as the visitor fixes it. */
-  const recheck = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const recheck = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const f = e.target.name as FieldName;
     if (!clientErrors[f] || !formRef.current) return;
     const next = validate(formRef.current);
@@ -150,30 +150,19 @@ export function ContactForm() {
           <label htmlFor="topic" className={labelCls}>
             Topic <span aria-hidden>*</span>
           </label>
-          <div className="relative">
-            <select
-              id="topic"
-              name="topic"
-              required
-              value={topic}
-              onChange={(e) => {
-                setTopic(e.target.value);
-                recheck(e);
-              }}
-              className={`${selectCls} ${topic ? "" : "text-ink-3"}`}
-              {...a11y("topic")}
-            >
-              <option value="" disabled>
-                Choose a topic
-              </option>
-              {TOPICS.map((t) => (
-                <option key={t} value={t} className="text-ink">
-                  {t}
-                </option>
-              ))}
-            </select>
-            <ChevronDown aria-hidden className="pointer-events-none absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3" strokeWidth={1.75} />
-          </div>
+          <Select
+            id="topic"
+            name="topic"
+            value={topic}
+            onChange={(v) => {
+              setTopic(v);
+              setClientErrors((prev) => ({ ...prev, topic: undefined }));
+            }}
+            options={TOPICS}
+            placeholder="Choose a topic"
+            invalid={Boolean(message("topic"))}
+            describedBy={message("topic") ? "topic-error" : undefined}
+          />
           {err("topic")}
         </div>
       </div>
