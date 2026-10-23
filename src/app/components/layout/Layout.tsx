@@ -32,6 +32,7 @@ const FOOTER_GROUPS: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: "Privacy Policy", to: "/privacy" },
       { label: "Terms of Use", to: "/terms" },
+      { label: "Cookie Policy", to: "/cookies" },
       { label: "Security", to: "/trust" },
     ],
   },

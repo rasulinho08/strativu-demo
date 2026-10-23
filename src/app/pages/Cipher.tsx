@@ -10,6 +10,8 @@ import { Reveal } from "../components/site/Reveal";
  */
 
 const INDIGO = "#5A5AF0";
+/** Indigo as text: darker in light mode, lighter in dark mode, so it keeps ≥4.5:1 contrast (WCAG 1.4.3). */
+const INDIGO_TEXT = "text-[#4747D4] dark:text-[#9AA0F7]";
 
 const POINTS = [
   {
@@ -51,18 +53,23 @@ function CipherBar() {
 
 /** Your people → Cipher → AI tools: where it sits, in one line. */
 function Flow() {
-  const node = "rounded-[var(--r-md)] border border-line bg-surface px-4 py-3 font-mono text-[12.5px] text-ink-2 whitespace-nowrap";
+  const node = "rounded-[var(--r-md)] border border-line bg-surface px-4 py-3 text-center font-mono text-[12.5px] text-ink-2 whitespace-nowrap";
+  // Phones: a vertical chain (no horizontal scrolling); from sm: one row.
+  const line = "self-center h-6 w-px border-l border-dashed sm:h-px sm:w-auto sm:min-w-6 sm:flex-1 sm:border-l-0 sm:border-t";
   return (
-    <figure aria-label="Cipher sits between your people and the AI tools they use, and in front of your own AI." className="flex items-center">
+    <figure
+      aria-label="Cipher sits between your people and the AI tools they use, and in front of your own AI."
+      className="flex flex-col items-stretch sm:flex-row sm:items-center"
+    >
       <span className={node}>Your people</span>
-      <span aria-hidden className="h-px min-w-6 flex-1 border-t border-dashed" style={{ borderColor: INDIGO }} />
+      <span aria-hidden className={line} style={{ borderColor: INDIGO }} />
       <span
-        className="rounded-[var(--r-md)] border px-4 py-3 font-mono text-[12.5px] font-semibold whitespace-nowrap"
-        style={{ borderColor: `color-mix(in srgb, ${INDIGO} 45%, transparent)`, background: `color-mix(in srgb, ${INDIGO} 10%, var(--surface))`, color: INDIGO }}
+        className={`rounded-[var(--r-md)] border px-4 py-3 text-center font-mono text-[12.5px] font-semibold whitespace-nowrap ${INDIGO_TEXT}`}
+        style={{ borderColor: `color-mix(in srgb, ${INDIGO} 45%, transparent)`, background: `color-mix(in srgb, ${INDIGO} 10%, var(--surface))` }}
       >
         Cipher
       </span>
-      <span aria-hidden className="h-px min-w-6 flex-1 border-t border-dashed" style={{ borderColor: INDIGO }} />
+      <span aria-hidden className={line} style={{ borderColor: INDIGO }} />
       <span className={node}>AI tools · your AI</span>
     </figure>
   );
@@ -81,7 +88,7 @@ export function Cipher() {
         }
         title={
           <>
-            Use AI at work. <span style={{ color: INDIGO }}>Keep your data in.</span>
+            Use AI at work. <span className={INDIGO_TEXT}>Keep your data in.</span>
           </>
         }
         lead="Cipher is a security layer between your company and AI. It checks what goes out to AI tools, and what comes in to your own AI, before it does harm."
@@ -95,18 +102,14 @@ export function Cipher() {
 
       <Section className="pt-0 md:pt-4">
         <Reveal>
-          <div className="overflow-x-auto pb-2 [scrollbar-width:none]">
-            <div className="min-w-[520px]">
-              <Flow />
-            </div>
-          </div>
+          <Flow />
         </Reveal>
         <ul className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-5">
           {POINTS.map((p, i) => (
             <Reveal as="li" key={p.n} delay={i * 0.06} className="min-w-0">
               <article className="relative h-full overflow-hidden rounded-[var(--r-xl)] border border-line bg-surface p-6 md:p-8">
                 <span aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: INDIGO, opacity: 0.85 }} />
-                <span className="font-mono text-[12px]" style={{ color: INDIGO }}>
+                <span className={`font-mono text-[12px] ${INDIGO_TEXT}`}>
                   {p.n}
                 </span>
                 <h2 className="t-h3 mt-5 text-ink">{p.title}</h2>

@@ -3,7 +3,8 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import fs from "node:fs";
 import path from "node:path";
-import { ROUTES, SITEMAP_ROUTES, STATIC_META, fullTitle, metaFor } from "./src/app/data/meta";
+import crypto from "node:crypto";
+import { NOT_FOUND_META, ROUTES, SITEMAP_ROUTES, STATIC_META, fullTitle, metaFor } from "./src/app/data/meta";
 import { site } from "./src/app/data/site";
 import { GRC } from "./src/app/data/grc360";
 
@@ -81,7 +82,7 @@ const PAGE_FOR_ROUTE: [RegExp, string][] = [
   [/^\/products\/cipher$/, "src/app/pages/Cipher.tsx"],
   [/^\/(about|trust)$/, "src/app/pages/Company.tsx"],
   [/^\/contact(\/|$)/, "src/app/pages/Contact.tsx"],
-  [/^\/(privacy|terms)$/, "src/app/pages/Legal.tsx"],
+  [/^\/(privacy|terms|cookies)$/, "src/app/pages/Legal.tsx"],
 ];
 
 function strativuSite(): Plugin {
@@ -157,7 +158,12 @@ function strativuSite(): Plugin {
         }
         // Home: the 3D mark is the hero, so its model starts downloading with the page (LogoScene fetches the same URL).
         if (route === "/")
-          html = html.replace("</head>", `    <link rel="preload" href="/models/strativu-mark.glb" as="fetch" crossorigin />\n  </head>`);
+          html = html.replace(
+            "</head>",
+            `    <link rel="preload" href="/models/strativu-mark.glb" as="fetch" crossorigin />\n` +
+              // the static mark is the LCP image on phones: fetch it with the HTML, not after the JS has run
+              `    <link rel="preload" as="image" href="${site.logo.mark2x}" imagesrcset="${site.logo.mark} 207w, ${site.logo.mark2x} 428w" imagesizes="min(56vw, 300px)" fetchpriority="high" />\n  </head>`
+          );
         const ld = jsonLd(route);
         if (ld.length) {
           const scripts = ld.map((o) => `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, "\\u003c")}</script>`);
@@ -172,6 +178,25 @@ function strativuSite(): Plugin {
         const file = route === "/" ? path.join(outDir, "index.html") : path.join(outDir, route.slice(1), "index.html");
         fs.mkdirSync(path.dirname(file), { recursive: true });
         fs.writeFileSync(file, html);
+      }
+
+      // 404.html: Vercel serves it with status 404 for every path that has no file (vercel.json has no catch-all rewrite,
+      // so unknown URLs are real 404s, not "soft 404" pages with status 200). The SPA boots and shows the NotFound page.
+      {
+        let html = template.replace(/<title>[^<]*<\/title>/, `<title>${esc(fullTitle(NOT_FOUND_META))}</title>`);
+        html = setMeta(html, "name", "description", NOT_FOUND_META.description);
+        html = setMeta(html, "name", "robots", "noindex");
+        fs.writeFileSync(path.join(outDir, "404.html"), html);
+      }
+
+      // CSP (vercel.json) allows inline scripts only by hash: fail the build if an inline script changed without the hash.
+      const csp =
+        (JSON.parse(fs.readFileSync(path.join(root, "vercel.json"), "utf8")).headers as { headers: { key: string; value: string }[] }[])
+          .flatMap((h) => h.headers)
+          .find((h) => h.key === "Content-Security-Policy")?.value ?? "";
+      for (const m of template.matchAll(/<script(?![^>]*\bsrc=)(?![^>]*application\/ld\+json)[^>]*>([\s\S]*?)<\/script>/g)) {
+        const hash = `'sha256-${crypto.createHash("sha256").update(m[1]).digest("base64")}'`;
+        if (!csp.includes(hash)) throw new Error(`[strativu-site] inline script hash ${hash} is missing from the CSP in vercel.json`);
       }
 
       const today = new Date().toISOString().slice(0, 10);
@@ -194,6 +219,12 @@ function previewRouteIndex(): Plugin {
         const url = (req.url ?? "").split("?")[0];
         if (url.length > 1 && !path.extname(url) && fs.existsSync(path.join(dist, url, "index.html"))) {
           req.url = `${url.replace(/\/$/, "")}/index.html${(req.url ?? "").slice(url.length)}`;
+        } else if (url.length > 1 && !url.startsWith("/api/") && !fs.existsSync(path.join(dist, url))) {
+          // like Vercel: no file → 404.html with status 404
+          _res.statusCode = 404;
+          _res.setHeader("Content-Type", "text/html; charset=utf-8");
+          _res.end(fs.readFileSync(path.join(dist, "404.html")));
+          return;
         }
         next();
       });

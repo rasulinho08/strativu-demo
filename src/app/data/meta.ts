@@ -26,14 +26,20 @@ export const legalDocs = {
   privacy: {
     path: "/privacy",
     title: "Privacy Policy",
-    updated: "2026-10-10",
+    updated: "2026-10-23",
     description: "How Strativu handles the details you send through strativu.com: what we collect, why, how long we keep it and your rights.",
   },
   terms: {
     path: "/terms",
     title: "Terms of Use",
-    updated: "2026-10-10",
+    updated: "2026-10-23",
     description: "Terms of use for strativu.com, the website of Strativu LLC in Baku.",
+  },
+  cookies: {
+    path: "/cookies",
+    title: "Cookie Policy",
+    updated: "2026-10-23",
+    description: "strativu.com sets no cookies and runs no analytics or advertising trackers. What the site stores in your browser, and which third parties it contacts.",
   },
 } as const;
 export type LegalDoc = keyof typeof legalDocs;

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 
 /**
@@ -291,8 +291,17 @@ export function LogoScene() {
   /** Dayanmış render dövrünü yenidən başladır (səhifə dəyişəndə də). */
   const wakeRef = useRef<() => void>(() => {});
   useEffect(() => wakeRef.current(), [pathname]);
+  /*
+    Telefonda (<1024px) daxili səhifələrdə loqo onsuz da görünmür (CHOREO.page → op≈0), ona görə three.js və model
+    yüklənmir; ana səhifəyə keçəndə bir dəfə qurulur. Masaüstündə və ana səhifədə dərhal qurulur.
+  */
+  const [armed, setArmed] = useState(() => pathname === "/" || !window.matchMedia("(max-width: 1023px)").matches);
+  useEffect(() => {
+    if (!armed && pathname === "/") setArmed(true);
+  }, [armed, pathname]);
 
   useEffect(() => {
+    if (!armed) return;
     const host = hostRef.current;
     const keyEl = keyRef.current;
     const floorEl = floorRef.current;
@@ -318,8 +327,12 @@ export function LogoScene() {
         const opts = { failIfMajorPerformanceCaveat: !force };
         const gl = (c.getContext("webgl2", opts) || c.getContext("webgl", opts)) as WebGLRenderingContext | null;
         if (!gl) return false;
+        // Proqram renderer (GPU-suz VDI, sürücüsüz kompüter, headless brauzer): 3D orada saytı ləngidir → statik işarə.
+        const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+        const name = String(gl.getParameter(dbg ? dbg.UNMASKED_RENDERER_WEBGL : gl.RENDERER) || "");
+        const software = /swiftshader|llvmpipe|softpipe|software|basic render/i.test(name);
         gl.getExtension("WEBGL_lose_context")?.loseContext();
-        return true;
+        return force || !software;
       } catch {
         return false;
       }
@@ -1066,7 +1079,7 @@ export function LogoScene() {
       disposed = true;
       cleanups.forEach((fn) => fn());
     };
-  }, []);
+  }, [armed]);
 
   return (
     <div

@@ -25,6 +25,8 @@ export const site = {
     src: "/brand/logo-full.png",
     /** Yalnız işarə. Tünd temada CSS yazı ilə birlikdə göstərilir. */
     mark: "/brand/logo-mark.png",
+    /** 2x (428px) — retina ekranlar üçün, tools/logo3d mənbəyindən. */
+    mark2x: "/brand/logo-mark@2x.webp",
     /** Tünd tema üçün hazır açıq-rəngli loqo faylınız varsa yolunu yazın: "/brand/logo-dark.png". */
     darkSrc: null as string | null,
     height: 28,

@@ -3,7 +3,7 @@ import { useState, type FormEvent } from "react";
 /**
  * Form sending for the site's forms.
  *  1. POST /api/contact (Vercel function → Resend → the corporate mailbox; api/contact.ts).
- *  2. If that is not configured (503) or fails on the server side (5xx), the same data goes to Formspree
+ *  2. If that does not send (not configured, blocked, missing, server error — anything but 200 or 422), the same data goes to Formspree
  *     (https://formspree.io/f/<id>), so a message is never lost.
  */
 export type FormspreeError = { field?: string; code?: string; message: string };
@@ -30,7 +30,9 @@ export function useFormspree(formId: string) {
         body: JSON.stringify(Object.fromEntries(data)),
         headers: { "Content-Type": "application/json", Accept: "application/json" },
       }).catch(() => null);
-      if (api && api.status < 500) {
+      // Sent, or rejected for a field (422): done. Anything else (not configured, blocked origin on a preview
+      // deployment, no /api in local preview, server error): the same data goes to Formspree.
+      if (api && (api.ok || api.status === 422)) {
         const body = await api.json().catch(() => null);
         if (api.ok) setState({ submitting: false, succeeded: true, errors: null });
         else setState({ submitting: false, succeeded: false, errors: toErrors(body, api.status) });

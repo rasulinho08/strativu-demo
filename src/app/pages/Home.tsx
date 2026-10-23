@@ -29,6 +29,8 @@ export default function Home() {
               yavaşca solur. 3D qurulmayanda (reduce motion, WebGL yoxdur, zəif cihaz) yerində qalır (theme.css → .logo-intro). */}
           <img
             src={site.logo.mark}
+            srcSet={`${site.logo.mark} 207w, ${site.logo.mark2x} 428w`}
+            sizes="min(56vw, 300px)"
             alt=""
             aria-hidden
             width={207}

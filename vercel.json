@@ -76,12 +76,6 @@
       "permanent": true
     }
   ],
-  "rewrites": [
-    {
-      "source": "/((?!api/|assets/|models/|projects/|brand/|\\.well-known/).*)",
-      "destination": "/index.html"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -105,6 +99,10 @@
         {
           "key": "Cross-Origin-Opener-Policy",
           "value": "same-origin"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'sha256-RQwPQSg8oDXosjddMeohLgsmoOgbUa5WH+K2dR5/gS0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.cdninstagram.com https://*.fbcdn.net; font-src 'self'; connect-src 'self' blob: data: https://formspree.io; media-src 'self'; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self' https://formspree.io; frame-ancestors 'none'; upgrade-insecure-requests"
         }
       ]
     },

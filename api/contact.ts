@@ -11,7 +11,7 @@
  */
 declare const process: { env: Record<string, string | undefined> };
 
-type Req = { method?: string; body?: unknown };
+type Req = { method?: string; body?: unknown; headers?: Record<string, string | string[] | undefined> };
 type Res = {
   setHeader: (k: string, v: string) => void;
   status: (code: number) => { json: (body: unknown) => void };
@@ -32,6 +32,19 @@ const LABELS: Record<string, string> = {
 };
 const MAX = 5000;
 
+/**
+ * Yalnız saytın öz səhifələrindən gələn sorğular qəbul olunur (brauzer POST-da həmişə Origin göndərir).
+ * Origin-siz və ya başqa domendən gələn sorğu (bot, başqa sayt) 403 alır. Əlavə domen: CONTACT_ALLOWED_ORIGINS (vergüllə).
+ */
+const ALLOWED_ORIGINS = ["https://strativu.com", "https://www.strativu.com"];
+function originAllowed(origin: string) {
+  if (!origin) return false;
+  const extra = (process.env.CONTACT_ALLOWED_ORIGINS || "").split(",").map((s) => s.trim()).filter(Boolean);
+  if ([...ALLOWED_ORIGINS, ...extra].includes(origin)) return true;
+  // lokal yoxlama (vite preview / vercel dev)
+  return /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) && process.env.VERCEL_ENV !== "production";
+}
+
 const clean = (v: unknown) =>
   String(v ?? "")
     .replace(/\r\n?/g, "\n")
@@ -46,6 +59,13 @@ export default async function handler(req: Req, res: Res) {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  const header = (k: string) => {
+    const v = req.headers?.[k];
+    return (Array.isArray(v) ? v[0] : v) ?? "";
+  };
+  if (!originAllowed(header("origin"))) return res.status(403).json({ error: "Forbidden" });
+  if (!header("content-type").toLowerCase().startsWith("application/json")) return res.status(415).json({ error: "Unsupported content type" });
 
   const key = process.env.RESEND_API_KEY;
   if (!key) return res.status(503).json({ code: "NOT_CONFIGURED", error: "Email sending is not configured" });

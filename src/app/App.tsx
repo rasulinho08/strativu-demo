@@ -29,6 +29,7 @@ const Contact = lazy(() => contact().then((m) => ({ default: m.Contact })));
 const ContactThanks = lazy(() => contact().then((m) => ({ default: m.ContactThanks })));
 const Privacy = lazy(() => legal().then((m) => ({ default: m.Privacy })));
 const Terms = lazy(() => legal().then((m) => ({ default: m.Terms })));
+const Cookies = lazy(() => legal().then((m) => ({ default: m.Cookies })));
 const Cipher = lazy(() => cipher().then((m) => ({ default: m.Cipher })));
 
 /** /coverage/:slug → /products/grc360/frameworks/:slug (client-side twin of the vercel.json redirect). */
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="/trust" element={<Trust />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/cookies" element={<Cookies />} />
           {/* Old routes (on Vercel these are 308 redirects in vercel.json; these cover client-side navigation) */}
           <Route path="/company" element={<Navigate to="/about" replace />} />
           <Route path="/company/about" element={<Navigate to="/about" replace />} />
