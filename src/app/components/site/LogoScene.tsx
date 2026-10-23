@@ -373,7 +373,7 @@ export function LogoScene() {
       } catch {
         return off(); // WebGL yoxdur — statik işarə göstərilir
       }
-      const pixelRatio = Math.min(window.devicePixelRatio, narrowMq.matches ? 1.25 : 1.5);
+      let pixelRatio = Math.min(window.devicePixelRatio, narrowMq.matches ? 1.25 : 1.5);
       renderer.setPixelRatio(1); // bufer ölçüsünü özümüz (cihaz pikseli ilə) veririk, bax: resize
       renderer.setClearColor(0x000000, 0);
       renderer.toneMapping = THREE.NoToneMapping; // brend rəngləri olduğu kimi qalsın
@@ -518,13 +518,15 @@ export function LogoScene() {
       }
 
       let themeDark = false;
+      /** Adaptiv keyfiyyət (bax: kadr döngəsi → govern) bloom-u söndürəndə true olur. */
+      let noBloom = false;
       const applyBloomPreset = () => {
         if (!bloomPass) return;
         const b = (narrowMq.matches ? BLOOM_MOBILE : BLOOM)[themeDark ? "dark" : "light"];
         bloomPass.strength = b.strength;
         bloomPass.radius = b.radius;
         bloomPass.threshold = b.threshold;
-        bloomPass.enabled = b.strength > 0;
+        bloomPass.enabled = b.strength > 0 && !noBloom;
       };
 
       const box = new THREE.Box3().setFromObject(model);
@@ -905,6 +907,46 @@ export function LogoScene() {
           renderer.setAnimationLoop(null);
         }
       };
+      /*
+        Adaptiv keyfiyyət: zəif kompüterlərdə (inteqrasiya olunmuş GPU, 4K ekran) loqo saytı "dondurmasın".
+        Aktiv hərəkət zamanı real kadr aralıqları ölçülür; median 25 ms-dən (≈40 fps) çoxdursa keyfiyyət bir pillə enir:
+          1 → bloom söndürülür · 2 → piksel sıxlığı 1x · 3 → 30 fps limiti · 4 → 3D dayanır, statik loqo göstərilir.
+      */
+      let fpsCap = narrowMq.matches ? 30 : 60;
+      let level = 0;
+      let samples: number[] = [];
+      let prevRendered = 0;
+      const govern = (now: number) => {
+        const gap = now - prevRendered;
+        prevRendered = now;
+        if (now - t0 < 1200 || gap > 250) return; // yüklənmə anı və ya tabdan qayıdış: ölçmə
+        samples.push(gap);
+        if (samples.length < 50) return;
+        const sorted = [...samples].sort((a, b) => a - b);
+        const median = sorted[Math.floor(sorted.length / 2)];
+        samples = [];
+        const budget = 1000 / fpsCap; // gözlənilən kadr aralığı
+        if (median <= Math.max(25, budget * 1.35)) return;
+        level += 1;
+        if (level === 1 && bloomPass?.enabled) {
+          noBloom = true;
+          applyBloomPreset();
+        } else if (level <= 2 && pixelRatio > 1) {
+          level = 2;
+          pixelRatio = 1;
+          resize();
+        } else if (level <= 3 && fpsCap > 30) {
+          level = 3;
+          fpsCap = 30;
+        } else {
+          // Hələ də yavaşdır: 3D-ni dayandır, yerində statik loqo (theme.css → html[data-logo3d="off"]).
+          renderer.setAnimationLoop(null);
+          running = false;
+          disposed = true;
+          host.style.opacity = "0";
+          root.dataset.logo3d = "off";
+        }
+      };
       const frame = () => {
         if (!visible) return;
         const now = performance.now();
@@ -913,7 +955,8 @@ export function LogoScene() {
           lastActive = now;
         }
         const settled = now - lastActive > 700;
-        const minGap = narrowMq.matches ? 1000 / 30 : settled ? 1000 / IDLE_FPS : 0; // mobil: 30 fps limiti
+        // mobil 30 fps; masaüstü 60 fps (144 Hz monitorda 144 kadr çəkməsin); sakit anda IDLE_FPS
+        const minGap = settled ? 1000 / Math.min(IDLE_FPS, fpsCap) : 1000 / fpsCap;
         if (now - last < minGap - 1) return;
         const dt = Math.min(0.1, (now - last) / 1000);
         last = now;
@@ -1002,6 +1045,8 @@ export function LogoScene() {
         updateTrails(now / 1000, iOp);
         if (composer && bloomPass?.enabled) composer.render();
         else renderer.render(scene, camera);
+        if (!settled) govern(now);
+        else prevRendered = now;
         maybeSleep(now);
       };
       wake();

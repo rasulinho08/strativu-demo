@@ -173,7 +173,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div
           className={`relative mx-auto flex items-center justify-between gap-4 overflow-hidden rounded-full border pl-5 pr-2 transition-[max-width,height,background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:pl-6 ${
             scrolled || open
-              ? "h-14 max-w-[1080px] border-line bg-[color-mix(in_srgb,var(--ground)_88%,transparent)] shadow-[var(--e2)] backdrop-blur-xl"
+              ? "h-14 max-w-[1080px] border-line bg-[color-mix(in_srgb,var(--ground)_90%,transparent)] shadow-[var(--e2)] backdrop-blur-md"
               : "h-14 max-w-[1240px] border-line/70 bg-[color-mix(in_srgb,var(--ground)_55%,transparent)] backdrop-blur-md md:h-16"
           }`}
         >
@@ -292,7 +292,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       </main>
 
       {/* ─── Footer: minimal ─── */}
-      <footer ref={footerRef} className="relative z-10 border-t border-line bg-[color-mix(in_srgb,var(--ground)_85%,transparent)] backdrop-blur-xl">
+      <footer ref={footerRef} className="relative z-10 border-t border-line bg-[color-mix(in_srgb,var(--ground)_96%,transparent)]">
         <Container className="py-12 md:py-14">
           <div className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-[minmax(0,5fr)_repeat(3,minmax(0,2fr))] md:gap-x-10">
             <div className="col-span-2 md:col-span-1">

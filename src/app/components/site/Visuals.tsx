@@ -36,7 +36,7 @@ export function Split({
 /** Ortaq çərçivə: incə xətt, yarı-şəffaf fon, kiçik başlıq. */
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <figure className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-[color-mix(in_srgb,var(--surface)_94%,transparent)] shadow-[var(--e2)] backdrop-blur-md">
+    <figure className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-[color-mix(in_srgb,var(--surface)_97%,transparent)] shadow-[var(--e2)]">
       <div className="flex items-center justify-between border-b border-line-soft px-5 py-3">
         <span className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink-3">{title}</span>
         <span className="font-mono text-[11.5px] text-ink-3">Illustrative</span>

@@ -88,7 +88,7 @@ function ModuleExplorer() {
       <Split
         sticky
         visual={
-          <figure className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-[color-mix(in_srgb,var(--surface)_94%,transparent)] shadow-[var(--e2)] backdrop-blur-md">
+          <figure className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-[color-mix(in_srgb,var(--surface)_97%,transparent)] shadow-[var(--e2)]">
             <div className="flex items-center justify-between border-b border-line-soft px-6 py-3.5">
               <span className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink-3">
                 Module {String(idx + 1).padStart(2, "0")} / {grcModules.length}
