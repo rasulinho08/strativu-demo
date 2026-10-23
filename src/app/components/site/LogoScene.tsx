@@ -908,25 +908,33 @@ export function LogoScene() {
         }
       };
       /*
-        Adaptiv keyfiyyət: zəif kompüterlərdə (inteqrasiya olunmuş GPU, 4K ekran) loqo saytı "dondurmasın".
-        Aktiv hərəkət zamanı real kadr aralıqları ölçülür; median 25 ms-dən (≈40 fps) çoxdursa keyfiyyət bir pillə enir:
-          1 → bloom söndürülür · 2 → piksel sıxlığı 1x · 3 → 30 fps limiti · 4 → 3D dayanır, statik loqo göstərilir.
+        Adaptiv keyfiyyət: zəif kompüterlərdə (inteqrasiya olunmuş GPU, 4K ekran) loqo saytı ləngitməsin.
+        Yalnız ardıcıl aktiv kadrlar ölçülür (sakit rejimin 20 fps kadrları sayılmır). 90 kadrlıq pəncərənin medianı
+        33 ms-dən (≈30 fps) çoxdursa və bu iki pəncərə ardıcıl təkrarlanırsa keyfiyyət bir pillə enir:
+          1 → bloom söndürülür · 2 → piksel sıxlığı 1x · 3 → 30 fps limiti.
+        Loqo heç vaxt söndürülmür — yalnız yüngülləşir.
       */
       let fpsCap = narrowMq.matches ? 30 : 60;
       let level = 0;
       let samples: number[] = [];
+      let badWindows = 0;
       let prevRendered = 0;
-      const govern = (now: number) => {
+      let prevWasActive = false;
+      const govern = (now: number, active: boolean) => {
         const gap = now - prevRendered;
+        const counted = active && prevWasActive && now - t0 > 3000 && gap < 250;
         prevRendered = now;
-        if (now - t0 < 1200 || gap > 250) return; // yüklənmə anı və ya tabdan qayıdış: ölçmə
+        prevWasActive = active;
+        if (!counted || level >= 3) return;
         samples.push(gap);
-        if (samples.length < 50) return;
-        const sorted = [...samples].sort((a, b) => a - b);
+        if (samples.length < 90) return;
+        const sorted = [...samples].sort((x, y) => x - y);
         const median = sorted[Math.floor(sorted.length / 2)];
         samples = [];
-        const budget = 1000 / fpsCap; // gözlənilən kadr aralığı
-        if (median <= Math.max(25, budget * 1.35)) return;
+        const limit = Math.max(33, (1000 / fpsCap) * 1.5);
+        badWindows = median > limit ? badWindows + 1 : 0;
+        if (badWindows < 2) return;
+        badWindows = 0;
         level += 1;
         if (level === 1 && bloomPass?.enabled) {
           noBloom = true;
@@ -935,16 +943,11 @@ export function LogoScene() {
           level = 2;
           pixelRatio = 1;
           resize();
-        } else if (level <= 3 && fpsCap > 30) {
+        } else if (fpsCap > 30) {
           level = 3;
           fpsCap = 30;
         } else {
-          // Hələ də yavaşdır: 3D-ni dayandır, yerində statik loqo (theme.css → html[data-logo3d="off"]).
-          renderer.setAnimationLoop(null);
-          running = false;
-          disposed = true;
-          host.style.opacity = "0";
-          root.dataset.logo3d = "off";
+          level = 3;
         }
       };
       const frame = () => {
@@ -1045,8 +1048,7 @@ export function LogoScene() {
         updateTrails(now / 1000, iOp);
         if (composer && bloomPass?.enabled) composer.render();
         else renderer.render(scene, camera);
-        if (!settled) govern(now);
-        else prevRendered = now;
+        govern(now, !settled);
         maybeSleep(now);
       };
       wake();
