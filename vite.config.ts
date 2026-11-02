@@ -7,6 +7,8 @@ import crypto from "node:crypto";
 import { NOT_FOUND_META, ROUTES, SITEMAP_ROUTES, STATIC_META, fullTitle, metaFor } from "./src/app/data/meta";
 import { site } from "./src/app/data/site";
 import { GRC } from "./src/app/data/grc360";
+import { insights, insightPath } from "./src/app/data/insights";
+import { alternates, basePath, langOf } from "./src/app/i18n/paths";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -35,6 +37,26 @@ function jsonLd(route: string): object[] {
         name: site.name,
         url: `${site.domain}/`,
         inLanguage: "en",
+        publisher: { "@id": org["@id"] },
+      },
+    ];
+  }
+  const article = insights.find((a) => insightPath(a.slug, "en") === route || insightPath(a.slug, "az") === route);
+  if (article) {
+    const lang = langOf(route);
+    const t = article[lang]!;
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: t.title,
+        description: t.description,
+        datePublished: article.date,
+        inLanguage: lang,
+        url: `${site.domain}${route}`,
+        mainEntityOfPage: `${site.domain}${route}`,
+        image: `${site.domain}${site.ogImage}`,
+        author: { "@id": org["@id"] },
         publisher: { "@id": org["@id"] },
       },
     ];
@@ -83,6 +105,7 @@ const PAGE_FOR_ROUTE: [RegExp, string][] = [
   [/^\/(about|trust)$/, "src/app/pages/Company.tsx"],
   [/^\/contact(\/|$)/, "src/app/pages/Contact.tsx"],
   [/^\/(privacy|terms|cookies)$/, "src/app/pages/Legal.tsx"],
+  [/^\/insights(\/|$)/, "src/app/pages/Insights.tsx"],
 ];
 
 function strativuSite(): Plugin {
@@ -134,6 +157,8 @@ function strativuSite(): Plugin {
         const title = fullTitle(meta);
         const url = `${site.domain}${route}`;
         let html = template.replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>`);
+        const lang = langOf(route);
+        if (lang === "az") html = html.replace('<html lang="en">', '<html lang="az">');
         html = setMeta(html, "name", "description", meta.description);
         html = setMeta(html, "property", "og:title", title);
         html = setMeta(html, "property", "og:description", meta.ogDescription ?? meta.description);
@@ -145,8 +170,18 @@ function strativuSite(): Plugin {
             /(<meta name="description" content="[^"]*" \/>)/,
             `$1\n    <link rel="canonical" href="${url}" />\n    <meta property="og:url" content="${url}" />`
           );
-        const page = PAGE_FOR_ROUTE.find(([re]) => re.test(route))?.[1];
-        if (route !== "/" && !page) throw new Error(`[strativu-site] no page file in PAGE_FOR_ROUTE for ${route}`);
+        // hreflang: a page with a twin in the other language names both (and English as x-default)
+        const alt = meta.noindex ? null : alternates(route);
+        if (alt)
+          html = html.replace(
+            "</head>",
+            `    <link rel="alternate" hreflang="en" href="${site.domain}${alt.en}" />\n` +
+              `    <link rel="alternate" hreflang="az" href="${site.domain}${alt.az}" />\n` +
+              `    <link rel="alternate" hreflang="x-default" href="${site.domain}${alt.en}" />\n  </head>`
+          );
+        html = html.replace('<meta property="og:site_name"', `<meta property="og:locale" content="${lang === "az" ? "az_AZ" : "en_US"}" />\n    <meta property="og:site_name"`);
+        const page = PAGE_FOR_ROUTE.find(([re]) => re.test(basePath(route)))?.[1];
+        if (basePath(route) !== "/" && !page) throw new Error(`[strativu-site] no page file in PAGE_FOR_ROUTE for ${route}`);
         const preload = page ? pageChunks.get(page) : undefined;
         if (page && !preload) throw new Error(`[strativu-site] no chunk found for ${page}`);
         if (preload) {
@@ -157,7 +192,7 @@ function strativuSite(): Plugin {
           if (links) html = html.replace("</head>", `    ${links}\n  </head>`);
         }
         // Home: the 3D mark is the hero, so its model starts downloading with the page (LogoScene fetches the same URL).
-        if (route === "/")
+        if (basePath(route) === "/")
           html = html.replace(
             "</head>",
             `    <link rel="preload" href="/models/strativu-mark.glb" as="fetch" crossorigin />\n` +

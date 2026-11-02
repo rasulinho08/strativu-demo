@@ -1,5 +1,6 @@
 import { Link } from "react-router";
-import { moreToCome, productLink, products, type Product } from "../../data/products";
+import { localizeProduct, moreToCome, productLink, products, type Product } from "../../data/products";
+import { useLang, useLocalize } from "../../i18n";
 import { screenSrcSet } from "../../data/grc360";
 import { Reveal } from "./Reveal";
 
@@ -10,10 +11,13 @@ import { Reveal } from "./Reveal";
  * The whole card is clickable (stretched link), but only the link text is the focus target.
  * A `featured` product gets the large card (FeaturedProductCard): full width, with a screen from the product.
  */
-export function ProductCard({ p, compact = false, headingLevel = 3 }: { p: Product; compact?: boolean; headingLevel?: 2 | 3 }) {
+export function ProductCard({ p: base, compact = false, headingLevel = 3 }: { p: Product; compact?: boolean; headingLevel?: 2 | 3 }) {
   const H = `h${headingLevel}` as const;
-  const link = productLink(p);
-  const isMore = p === moreToCome;
+  const lang = useLang();
+  const L = useLocalize();
+  const p = localizeProduct(base, lang);
+  const link = productLink(p, lang);
+  const isMore = base === moreToCome;
   const arrow = p.arrow === false ? null : link.href ? "↗" : "→";
   const linkCls =
     "relative inline-flex items-center gap-1.5 text-[14.5px] font-medium text-brand-ink after:absolute after:-inset-x-[100vw] after:-inset-y-[100vh] after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-4";
@@ -27,7 +31,7 @@ export function ProductCard({ p, compact = false, headingLevel = 3 }: { p: Produ
           {arrow}
         </span>
       )}
-      {link.href && <span className="sr-only"> (opens in a new tab)</span>}
+      {link.href && <span className="sr-only">{lang === "az" ? " (yeni tabda açılır)" : " (opens in a new tab)"}</span>}
     </>
   );
 
@@ -64,7 +68,7 @@ export function ProductCard({ p, compact = false, headingLevel = 3 }: { p: Produ
             {linkInner}
           </a>
         ) : (
-          <Link to={link.to ?? "/products"} className={linkCls}>
+          <Link to={L(link.to ?? "/products")} className={linkCls}>
             {linkInner}
           </Link>
         )}
@@ -74,9 +78,12 @@ export function ProductCard({ p, compact = false, headingLevel = 3 }: { p: Produ
 }
 
 /* ── Large card for a featured product: text and a call to action on one side, a screen from the product on the other ── */
-function FeaturedProductCard({ p, compact = false, headingLevel = 3 }: { p: Product; compact?: boolean; headingLevel?: 2 | 3 }) {
+function FeaturedProductCard({ p: base, compact = false, headingLevel = 3 }: { p: Product; compact?: boolean; headingLevel?: 2 | 3 }) {
   const H = `h${headingLevel}` as const;
-  const link = productLink(p);
+  const lang = useLang();
+  const L = useLocalize();
+  const p = localizeProduct(base, lang);
+  const link = productLink(p, lang);
   const linkCls =
     "relative inline-flex h-12 items-center gap-2 rounded-full bg-brand px-6 text-[15px] font-medium text-on-brand transition-colors group-hover:bg-brand-hover after:absolute after:-inset-x-[100vw] after:-inset-y-[100vh] after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-4";
   const linkInner = (
@@ -86,7 +93,7 @@ function FeaturedProductCard({ p, compact = false, headingLevel = 3 }: { p: Prod
       <span aria-hidden className="transition-transform duration-150 group-hover:translate-x-0.5">
         {link.href ? "↗" : "→"}
       </span>
-      {link.href && <span className="sr-only"> (opens in a new tab)</span>}
+      {link.href && <span className="sr-only">{lang === "az" ? " (yeni tabda açılır)" : " (opens in a new tab)"}</span>}
     </>
   );
   const tint = p.color ?? "var(--brand)";
@@ -125,7 +132,7 @@ function FeaturedProductCard({ p, compact = false, headingLevel = 3 }: { p: Prod
               {linkInner}
             </a>
           ) : (
-            <Link to={link.to ?? "/products"} className={linkCls}>
+            <Link to={L(link.to ?? "/products")} className={linkCls}>
               {linkInner}
             </Link>
           )}

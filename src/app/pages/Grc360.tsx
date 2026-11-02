@@ -21,6 +21,8 @@ import {
 } from "../data/grc360";
 import { Film, FilmScenes } from "../components/site/Film";
 import { ControlMap, DeployPanel, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
+import { useLang } from "../i18n";
+import { grcAz } from "../data/grc360";
 
 /**
  * GRC360 by Strativu — the interim product site under /products/grc360 (until GRC360 has its own site):
@@ -80,6 +82,7 @@ function useAutoAdvance<T extends HTMLElement>(count: number, ms: number) {
 /* ── Module explorer: compact grid of names (left), selected module in a panel (right).
    Advances on its own while on screen until the visitor interacts (see useAutoAdvance). ── */
 function ModuleExplorer() {
+  const az = useLang() === "az";
   const { ref, idx, select, bind, reduce } = useAutoAdvance<HTMLDivElement>(grcModules.length, 3200);
   const m = grcModules[idx];
 
@@ -91,7 +94,7 @@ function ModuleExplorer() {
           <figure className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-[color-mix(in_srgb,var(--surface)_97%,transparent)] shadow-[var(--e2)]">
             <div className="flex items-center justify-between border-b border-line-soft px-6 py-3.5">
               <span className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink-3">
-                Module {String(idx + 1).padStart(2, "0")} / {grcModules.length}
+                {az ? "Modul" : "Module"} {String(idx + 1).padStart(2, "0")} / {grcModules.length}
               </span>
               {/* irəliləyiş: hansı modulda olduğunu göstərir */}
               <span className="hidden gap-1 sm:flex" aria-hidden>
@@ -110,10 +113,10 @@ function ModuleExplorer() {
                   transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <h3 className="t-h2 text-ink">{m.name}</h3>
-                  <p className="mt-4 text-[17px] leading-[1.6] text-ink-2">{m.does}</p>
+                  <p className="mt-4 text-[17px] leading-[1.6] text-ink-2">{az ? (grcAz.modules[m.name] ?? m.does) : m.does}</p>
                   {m.screens.length > 0 && (
                     <>
-                      <p className="mt-8 font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink-3">Screens</p>
+                      <p className="mt-8 font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink-3">{az ? "Ekranlar" : "Screens"}</p>
                       <ul className="mt-3 flex flex-wrap gap-2">
                         {m.screens.map((sc) => (
                           <li key={sc} className="rounded-full border border-line px-3 py-1 text-[13px] text-ink-2">
@@ -167,12 +170,21 @@ const WHY = [
     key: "links",
     title: "Everything is linked",
     body: "A risk is tied to the controls, policies, assets and requirements that treat it, scored 5×5 against your own risk appetite. No links kept by hand.",
+    az: {
+      title: "Hər şey bir-birinə bağlıdır",
+      body: "Risk onu müalicə edən nəzarət tədbirlərinə, siyasətlərə, aktivlərə və tələblərə birbaşa bağlıdır, öz risk iştahınıza görə 5×5 qiymətləndirilir. Əl ilə saxlanılan əlaqə yoxdur.",
+    },
     visual: <RiskLinks />,
   },
   {
     key: "frameworks",
     title: "Any framework, as a package",
     body: "Build a package in the product or import it from CSV. Compliance Analysis shows the gaps per requirement.",
+    az: {
+      title: "İstənilən framework, paket kimi",
+      body: "Paketi məhsulda qurun və ya CSV-dən idxal edin. Compliance Analysis hər tələb üzrə boşluqları göstərir.",
+      link: "İşlədiyimiz framework-lər (EN)",
+    },
     visual: <ControlMap />,
     link: { to: GRC.frameworks, label: "Frameworks we work with" },
   },
@@ -180,17 +192,26 @@ const WHY = [
     key: "access",
     title: "Your directory, a system log",
     body: "Sign in with LDAP, Active Directory, OAuth or SAML. Permissions per module and action, checked on the server, and every change in a per-tenant log.",
+    az: {
+      title: "Sizin kataloq, sistem jurnalı",
+      body: "LDAP, Active Directory, OAuth və ya SAML ilə giriş. Hər modul və əməliyyat üzrə icazələr serverdə yoxlanılır, hər dəyişiklik müştəriyə aid jurnala yazılır.",
+    },
     visual: <SystemLog />,
   },
   {
     key: "deploy",
     title: "Our cloud or your servers",
     body: "On-premise and air-gapped for banks and public bodies, or a tenant in our cloud. In Azerbaijani and English, with the Personal Data Law (998-IIIQ) as a package.",
+    az: {
+      title: "Bizim bulud və ya sizin serverlər",
+      body: "Banklar və dövlət qurumları üçün on-premise və internetdən təcrid olunmuş quraşdırma, ya da bizim buludda ayrıca mühit. Azərbaycan və ingilis dilində, Fərdi məlumatlar haqqında qanun (998-IIIQ) paket kimi.",
+    },
     visual: <DeployPanel stack={grcStack} />,
   },
 ];
 
 function WhyTabs() {
+  const az = useLang() === "az";
   const { ref, idx, select, bind, reduce } = useAutoAdvance<HTMLDivElement>(WHY.length, 6000);
   const w = WHY[idx];
   return (
@@ -226,7 +247,7 @@ function WhyTabs() {
                   <span className={`font-mono text-[12px] transition-colors ${on ? "text-brand" : "text-ink-3"}`}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className={`t-h3 transition-colors ${on ? "text-ink" : "text-ink-2 group-hover:text-ink"}`}>{item.title}</span>
+                  <span className={`t-h3 transition-colors ${on ? "text-ink" : "text-ink-2 group-hover:text-ink"}`}>{az ? item.az.title : item.title}</span>
                 </button>
                 <AnimatePresence initial={false}>
                   {on && (
@@ -238,10 +259,10 @@ function WhyTabs() {
                       className="overflow-hidden"
                     >
                       <div className="pb-6 pl-9">
-                        <p className="max-w-[48ch] text-[16px] leading-[1.6] text-ink-2">{item.body}</p>
+                        <p className="max-w-[48ch] text-[16px] leading-[1.6] text-ink-2">{az ? item.az.body : item.body}</p>
                         {item.link && (
                           <div className="mt-4">
-                            <TextLink to={item.link.to}>{item.link.label}</TextLink>
+                            <TextLink to={item.link.to}>{az ? (item.az.link ?? item.link.label) : item.link.label}</TextLink>
                           </div>
                         )}
                       </div>
@@ -261,6 +282,7 @@ function WhyTabs() {
    Advances on its own until the visitor interacts (see useAutoAdvance).
    Responsive WebP (srcset); only the next screen is fetched, after the current one has loaded and the page is idle. ── */
 function ScreenGallery() {
+  const az = useLang() === "az";
   const { ref, idx, select, bind, reduce } = useAutoAdvance<HTMLElement>(grcScreens.length, 4200);
   const sc = grcScreens[idx];
   const warmNext = () => {
@@ -275,7 +297,7 @@ function ScreenGallery() {
   };
   return (
     <figure ref={ref} {...bind}>
-      <div role="tablist" aria-label="GRC360 screens" className="-mx-1 flex gap-1 overflow-x-auto pb-3 [scrollbar-width:none]">
+      <div role="tablist" aria-label={az ? "GRC360 ekranları" : "GRC360 screens"} className="-mx-1 flex gap-1 overflow-x-auto pb-3 [scrollbar-width:none]">
         {grcScreens.map((g, i) => {
           const on = i === idx;
           return (
@@ -310,7 +332,7 @@ function ScreenGallery() {
             sizes={SCREEN_SIZES}
             width={GRC_SCREEN_SIZE.width}
             height={GRC_SCREEN_SIZE.height}
-            alt={sc.alt}
+            alt={az ? (grcAz.screenAlt[sc.key] ?? sc.alt) : sc.alt}
             onLoad={warmNext}
             initial={reduce ? false : { opacity: 0, scale: 1.01 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -322,7 +344,11 @@ function ScreenGallery() {
         </AnimatePresence>
       </div>
       <figcaption className="mt-3 flex items-center justify-between gap-4 font-mono text-[11px] text-ink-2">
-        <span>{sc.label}, current build. Demo data: names and records are made up.</span>
+        <span>
+          {az
+            ? `${sc.label}, hazırkı versiya. Demo məlumatlar: adlar və qeydlər uydurmadır.`
+            : `${sc.label}, current build. Demo data: names and records are made up.`}
+        </span>
         <span className="hidden sm:inline">
           {String(idx + 1).padStart(2, "0")} / {String(grcScreens.length).padStart(2, "0")}
         </span>
@@ -332,19 +358,25 @@ function ScreenGallery() {
 }
 
 export function Grc360() {
+  const az = useLang() === "az";
+  const rel = az ? grcAz.release : grcRelease;
   return (
     <>
       <PageHeader
         top={<Grc360Nav />}
-        eyebrow={`${grcRelease.label} · ${grcRelease.detail}`}
-        title="Governance, risk and compliance. All of it, in one place."
-        lead="GRC360 by Strativu: twelve connected modules in Azerbaijani and English. Run it in our cloud or on your own servers, air-gapped if you need to."
+        eyebrow={`${rel.label} · ${rel.detail}`}
+        title={az ? "İdarəetmə, risk və uyğunluq. Hamısı bir yerdə." : "Governance, risk and compliance. All of it, in one place."}
+        lead={
+          az
+            ? "GRC360 by Strativu: Azərbaycan və ingilis dilində on iki bir-birinə bağlı modul. Bizim buludda və ya öz serverlərinizdə işlədin, lazım olsa internetdən tam təcrid olunmuş halda."
+            : "GRC360 by Strativu: twelve connected modules in Azerbaijani and English. Run it in our cloud or on your own servers, air-gapped if you need to."
+        }
       >
         <div className="flex flex-wrap items-center gap-x-7 gap-y-4">
           <Btn to={GRC.earlyAccess} size="lg">
-            Request early access
+            {az ? "Erkən giriş istəyin" : "Request early access"}
           </Btn>
-          <TextLink to={`${GRC.base}#film`}>Watch the film</TextLink>
+          <TextLink to={`${GRC.base}#film`}>{az ? "Filmə baxın" : "Watch the film"}</TextLink>
         </div>
       </PageHeader>
 
@@ -360,9 +392,9 @@ export function Grc360() {
       <Section id="film">
         <div className="grid grid-cols-1 gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:items-start xl:gap-x-20">
           <Reveal>
-            <Eyebrow>The film</Eyebrow>
-            <h2 className="t-h2 text-ink">GRC360 in 40 seconds.</h2>
-            <p className={BODY}>Real screens from the current build, with demo data.</p>
+            <Eyebrow>{az ? "Film" : "The film"}</Eyebrow>
+            <h2 className="t-h2 text-ink">{az ? "40 saniyədə GRC360." : "GRC360 in 40 seconds."}</h2>
+            <p className={BODY}>{az ? "Hazırkı versiyanın real ekranları, demo məlumatlarla." : "Real screens from the current build, with demo data."}</p>
           </Reveal>
           <div>
             <div className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-surface shadow-[var(--e3)]">
@@ -370,7 +402,7 @@ export function Grc360() {
                 src={grcFilm.src}
                 webm={grcFilm.webm}
                 poster={grcFilm.poster}
-                label="GRC360 product film"
+                label={az ? "GRC360 məhsul filmi" : "GRC360 product film"}
                 describedBy="grc-film-scenes"
               />
             </div>
@@ -385,14 +417,14 @@ export function Grc360() {
           <dl className="grid grid-cols-2 gap-x-8 gap-y-10 border-t border-line pt-10 lg:grid-cols-4">
             {grcFigures.map((f, i) => (
               <Reveal key={f.label} delay={i * 0.06}>
-                <dt className="sr-only">{f.label}</dt>
+                <dt className="sr-only">{az ? grcAz.figures.at(i) : f.label}</dt>
                 <dd>
                   <span className="block text-[clamp(44px,5vw,72px)] font-semibold leading-none tracking-[-0.04em] text-ink">
                     {f.value}
                     {f.suffix}
                   </span>
                   <span aria-hidden className="mt-3 block font-mono text-[12px] uppercase leading-[1.5] tracking-[0.12em] text-ink-3">
-                    {f.label}
+                    {az ? grcAz.figures.at(i)?.toLocaleUpperCase("az") : f.label}
                   </span>
                 </dd>
               </Reveal>
@@ -406,13 +438,17 @@ export function Grc360() {
         <Duo
           head={
             <Reveal>
-              <Eyebrow>Modules</Eyebrow>
-              <h2 className="t-h2 text-ink">Twelve modules. One model underneath.</h2>
+              <Eyebrow>{az ? "Modullar" : "Modules"}</Eyebrow>
+              <h2 className="t-h2 text-ink">{az ? "On iki modul. Altında bir model." : "Twelve modules. One model underneath."}</h2>
             </Reveal>
           }
         >
           <Reveal>
-            <p className={BODY_R}>Every module reads and writes the same records, so a risk, the asset it affects, the control that treats it and the audit finding that tests it stay linked. Thirty-one screens in all.</p>
+            <p className={BODY_R}>
+              {az
+                ? "Hər modul eyni qeydləri oxuyur və yazır. Ona görə risk, təsir etdiyi aktiv, onu müalicə edən nəzarət tədbiri və onu yoxlayan audit tapıntısı bir-birinə bağlı qalır. Cəmi otuz bir ekran."
+                : "Every module reads and writes the same records, so a risk, the asset it affects, the control that treats it and the audit finding that tests it stay linked. Thirty-one screens in all."}
+            </p>
           </Reveal>
         </Duo>
         <Reveal className="mt-12">
@@ -423,8 +459,8 @@ export function Grc360() {
       {/* Why GRC360: four points as tabs, each with its own illustration */}
       <Section id="why" className="pt-0 md:pt-0">
         <Reveal>
-          <Eyebrow>Why GRC360</Eyebrow>
-          <h2 className="t-h2 max-w-[20ch] text-ink">Built for teams that answer to auditors.</h2>
+          <Eyebrow>{az ? "Niyə GRC360" : "Why GRC360"}</Eyebrow>
+          <h2 className="t-h2 max-w-[20ch] text-ink">{az ? "Auditorlara hesabat verən komandalar üçün." : "Built for teams that answer to auditors."}</h2>
         </Reveal>
         <Reveal className="mt-12">
           <WhyTabs />
@@ -435,18 +471,18 @@ export function Grc360() {
         <Duo
           head={
             <Reveal>
-              <Eyebrow>Where it stands</Eyebrow>
-              <h2 className="t-h2 text-ink">Built in the open.</h2>
+              <Eyebrow>{az ? "Hazırkı vəziyyət" : "Where it stands"}</Eyebrow>
+              <h2 className="t-h2 text-ink">{az ? "Açıq şəkildə qurulur." : "Built in the open."}</h2>
               <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <Btn to={GRC.earlyAccess} size="lg">
-                  Request early access
+                  {az ? "Erkən giriş istəyin" : "Request early access"}
                 </Btn>
-                <TextLink to={GRC.changelog}>Build log</TextLink>
+                <TextLink to={GRC.changelog}>{az ? "Dəyişiklik jurnalı (EN)" : "Build log"}</TextLink>
               </div>
             </Reveal>
           }
         >
-          <Rows headingLevel={3} items={grcStatus.map((st) => ({ title: st.k, body: st.v }))} />
+          <Rows headingLevel={3} items={(az ? grcAz.status : grcStatus).map((st) => ({ title: st.k, body: st.v }))} />
         </Duo>
       </Section>
     </>
@@ -539,13 +575,18 @@ export function Changelog() {
 }
 
 export function EarlyAccess() {
+  const az = useLang() === "az";
   return (
     <>
       <PageHeader
         top={<Grc360Nav />}
-        eyebrow={`Early access · ${grcRelease.detail}`}
-        title="Shape the product before it ships."
-        lead="GRC360 early access is open to a small number of teams that run risk and compliance work in Azerbaijan and the region."
+        eyebrow={az ? `Erkən giriş · ${grcAz.release.detail}` : `Early access · ${grcRelease.detail}`}
+        title={az ? "Məhsulu buraxılışdan əvvəl birlikdə formalaşdırın." : "Shape the product before it ships."}
+        lead={
+          az
+            ? "GRC360 erkən girişi Azərbaycanda və regionda risk və uyğunluq işi aparan az sayda komanda üçün açıqdır."
+            : "GRC360 early access is open to a small number of teams that run risk and compliance work in Azerbaijan and the region."
+        }
       />
       <Section className="pt-0 md:pt-0" logoHide>
         <Duo
@@ -555,8 +596,18 @@ export function EarlyAccess() {
               headingLevel={2}
               items={[
                 {
-                  title: "Who it is for",
-                  body: (
+                  title: az ? "Kimlər üçündür" : "Who it is for",
+                  body: az ? (
+                    <>
+                      Bank və maliyyə qurumlarında, dövlət qurumlarında və böyüyən şirkətlərdə ISO 27001, PCI DSS, Fərdi məlumatlar
+                      haqqında qanun və ya{" "}
+                      <Link to={GRC.frameworks} className={INLINE_LINK}>
+                        siyahımızdakı
+                      </Link>{" "}
+                      başqa framework-ə hazırlaşan təhlükəsizlik, risk və uyğunluq rəhbərləri. Qarşıdan gələn audit və ya tənzimləyici
+                      yoxlaması önəmlidir, komandanın ölçüsü yox.
+                    </>
+                  ) : (
                     <>
                       Security, risk and compliance leads at banks and financial institutions, public bodies and growing companies
                       preparing for ISO 27001, PCI DSS, Azerbaijan’s Personal Data Law or another framework on our{" "}
@@ -568,23 +619,29 @@ export function EarlyAccess() {
                   ),
                 },
                 {
-                  title: "What you get",
-                  body: "From Q1 2027: your own workspace on the development version, direct contact with our engineers, and priority for the frameworks you need. No cost during early access.",
+                  title: az ? "Nə əldə edirsiniz" : "What you get",
+                  body: az
+                    ? "2027-ci ilin I rübündən: inkişaf versiyasında öz iş mühitiniz, mühəndislərimizlə birbaşa əlaqə və sizə lazım olan framework-lərə üstünlük. Erkən giriş müddətində ödəniş yoxdur."
+                    : "From Q1 2027: your own workspace on the development version, direct contact with our engineers, and priority for the frameworks you need. No cost during early access.",
                 },
                 {
-                  title: "What we ask",
-                  body: "One 45-minute call a month, honest feedback on what breaks, and permission to use what we learn (never your data) to shape the product.",
+                  title: az ? "Nə xahiş edirik" : "What we ask",
+                  body: az
+                    ? "Ayda bir 45 dəqiqəlik görüş, nəyin işləmədiyi barədə səmimi rəy və öyrəndiklərimizdən (heç vaxt məlumatlarınızdan yox) məhsulu formalaşdırmaq üçün istifadəyə icazə."
+                    : "One 45-minute call a month, honest feedback on what breaks, and permission to use what we learn (never your data) to shape the product.",
                 },
                 {
-                  title: "What happens next",
-                  body: "We review requests weekly. A person from our team replies within five working days, and if it is not a fit yet, we say why.",
+                  title: az ? "Sonra nə olur" : "What happens next",
+                  body: az
+                    ? "Sorğulara hər həftə baxırıq. Komandamızdan bir nəfər beş iş günü ərzində cavab verir, hələ uyğun deyilsə, səbəbini deyirik."
+                    : "We review requests weekly. A person from our team replies within five working days, and if it is not a fit yet, we say why.",
                 },
               ]}
             />
           }
         >
           <Reveal>
-            <Eyebrow>Request access</Eyebrow>
+            <Eyebrow>{az ? "Giriş istəyin" : "Request access"}</Eyebrow>
           </Reveal>
           <Reveal delay={0.06} className="mt-8">
             <EarlyAccessForm />

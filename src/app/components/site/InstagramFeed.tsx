@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLang } from "../../i18n";
 import { Duo, TextLink, Eyebrow } from "./primitives";
 import { Reveal } from "./Reveal";
 import { site } from "../../data/site";
@@ -10,6 +11,7 @@ type Post = { id: string; image: string; caption: string; permalink: string; tim
  * Postlar /api/instagram-dan gəlir (api/instagram.ts). Post yoxdursa bölmə ümumiyyətlə göstərilmir.
  */
 export function InstagramFeed() {
+  const lang = useLang();
   const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
@@ -31,8 +33,8 @@ export function InstagramFeed() {
         <Duo
           head={
             <Reveal>
-              <Eyebrow>Behind the scenes</Eyebrow>
-              <h2 className="t-h2 text-ink">From our Instagram.</h2>
+              <Eyebrow>{lang === "az" ? "Pərdəarxası" : "Behind the scenes"}</Eyebrow>
+              <h2 className="t-h2 text-ink">{lang === "az" ? "Instagram-dan." : "From our Instagram."}</h2>
             </Reveal>
           }
         >
@@ -58,7 +60,7 @@ export function InstagramFeed() {
               ))}
             </ul>
             <Reveal className="mt-8">
-              <TextLink href={site.company.instagram}>@strativu on Instagram</TextLink>
+              <TextLink href={site.company.instagram}>{lang === "az" ? "Instagram-da @strativu" : "@strativu on Instagram"}</TextLink>
             </Reveal>
         </Duo>
       </div>

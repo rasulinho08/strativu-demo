@@ -18,6 +18,7 @@ export function Select({
   placeholder,
   invalid,
   describedBy,
+  labels,
 }: {
   id: string;
   name: string;
@@ -27,7 +28,10 @@ export function Select({
   placeholder: string;
   invalid?: boolean;
   describedBy?: string;
+  /** Shown text per option value (the value itself is what the form sends). */
+  labels?: Record<string, string>;
 }) {
+  const labelOf = (o: string) => labels?.[o] ?? o;
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -72,7 +76,7 @@ export function Select({
     else if (e.key === "Escape") setOpen(false);
     else if (e.key === "Tab") return setOpen(false);
     else if (e.key.length === 1) {
-      const i = options.findIndex((o) => o.toLowerCase().startsWith(e.key.toLowerCase()));
+      const i = options.findIndex((o) => labelOf(o).toLowerCase().startsWith(e.key.toLowerCase()));
       if (i >= 0) setActive(i);
       return;
     } else return;
@@ -97,7 +101,7 @@ export function Select({
         onKeyDown={onKey}
         className={`${fieldBase} flex h-12 cursor-pointer items-center justify-between gap-3 text-left ${value ? "text-ink" : "text-ink-3"}`}
       >
-        <span className="truncate">{value || placeholder}</span>
+        <span className="truncate">{value ? labelOf(value) : placeholder}</span>
         <ChevronDown
           aria-hidden
           className={`h-4 w-4 shrink-0 text-ink-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
@@ -131,7 +135,7 @@ export function Select({
                     i === active ? "bg-brand-soft text-ink" : "text-ink-2"
                   } ${selected ? "font-medium text-ink" : ""}`}
                 >
-                  {o}
+                  {labelOf(o)}
                   {selected && <Check aria-hidden className="h-4 w-4 text-brand" strokeWidth={2} />}
                 </li>
               );

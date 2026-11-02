@@ -5,25 +5,36 @@ import { Btn } from "./primitives";
 import { Select } from "./Select";
 import { site } from "../../data/site";
 import { errorCls, fieldCls, labelCls, smallLinkCls, textareaCls } from "./formStyles";
+import { localize, useLang, type Lang } from "../../i18n";
 
 /** Topic options (Website Blueprint v2). `/contact?topic=Other` pre-selects one. */
 const TOPICS = ["Product inquiry", "Partnership", "Investment", "Other"] as const;
+/** Topic labels on /az (the value sent stays English, so the email subject is the same in both languages). */
+const TOPIC_AZ: Record<string, string> = { "Product inquiry": "Məhsul sorğusu", Partnership: "Tərəfdaşlıq", Investment: "İnvestisiya", Other: "Digər" };
+
+const MSG = {
+  name: { en: "Please enter your full name.", az: "Ad və soyadınızı yazın." },
+  emailEmpty: { en: "Please enter your email address.", az: "E-poçt ünvanınızı yazın." },
+  emailBad: { en: "Please enter a valid email address, like name@company.com.", az: "Düzgün e-poçt ünvanı yazın, məsələn name@company.com." },
+  topic: { en: "Please choose a topic.", az: "Mövzu seçin." },
+  message: { en: "Please write a message.", az: "Mesajınızı yazın." },
+  consent: { en: "Please confirm that we may process your data to reply.", az: "Cavab vermək üçün məlumatlarınızı emal etməyimizə razılıq verin." },
+};
 
 type FieldName = "name" | "email" | "company" | "topic" | "message" | "consent";
 const FIELDS: FieldName[] = ["name", "email", "company", "topic", "message", "consent"];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Client-side check before anything is sent; the messages are shown next to the fields. */
-function validate(form: HTMLFormElement): Partial<Record<FieldName, string>> {
+function validate(form: HTMLFormElement, lang: Lang = "en"): Partial<Record<FieldName, string>> {
   const v = (n: string) => String(new FormData(form).get(n) ?? "").trim();
   const errors: Partial<Record<FieldName, string>> = {};
-  if (!v("name")) errors.name = "Please enter your full name.";
-  if (!v("email")) errors.email = "Please enter your email address.";
-  else if (!EMAIL_RE.test(v("email"))) errors.email = "Please enter a valid email address, like name@company.com.";
-  if (!v("topic")) errors.topic = "Please choose a topic.";
-  if (!v("message")) errors.message = "Please write a message.";
-  if (!(form.elements.namedItem("consent") as HTMLInputElement | null)?.checked)
-    errors.consent = "Please confirm that we may process your data to reply.";
+  if (!v("name")) errors.name = MSG.name[lang];
+  if (!v("email")) errors.email = MSG.emailEmpty[lang];
+  else if (!EMAIL_RE.test(v("email"))) errors.email = MSG.emailBad[lang];
+  if (!v("topic")) errors.topic = MSG.topic[lang];
+  if (!v("message")) errors.message = MSG.message[lang];
+  if (!(form.elements.namedItem("consent") as HTMLInputElement | null)?.checked) errors.consent = MSG.consent[lang];
   return errors;
 }
 
@@ -34,6 +45,8 @@ function validate(form: HTMLFormElement): Partial<Record<FieldName, string>> {
  * If the request fails for any reason that is not tied to a field, one visible fallback line offers the email address.
  */
 export function ContactForm() {
+  const lang = useLang();
+  const az = lang === "az";
   const [state, handleSubmit] = useFormspree(site.formspreeId);
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -55,8 +68,8 @@ export function ContactForm() {
   }, [params]);
 
   useEffect(() => {
-    if (state.succeeded) navigate("/contact/thank-you");
-  }, [state.succeeded, navigate]);
+    if (state.succeeded) navigate(localize("/contact/thank-you", lang));
+  }, [state.succeeded, navigate, lang]);
 
   // After a failed check or send: focus the first invalid field, or the error line.
   useEffect(() => {
@@ -86,7 +99,7 @@ export function ContactForm() {
     ) : null;
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    const errors = validate(e.currentTarget);
+    const errors = validate(e.currentTarget, lang);
     setClientErrors(errors);
     if (Object.keys(errors).length) {
       e.preventDefault();
@@ -100,7 +113,7 @@ export function ContactForm() {
   const recheck = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const f = e.target.name as FieldName;
     if (!clientErrors[f] || !formRef.current) return;
-    const next = validate(formRef.current);
+    const next = validate(formRef.current, lang);
     setClientErrors((prev) => ({ ...prev, [f]: next[f] }));
   };
 
@@ -111,20 +124,20 @@ export function ContactForm() {
       {/* Spam honeypot: hidden from people, filled in by bots; Formspree drops submissions that fill it. */}
       <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
       <p className="text-[13px] text-ink-3">
-        Fields marked <span aria-hidden>*</span>
-        <span className="sr-only">with an asterisk</span> are required.
+        {az ? "Ulduz" : "Fields marked"} <span aria-hidden>*</span>
+        <span className="sr-only">{az ? "işarəsi olan" : "with an asterisk"}</span> {az ? "ilə işarələnmiş sahələr məcburidir." : "are required."}
       </p>
       <div className="grid grid-cols-1 gap-x-10 gap-y-9 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className={labelCls}>
-            Full name <span aria-hidden>*</span>
+            {az ? "Ad və soyad" : "Full name"} <span aria-hidden>*</span>
           </label>
           <input id="name" name="name" required autoComplete="name" className={fieldCls} onChange={recheck} {...a11y("name")} />
           {err("name")}
         </div>
         <div>
           <label htmlFor="email" className={labelCls}>
-            Email <span aria-hidden>*</span>
+            {az ? "E-poçt" : "Email"} <span aria-hidden>*</span>
           </label>
           <input
             id="email"
@@ -141,14 +154,14 @@ export function ContactForm() {
         </div>
         <div>
           <label htmlFor="company" className={labelCls}>
-            Company <span className="font-normal text-ink-3">· optional</span>
+            {az ? "Şirkət" : "Company"} <span className="font-normal text-ink-3">· {az ? "istəyə görə" : "optional"}</span>
           </label>
           <input id="company" name="company" autoComplete="organization" className={fieldCls} {...a11y("company")} />
           {err("company")}
         </div>
         <div>
           <label htmlFor="topic" className={labelCls}>
-            Topic <span aria-hidden>*</span>
+            {az ? "Mövzu" : "Topic"} <span aria-hidden>*</span>
           </label>
           <Select
             id="topic"
@@ -159,7 +172,8 @@ export function ContactForm() {
               setClientErrors((prev) => ({ ...prev, topic: undefined }));
             }}
             options={TOPICS}
-            placeholder="Choose a topic"
+            labels={az ? TOPIC_AZ : undefined}
+            placeholder={az ? "Mövzu seçin" : "Choose a topic"}
             invalid={Boolean(message("topic"))}
             describedBy={message("topic") ? "topic-error" : undefined}
           />
@@ -168,7 +182,7 @@ export function ContactForm() {
       </div>
       <div>
         <label htmlFor="message" className={labelCls}>
-          Message <span aria-hidden>*</span>
+          {az ? "Mesaj" : "Message"} <span aria-hidden>*</span>
         </label>
         <textarea id="message" name="message" required rows={5} className={textareaCls} onChange={recheck} {...a11y("message")} />
         {err("message")}
@@ -187,12 +201,15 @@ export function ContactForm() {
           />
           <div className="text-[14.5px] leading-[1.6] text-ink-2">
             <label htmlFor="consent">
-              I agree to Strativu processing my data to respond to this message. <span aria-hidden>*</span>
+              {az
+                ? "Bu mesaja cavab vermək üçün Strativu-nun məlumatlarımı emal etməsinə razıyam."
+                : "I agree to Strativu processing my data to respond to this message."}{" "}
+              <span aria-hidden>*</span>
             </label>
             <p className="mt-1 text-[13px] text-ink-3">
-              How we handle it:{" "}
+              {az ? "Necə emal edirik:" : "How we handle it:"}{" "}
               <Link to="/privacy" className={smallLinkCls}>
-                Privacy Policy
+                {az ? "Məxfilik siyasəti (EN)" : "Privacy Policy"}
               </Link>
             </p>
           </div>
@@ -201,7 +218,7 @@ export function ContactForm() {
       </div>
       {showFormError && (
         <p ref={alertRef} tabIndex={-1} role="alert" className="text-[15px] leading-[1.6] text-warn focus:outline-none">
-          Could not send. Please email{" "}
+          {az ? "Göndərmək alınmadı. Zəhmət olmasa yazın:" : "Could not send. Please email"}{" "}
           <a href={`mailto:${site.company.email}`} className="underline underline-offset-4">
             {site.company.email}
           </a>
@@ -210,7 +227,7 @@ export function ContactForm() {
       )}
       <div className="pt-3">
         <Btn type="submit" size="lg" disabled={state.submitting}>
-          {state.submitting ? "Sending…" : "Send message"}
+          {state.submitting ? (az ? "Göndərilir…" : "Sending…") : az ? "Mesajı göndər" : "Send message"}
         </Btn>
       </div>
     </form>

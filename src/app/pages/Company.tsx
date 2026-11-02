@@ -5,6 +5,7 @@ import { InstagramFeed } from "../components/site/InstagramFeed";
 import { site } from "../data/site";
 import { GRC } from "../data/grc360";
 import { Split, SystemLog } from "../components/site/Visuals";
+import { useT } from "../i18n";
 
 /**
  * About Us (/about) and Security (/trust).
@@ -20,43 +21,73 @@ const MAILTO = `mailto:${site.company.email}`;
 
 /** Mission · Vision and Principles (Website Blueprint v2 → 05 About Us). */
 const MISSION_VISION = [
-  { k: "Mission", v: "To find meaningful problems across markets and build products that create real, measurable value." },
   {
-    k: "Vision",
-    v: "A trusted ecosystem of products, each solving one problem well, together improving how people and businesses work.",
+    k: { en: "Mission", az: "Missiya" },
+    v: {
+      en: "To find meaningful problems across markets and build products that create real, measurable value.",
+      az: "Müxtəlif bazarlarda vacib problemləri tapmaq və real, ölçülə bilən dəyər yaradan məhsullar qurmaq.",
+    },
+  },
+  {
+    k: { en: "Vision", az: "Vizyon" },
+    v: {
+      en: "A trusted ecosystem of products, each solving one problem well, together improving how people and businesses work.",
+      az: "Hər biri bir problemi yaxşı həll edən və birlikdə insanların və şirkətlərin işini yaxşılaşdıran etibarlı məhsullar ekosistemi.",
+    },
   },
 ];
 
 const PRINCIPLES = [
-  { n: "01", title: "Problem first", body: "We start with the problem, never the technology." },
-  { n: "02", title: "Value is measured", body: "If we can't show the value, we're not done." },
-  { n: "03", title: "Simplicity", body: "We handle the complexity so users don't have to." },
-  { n: "04", title: "Trust", body: "We build responsibly and say what's ready and what isn't." },
+  {
+    n: "01",
+    title: { en: "Problem first", az: "Əvvəl problem" },
+    body: { en: "We start with the problem, never the technology.", az: "Texnologiyadan yox, həmişə problemdən başlayırıq." },
+  },
+  {
+    n: "02",
+    title: { en: "Value is measured", az: "Dəyər ölçülür" },
+    body: { en: "If we can't show the value, we're not done.", az: "Dəyəri göstərə bilmiriksə, işimiz bitməyib." },
+  },
+  {
+    n: "03",
+    title: { en: "Simplicity", az: "Sadəlik" },
+    body: { en: "We handle the complexity so users don't have to.", az: "Mürəkkəbliyi biz üzərimizə götürürük ki, istifadəçi onunla məşğul olmasın." },
+  },
+  {
+    n: "04",
+    title: { en: "Trust", az: "Etibar" },
+    body: { en: "We build responsibly and say what's ready and what isn't.", az: "Məsuliyyətlə qururuq və nəyin hazır olduğunu, nəyin olmadığını açıq deyirik." },
+  },
 ];
 
 export function About() {
+  const t = useT();
   return (
     <>
       <PageHeader
-        eyebrow="About Us"
-        title="Why Strativu exists"
-        lead="Strativu is built on one belief: technology only matters when it creates value. Too many products start with what technology can do. We start with what people and businesses need."
+        eyebrow={t({ en: "About Us", az: "Haqqımızda" })}
+        title={t({ en: "Why Strativu exists", az: "Strativu niyə var" })}
+        lead={t({
+          en: "Strativu is built on one belief: technology only matters when it creates value. Too many products start with what technology can do. We start with what people and businesses need.",
+          az: "Strativu bir inanc üzərində qurulub: texnologiya yalnız dəyər yaradanda önəmlidir. Bir çox məhsul texnologiyanın nə edə biləcəyindən başlayır. Biz insanlara və şirkətlərə nəyin lazım olduğundan başlayırıq.",
+        })}
       />
 
       <Section>
         <Duo
           head={
             <Reveal>
-              <Eyebrow>Story</Eyebrow>
-              <h2 className="t-h2 text-ink">Why an ecosystem</h2>
+              <Eyebrow>{t({ en: "Story", az: "Hekayə" })}</Eyebrow>
+              <h2 className="t-h2 text-ink">{t({ en: "Why an ecosystem", az: "Niyə ekosistem" })}</h2>
             </Reveal>
           }
         >
           <Reveal delay={0.06}>
             <p className={BODY}>
-              That's why Strativu is an ecosystem, not a single product or a single industry. Wherever we find a meaningful problem,
-              we build a focused product to solve it. Today our products serve organisations in governance and digital security.
-              Tomorrow, they may serve entirely different markets.
+              {t({
+                en: "That's why Strativu is an ecosystem, not a single product or a single industry. Wherever we find a meaningful problem, we build a focused product to solve it. Today our products serve organisations in governance and digital security. Tomorrow, they may serve entirely different markets.",
+                az: "Buna görə Strativu tək bir məhsul və ya tək bir sahə deyil, ekosistemdir. Harada vacib bir problem tapırıqsa, onu həll etmək üçün fokuslanmış məhsul qururuq. Bu gün məhsullarımız idarəetmə və rəqəmsal təhlükəsizlik sahəsində təşkilatlara xidmət edir. Sabah tamamilə fərqli bazarlara xidmət edə bilər.",
+              })}
             </p>
           </Reveal>
         </Duo>
@@ -64,13 +95,13 @@ export function About() {
 
       <Section className="pt-0 md:pt-0">
         <Reveal>
-          <h2 className="eyebrow">Mission · Vision</h2>
+          <h2 className="eyebrow">{t({ en: "Mission · Vision", az: "Missiya · Vizyon" })}</h2>
         </Reveal>
         <dl className="mt-10 grid grid-cols-1 border-t border-line md:grid-cols-2">
           {MISSION_VISION.map((m, i) => (
-            <Reveal key={m.k} delay={i * 0.08} className={`border-b border-line py-10 md:border-b-0 md:py-12 ${i ? "md:border-l md:pl-12" : "md:pr-12"}`}>
-              <dt className="mono-label">{m.k}</dt>
-              <dd className="mt-5 max-w-[30ch] text-[clamp(22px,2.3vw,30px)] font-medium leading-[1.3] tracking-[-0.015em] text-ink">{m.v}</dd>
+            <Reveal key={m.k.en} delay={i * 0.08} className={`border-b border-line py-10 md:border-b-0 md:py-12 ${i ? "md:border-l md:pl-12" : "md:pr-12"}`}>
+              <dt className="mono-label">{t(m.k)}</dt>
+              <dd className="mt-5 max-w-[30ch] text-[clamp(22px,2.3vw,30px)] font-medium leading-[1.3] tracking-[-0.015em] text-ink">{t(m.v)}</dd>
             </Reveal>
           ))}
         </dl>
@@ -81,12 +112,12 @@ export function About() {
           sticky
           head={
             <Reveal>
-              <Eyebrow>Principles</Eyebrow>
-              <h2 className="t-h2 text-ink">How we work</h2>
+              <Eyebrow>{t({ en: "Principles", az: "Prinsiplər" })}</Eyebrow>
+              <h2 className="t-h2 text-ink">{t({ en: "How we work", az: "Necə işləyirik" })}</h2>
             </Reveal>
           }
         >
-          <Rows headingLevel={3} items={PRINCIPLES} />
+          <Rows headingLevel={3} items={PRINCIPLES.map((p) => ({ n: p.n, title: t(p.title), body: t(p.body) }))} />
         </Duo>
       </Section>
 

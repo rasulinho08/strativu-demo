@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
 import { Reveal } from "./Reveal";
+import { useLocalize } from "../../i18n";
 
 export function Container({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <div className={`mx-auto w-full max-w-[1200px] px-5 md:px-8 ${className}`}>{children}</div>;
@@ -181,6 +182,7 @@ export function Btn({
     invert: "bg-[var(--ground)] text-[var(--ink)] hover:bg-[var(--surface-2)]",
   };
   const cls = `${base} ${sizes[size]} ${variants[variant]} ${className}`;
+  const L = useLocalize();
 
   const inner = (
     <>
@@ -191,7 +193,7 @@ export function Btn({
 
   if (to)
     return (
-      <Link to={to} className={cls}>
+      <Link to={L(to)} className={cls}>
         {inner}
       </Link>
     );
@@ -221,6 +223,7 @@ export function TextLink({
 }) {
   // py-3/-my-3: a 44px tap target without changing the layout
   const cls = `group -my-3 inline-flex items-center gap-1.5 py-3 text-[14.5px] font-medium text-brand-ink transition-colors hover:text-brand ${className}`;
+  const L = useLocalize();
   const inner = (
     <>
       <span className="link-line">{children}</span>
@@ -235,7 +238,7 @@ export function TextLink({
       </a>
     );
   return (
-    <Link to={to ?? "/"} className={cls}>
+    <Link to={L(to ?? "/")} className={cls}>
       {inner}
     </Link>
   );

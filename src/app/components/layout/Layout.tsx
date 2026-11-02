@@ -9,35 +9,45 @@ import { ErrorBoundary } from "../site/ErrorBoundary";
 import { useRouteMeta } from "../site/Seo";
 import { ThemeToggle } from "../theme-toggle";
 import { site } from "../../data/site";
+import { LangSwitch, basePath, langOf, localize, type Lang } from "../../i18n";
 
 /**
  * Main nav (Website Blueprint v2): Home · Products · About Us · Contact.
  * `match`: the section the link lights up for — /products/* (incl. the GRC360 pages) marks Products, /contact/* marks Contact.
  */
 const NAV = [
-  { label: "Home", to: "/", match: "/" },
-  { label: "Products", to: "/products", match: "/products" },
-  { label: "About Us", to: "/about", match: "/about" },
-  { label: "Contact", to: "/contact", match: "/contact" },
+  { label: { en: "Home", az: "Ana səhifə" }, to: "/", match: "/" },
+  { label: { en: "Products", az: "Məhsullar" }, to: "/products", match: "/products" },
+  { label: { en: "Insights", az: "Bilik bazası" }, to: "/insights", match: "/insights" },
+  { label: { en: "About Us", az: "Haqqımızda" }, to: "/about", match: "/about" },
+  { label: { en: "Contact", az: "Əlaqə" }, to: "/contact", match: "/contact" },
 ];
-const inSection = (pathname: string, match: string) =>
-  match === "/" ? pathname === "/" : pathname === match || pathname.startsWith(match + "/");
+/** Works for both languages: /az/products/... lights Products like /products/... does. */
+const inSection = (pathname: string, match: string) => {
+  const p = basePath(pathname);
+  return match === "/" ? p === "/" : p === match || p.startsWith(match + "/");
+};
 
 type FooterLink = { label: string; to?: string; href?: string };
-/** Footer qrupları (blueprint → 07 Footer). "Security" (/trust) blueprint-ə yeganə əlavədir (security.txt oraya baxır). */
-const FOOTER_GROUPS: { title: string; links: FooterLink[] }[] = [
-  { title: "Pages", links: NAV.map((n) => ({ label: n.label, to: n.to })) },
+/**
+ * Footer qrupları (blueprint → 07 Footer). "Security" (/trust) blueprint-ə yeganə əlavədir (security.txt oraya baxır).
+ * Hüquqi səhifələr yalnız ingiliscədir (tərcümə hüquqşünas yoxlamasından sonra); AZ footer-də bu qeyd olunur.
+ */
+const footerGroups = (lang: Lang): { id: string; title: string; links: FooterLink[] }[] => [
+  { id: "pages", title: lang === "az" ? "Səhifələr" : "Pages", links: NAV.map((n) => ({ label: n.label[lang], to: n.to })) },
   {
-    title: "Legal",
+    id: "legal",
+    title: lang === "az" ? "Hüquqi (EN)" : "Legal",
     links: [
-      { label: "Privacy Policy", to: "/privacy" },
-      { label: "Terms of Use", to: "/terms" },
-      { label: "Cookie Policy", to: "/cookies" },
-      { label: "Security", to: "/trust" },
+      { label: lang === "az" ? "Məxfilik siyasəti" : "Privacy Policy", to: "/privacy" },
+      { label: lang === "az" ? "İstifadə şərtləri" : "Terms of Use", to: "/terms" },
+      { label: lang === "az" ? "Cookie siyasəti" : "Cookie Policy", to: "/cookies" },
+      { label: lang === "az" ? "Təhlükəsizlik" : "Security", to: "/trust" },
     ],
   },
   {
-    title: "Contact",
+    id: "contact",
+    title: lang === "az" ? "Əlaqə" : "Contact",
     links: [
       { label: site.company.email, href: `mailto:${site.company.email}` },
       ...(site.company.linkedin ? [{ label: "LinkedIn", href: site.company.linkedin }] : []),
@@ -53,6 +63,8 @@ const FOOTER_LINE = site.tagline;
 
 export default function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
+  const lang = langOf(location.pathname);
+  const L = (to: string) => localize(to, lang);
   useRouteMeta();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -160,7 +172,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-[6px] focus:border focus:border-line focus:bg-surface focus:px-4 focus:py-2"
       >
-        Skip to content
+        {lang === "az" ? "Məzmuna keç" : "Skip to content"}
       </a>
 
       {/* ─── Header: floating rounded bar. Logo left · pages centre · theme toggle right ─── */}
@@ -186,11 +198,11 @@ export default function Layout({ children }: { children: ReactNode }) {
               scrolled ? "opacity-100" : "opacity-0"
             }`}
           />
-          <Logo animate />
+          <Logo animate to={L("/")} />
 
           {/* md–lg: in the flow between logo and toggle; from lg: centred on the bar. */}
           <nav
-            aria-label="Primary"
+            aria-label={lang === "az" ? "Əsas menyu" : "Primary"}
             className="hidden items-center gap-0.5 md:flex lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:gap-1"
             onMouseLeave={() => setHovered(null)}
           >
@@ -200,7 +212,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               return (
                 <NavLink
                   key={n.to}
-                  to={n.to}
+                  to={L(n.to)}
                   end={n.to === "/"}
                   aria-current={active ? "page" : undefined}
                   onMouseEnter={() => setHovered(n.to)}
@@ -218,13 +230,14 @@ export default function Layout({ children }: { children: ReactNode }) {
                       transition={{ type: "spring", stiffness: 420, damping: 34 }}
                     />
                   )}
-                  {n.label}
+                  {n.label[lang]}
                 </NavLink>
               );
             })}
           </nav>
 
-          <div className="hidden items-center md:flex">
+          <div className="hidden items-center gap-1 md:flex">
+            <LangSwitch />
             <ThemeToggle className="text-ink-2 hover:bg-surface-2 hover:text-ink" />
           </div>
 
@@ -236,7 +249,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
               aria-controls="mobile-nav"
-              aria-label={open ? "Close menu" : "Open menu"}
+              aria-label={open ? (lang === "az" ? "Menyunu bağla" : "Close menu") : lang === "az" ? "Menyunu aç" : "Open menu"}
             >
               {open ? <X className="h-5 w-5" strokeWidth={1.75} /> : <Menu className="h-5 w-5" strokeWidth={1.75} />}
             </button>
@@ -254,7 +267,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             id="mobile-nav"
             role="dialog"
             aria-modal="true"
-            aria-label="Menu"
+            aria-label={lang === "az" ? "Menyu" : "Menu"}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -262,22 +275,23 @@ export default function Layout({ children }: { children: ReactNode }) {
             className="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-ground pt-24 md:hidden"
           >
             <Container className="flex h-full flex-col pt-4">
-              <nav aria-label="Mobile" className="flex flex-col">
+              <nav aria-label={lang === "az" ? "Mobil menyu" : "Mobile"} className="flex flex-col">
                 {NAV.map((n) => (
                   <NavLink
                     key={n.to}
-                    to={n.to}
+                    to={L(n.to)}
                     end={n.to === "/"}
                     aria-current={inSection(location.pathname, n.match) ? "page" : undefined}
                     className={`border-b border-line-soft py-4 text-[20px] ${
                       inSection(location.pathname, n.match) ? "font-medium text-ink" : "text-ink-2"
                     }`}
                   >
-                    {n.label}
+                    {n.label[lang]}
                   </NavLink>
                 ))}
               </nav>
-              <div className="mt-8 flex items-center justify-between gap-4">
+              <LangSwitch className="mt-6" />
+              <div className="mt-6 flex items-center justify-between gap-4">
                 <a href={`mailto:${site.company.email}`} className="-my-3 py-3 text-[15px] text-ink-2">
                   {site.company.email}
                 </a>
@@ -297,7 +311,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <Container className="py-12 md:py-14">
           <div className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-[minmax(0,5fr)_repeat(3,minmax(0,2fr))] md:gap-x-10">
             <div className="col-span-2 md:col-span-1">
-              <Logo />
+              <Logo to={L("/")} />
               <p className="mt-5 text-[15px] leading-[1.6] text-ink-2">
                 {/* manifest: one sentence per line */}
                 {site.tagline.split(/(?<=\.)\s+/).map((line) => (
@@ -307,14 +321,14 @@ export default function Layout({ children }: { children: ReactNode }) {
                 ))}
               </p>
             </div>
-            {FOOTER_GROUPS.map((g) => (
-              <nav key={g.title} aria-label={`Footer ${g.title}`} className={g.title === "Contact" ? "col-span-2 sm:col-span-1" : ""}>
+            {footerGroups(lang).map((g) => (
+              <nav key={g.id} aria-label={`Footer ${g.title}`} className={g.id === "contact" ? "col-span-2 sm:col-span-1" : ""}>
                 <h2 className="mono-label">{g.title}</h2>
                 <ul className="mt-4 space-y-2.5">
                   {g.links.map((l) => (
                     <li key={l.label}>
                       {l.to ? (
-                        <Link to={l.to} className="-my-1.5 inline-block py-1.5 text-[14px] text-ink-2 transition-colors hover:text-ink">
+                        <Link to={L(l.to)} className="-my-1.5 inline-block py-1.5 text-[14px] text-ink-2 transition-colors hover:text-ink">
                           {l.label}
                         </Link>
                       ) : l.href?.startsWith("mailto:") ? (
@@ -330,7 +344,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                         >
                           {l.label}
                           <span aria-hidden> ↗</span>
-                          <span className="sr-only"> (opens in a new tab)</span>
+                          <span className="sr-only">{lang === "az" ? " (yeni tabda açılır)" : " (opens in a new tab)"}</span>
                         </a>
                       )}
                     </li>
@@ -341,7 +355,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           </div>
           <div className="mt-12 border-t border-line-soft pt-6 text-[13px] text-ink-3">
             <p>
-              © {new Date().getFullYear()} {site.name}. All rights reserved.
+              © {new Date().getFullYear()} {site.name}. {lang === "az" ? "Bütün hüquqlar qorunur." : "All rights reserved."}
               {site.company.registrationNo && ` · ${site.company.legalName} · ${site.company.registrationNo}`}
             </p>
           </div>

@@ -1,12 +1,14 @@
 import { Btn, Container } from "./primitives";
 import { Reveal } from "./Reveal";
 import { site } from "../../data/site";
+import { useLang } from "../../i18n";
 
 /**
  * Closing stage on the home page: a tall, transparent section — the 3D mark flies back to centre above the text
  * (LogoScene looks for `[data-logo-stage]`). One action ("Contact us") and the email address.
  */
 export function ClosingCTA({ title, body }: { title: string; body: string }) {
+  const lang = useLang();
   return (
     <section data-logo-stage className="stage-pad relative flex min-h-[100svh] flex-col justify-end pb-20 md:pb-28">
       <Container>
@@ -18,7 +20,7 @@ export function ClosingCTA({ title, body }: { title: string; body: string }) {
             <p className="mx-auto mt-6 max-w-[48ch] text-[17px] leading-[1.65] text-ink-2">{body}</p>
             <div className="mt-10 flex flex-col items-center justify-center gap-5 sm:flex-row sm:gap-8">
               <Btn to="/contact" size="lg">
-                Contact us
+                {lang === "az" ? "Bizimlə əlaqə" : "Contact us"}
               </Btn>
               <a href={`mailto:${site.company.email}`} className="link-line text-[15px] text-ink-2 hover:text-ink">
                 {site.company.email}

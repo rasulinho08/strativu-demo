@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useInView, useReducedMotion } from "motion/react";
 import { Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { useLang } from "../../i18n";
 
 /**
  * Məhsul filmi: səssiz, ekrana gələndə öz-özünə oynayır, çıxanda dayanır (trafik və batareyaya qənaət).
@@ -21,6 +22,7 @@ export function Film({
   /** id of the text alternative (FilmScenes) */
   describedBy?: string;
 }) {
+  const az = useLang() === "az";
   const ref = useRef<HTMLVideoElement>(null);
   const inView = useInView(ref, { margin: "-15% 0px -15% 0px" });
   const reduce = useReducedMotion();
@@ -73,7 +75,7 @@ export function Film({
                 v.pause();
               }
             }}
-            aria-label={playing ? "Pause film" : "Play film"}
+            aria-label={playing ? (az ? "Filmi dayandır" : "Pause film") : az ? "Filmi oynat" : "Play film"}
             className={`${btn} w-11`}
           >
             {playing ? <Pause className="h-4 w-4" aria-hidden /> : <Play className="h-4 w-4" aria-hidden />}
@@ -88,11 +90,11 @@ export function Film({
                 v.play().catch(() => {});
               }
             }}
-            aria-label={muted ? "Turn sound on" : "Turn sound off"}
+            aria-label={muted ? (az ? "Səsi aç" : "Turn sound on") : az ? "Səsi söndür" : "Turn sound off"}
             className={`${btn} px-4`}
           >
             {muted ? <VolumeX className="h-4 w-4" aria-hidden /> : <Volume2 className="h-4 w-4" aria-hidden />}
-            <span className="hidden sm:inline">{muted ? "Sound on" : "Sound off"}</span>
+            <span className="hidden sm:inline">{muted ? (az ? "Səsi aç" : "Sound on") : az ? "Səsi söndür" : "Sound off"}</span>
           </button>
         </div>
       )}
@@ -115,19 +117,36 @@ export const FILM_SCENES = [
   "A closing card with the module names and strativu.com.",
 ];
 
+/** Azərbaycanca mətn alternativi (/az səhifəsi). */
+export const FILM_SCENES_AZ = [
+  "Masanın üstünə səpələnmiş cədvəllər, e-poçt yazışmaları və yapışqan qeydlər, yanında “Managing governance, risk and compliance across multiple systems shouldn’t be this complicated.” sətri.",
+  "GRC360 loqosu.",
+  "Command Center: gecikmiş, bugünkü və gələcək tapşırıqlar, altında aktiv və biznes risklərinin istilik xəritələri.",
+  "Organization Hub və Asset Management: istifadəçilər, departamentlər (15 aktiv riski olan IT departamenti) və müştəri bazası üçün aktiv qeydi.",
+  "Risk Management: müştəri bazasına icazəsiz giriş riski — ilkin qiymət, Mitigate müalicəsi, onu müalicə edən nəzarət tədbirləri (çoxfaktorlu autentifikasiya, rüblük giriş baxışı), müalicə layihəsi və risk sahibləri.",
+  "Compliance Hub: uyğunluq paketləri (Fərdi məlumatlar haqqında qanun, PCI DSS v4.0.1, GDPR, NIST CSF 2.0, SOC 2 Type II, ISO/IEC 27001:2022), ISO/IEC 27001:2022 paketinin bəndləri və bağlı olduğu risk və paketləri göstərən nəzarət qeydi.",
+  "Settings: giriş üsulları (lokal, OAuth, SAML və LDAP) və sistem jurnalına keçid.",
+  "Modul adları və strativu.com ilə son kadr.",
+];
+
 export function FilmScenes({ id, className = "" }: { id: string; className?: string }) {
+  const az = useLang() === "az";
   return (
     <details className={`group text-[14px] leading-[1.6] text-ink-2 ${className}`}>
       <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 font-medium text-brand-ink hover:text-brand [&::-webkit-details-marker]:hidden">
         <span aria-hidden className="inline-block transition-transform duration-200 group-open:rotate-90">
           ›
         </span>
-        What the film shows
+        {az ? "Filmdə nə göstərilir" : "What the film shows"}
       </summary>
       <div id={id}>
-        <p className="mt-2 text-ink-2">A 40-second walk through the current build, with demo data. The sound is off until you turn it on.</p>
+        <p className="mt-2 text-ink-2">
+          {az
+            ? "Hazırkı versiya üzrə 40 saniyəlik gəzinti, demo məlumatlarla. Səsi siz açana qədər söndürülüdür."
+            : "A 40-second walk through the current build, with demo data. The sound is off until you turn it on."}
+        </p>
         <ol className="mt-3 list-decimal space-y-1.5 pl-5">
-          {FILM_SCENES.map((t) => (
+          {(az ? FILM_SCENES_AZ : FILM_SCENES).map((t) => (
             <li key={t}>{t}</li>
           ))}
         </ol>

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router";
 import { site } from "../../data/site";
 import { fullTitle, metaFor, NOT_FOUND_META } from "../../data/meta";
+import { alternates, langOf } from "../../i18n/paths";
 
 function upsertMeta(attr: "name" | "property", key: string, content: string) {
   let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
@@ -27,6 +28,19 @@ export function useRouteMeta() {
     const url = `${site.domain}${path}`;
     const image = `${site.domain}${site.ogImage}`;
     document.title = title;
+    document.documentElement.lang = langOf(pathname);
+    // hreflang pair (the static heads carry the same; kept in sync on client navigation)
+    document.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach((l) => l.remove());
+    const alt = meta.noindex ? null : alternates(path);
+    if (alt) {
+      for (const [hl, p] of [["en", alt.en], ["az", alt.az], ["x-default", alt.en]] as const) {
+        const l = document.createElement("link");
+        l.rel = "alternate";
+        l.hreflang = hl;
+        l.href = `${site.domain}${p}`;
+        document.head.appendChild(l);
+      }
+    }
     upsertMeta("name", "description", meta.description);
     upsertMeta("name", "robots", meta.noindex ? "noindex" : "index, follow");
     upsertMeta("property", "og:title", title);

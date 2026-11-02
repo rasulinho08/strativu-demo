@@ -5,14 +5,16 @@ import { useFormspree } from "../../lib/formspree";
 import { Btn } from "./primitives";
 import { site } from "../../data/site";
 import { errorCls, fieldCls, labelCls, smallLinkCls, textareaCls } from "./formStyles";
+import { useLang } from "../../i18n";
 
-const optional = <span className="font-normal text-ink-3"> · optional</span>;
+const Optional = ({ az }: { az: boolean }) => <span className="font-normal text-ink-3"> · {az ? "istəyə görə" : "optional"}</span>;
 
 type FieldName = "name" | "email" | "company" | "role" | "frameworks" | "message";
 const FIELDS: FieldName[] = ["name", "email", "company", "role", "frameworks", "message"];
 
 /** GRC360 early-access request (/products/grc360/early-access). Posts to Formspree with form=early-access. */
 export function EarlyAccessForm() {
+  const az = useLang() === "az";
   const [state, handleSubmit] = useFormspree(site.formspreeId);
   const doneRef = useRef<HTMLParagraphElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -51,10 +53,12 @@ export function EarlyAccessForm() {
     return (
       <div role="status" className="border-t border-line pt-8">
         <p ref={doneRef} tabIndex={-1} className="t-h3 flex items-center gap-3 text-ink focus:outline-none">
-          <Check className="h-5 w-5 text-brand" strokeWidth={2} aria-hidden /> Received.
+          <Check className="h-5 w-5 text-brand" strokeWidth={2} aria-hidden /> {az ? "Qəbul olundu." : "Received."}
         </p>
         <p className="mt-3 max-w-[48ch] text-[16px] leading-[1.6] text-ink-2">
-          We review requests weekly. A person from our team, not an automated email, replies within five working days.
+          {az
+            ? "Sorğulara hər həftə baxırıq. Avtomatik məktub yox, komandamızdan bir nəfər beş iş günü ərzində cavab verir."
+            : "We review requests weekly. A person from our team, not an automated email, replies within five working days."}
         </p>
       </div>
     );
@@ -68,14 +72,22 @@ export function EarlyAccessForm() {
       <div className="grid grid-cols-1 gap-x-10 gap-y-9 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className={labelCls}>
-            Name
+            {az ? "Ad" : "Name"}
           </label>
-          <input id="name" name="name" required autoComplete="name" className={fieldCls} placeholder="Full name" {...a11y("name")} />
+          <input
+            id="name"
+            name="name"
+            required
+            autoComplete="name"
+            className={fieldCls}
+            placeholder={az ? "Ad və soyad" : "Full name"}
+            {...a11y("name")}
+          />
           {err("name")}
         </div>
         <div>
           <label htmlFor="email" className={labelCls}>
-            Work email
+            {az ? "İş e-poçtu" : "Work email"}
           </label>
           <input
             id="email"
@@ -91,7 +103,7 @@ export function EarlyAccessForm() {
         </div>
         <div>
           <label htmlFor="company" className={labelCls}>
-            Company
+            {az ? "Şirkət" : "Company"}
           </label>
           <input
             id="company"
@@ -99,21 +111,22 @@ export function EarlyAccessForm() {
             required
             autoComplete="organization"
             className={fieldCls}
-            placeholder="Company name"
+            placeholder={az ? "Şirkətin adı" : "Company name"}
             {...a11y("company")}
           />
           {err("company")}
         </div>
         <div>
           <label htmlFor="role" className={labelCls}>
-            Role{optional}
+            {az ? "Vəzifə" : "Role"}
+            <Optional az={az} />
           </label>
           <input
             id="role"
             name="role"
             autoComplete="organization-title"
             className={fieldCls}
-            placeholder="e.g. Head of Security"
+            placeholder={az ? "məs. Təhlükəsizlik rəhbəri" : "e.g. Head of Security"}
             {...a11y("role")}
           />
           {err("role")}
@@ -121,28 +134,34 @@ export function EarlyAccessForm() {
       </div>
       <div>
         <label htmlFor="frameworks" className={labelCls}>
-          Frameworks you are audited against{optional}
+          {az ? "Hansı framework-lər üzrə audit olunursunuz" : "Frameworks you are audited against"}
+          <Optional az={az} />
         </label>
         <input id="frameworks" name="frameworks" className={fieldCls} placeholder="Law 998-IIIQ, PCI DSS, ISO 27001, …" {...a11y("frameworks")} />
         {err("frameworks")}
       </div>
       <div>
         <label htmlFor="message" className={labelCls}>
-          Your compliance programme today{optional}
+          {az ? "Bu gün uyğunluq proqramınız" : "Your compliance programme today"}
+          <Optional az={az} />
         </label>
         <textarea
           id="message"
           name="message"
           rows={4}
           className={textareaCls}
-          placeholder="Team size, tools you use today, your next audit or regulator review."
+          placeholder={
+            az
+              ? "Komandanın ölçüsü, bu gün istifadə etdiyiniz alətlər, növbəti audit və ya tənzimləyici yoxlaması."
+              : "Team size, tools you use today, your next audit or regulator review."
+          }
           {...a11y("message")}
         />
         {err("message")}
       </div>
       {showFormError && (
         <p ref={alertRef} tabIndex={-1} role="alert" className="text-[15px] leading-[1.6] text-warn focus:outline-none">
-          Could not send. Please email{" "}
+          {az ? "Göndərmək alınmadı. Zəhmət olmasa yazın:" : "Could not send. Please email"}{" "}
           <a href={`mailto:${site.company.email}`} className="underline underline-offset-4">
             {site.company.email}
           </a>
@@ -151,12 +170,12 @@ export function EarlyAccessForm() {
       )}
       <div className="flex flex-col gap-4 pt-3 sm:items-start">
         <Btn type="submit" size="lg" disabled={state.submitting}>
-          {state.submitting ? "Sending…" : "Request early access"}
+          {state.submitting ? (az ? "Göndərilir…" : "Sending…") : az ? "Erkən giriş istəyin" : "Request early access"}
         </Btn>
         <p className="text-[13px] leading-[1.6] text-ink-3">
-          No mailing list. We use these details only to reply to you.{" "}
+          {az ? "Poçt siyahısı yoxdur. Bu məlumatları yalnız sizə cavab vermək üçün istifadə edirik." : "No mailing list. We use these details only to reply to you."}{" "}
           <Link to="/privacy" className={smallLinkCls}>
-            Privacy Policy
+            {az ? "Məxfilik siyasəti (EN)" : "Privacy Policy"}
           </Link>
           .
         </p>

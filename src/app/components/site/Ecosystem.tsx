@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from "motion/react";
+import { useLang } from "../../i18n";
 
 /**
  * "What Strativu is" — a monochrome line illustration of the ecosystem: Strativu at the centre, thin lines to the
@@ -7,16 +8,16 @@ import { motion, useReducedMotion } from "motion/react";
  * With reduced motion it is a still drawing.
  */
 
-type Node = { x: number; y: number; label: string; sub: string; future?: boolean };
+type Node = { x: number; y: number; label: { en: string; az: string }; sub: { en: string; az: string }; future?: boolean };
 
 const C = { x: 240, y: 210 };
 const ORBIT = 168;
 /** Nodes sit on the orbit; angle in degrees (0 = right, negative = up). */
 const at = (deg: number) => ({ x: C.x + ORBIT * Math.cos((deg * Math.PI) / 180), y: C.y + ORBIT * Math.sin((deg * Math.PI) / 180) });
 const NODES: Node[] = [
-  { ...at(-42), label: "GRC360", sub: "Early access" },
-  { ...at(34), label: "Cipher", sub: "Coming soon" },
-  { ...at(196), label: "Next", sub: "Any market", future: true },
+  { ...at(-42), label: { en: "GRC360", az: "GRC360" }, sub: { en: "Early access", az: "Erkən giriş" } },
+  { ...at(34), label: { en: "Cipher", az: "Cipher" }, sub: { en: "Coming soon", az: "Tezliklə" } },
+  { ...at(196), label: { en: "Next", az: "Növbəti" }, sub: { en: "Any market", az: "Hər bazar" }, future: true },
 ];
 const R_CENTRE = 60;
 const R_NODE = 50;
@@ -33,6 +34,7 @@ function edge(n: Node) {
 
 export function EcosystemDiagram({ className = "" }: { className?: string }) {
   const reduce = useReducedMotion();
+  const lang = useLang();
   return (
     <figure className={className}>
       <svg
@@ -42,7 +44,7 @@ export function EcosystemDiagram({ className = "" }: { className?: string }) {
         className="block h-auto w-full overflow-visible"
       >
         <title id="ecosystem-title">
-          The Strativu ecosystem: Strativu at the centre, connected to GRC360, Cipher and the next product.
+          {lang === "az" ? "Strativu ekosistemi: mərkəzdə Strativu, ona GRC360, Cipher və növbəti məhsul bağlıdır." : "The Strativu ecosystem: Strativu at the centre, connected to GRC360, Cipher and the next product."}
         </title>
         {/* faint orbit */}
         <circle cx={C.x} cy={C.y} r={ORBIT} fill="none" stroke="var(--line)" strokeWidth={1} strokeDasharray="2 6" />
@@ -51,7 +53,7 @@ export function EcosystemDiagram({ className = "" }: { className?: string }) {
           const e = edge(n);
           const path = `M${e.x1} ${e.y1} L${e.x2} ${e.y2}`;
           return (
-            <g key={n.label}>
+            <g key={n.label.en}>
               <motion.path
                 d={path}
                 fill="none"
@@ -79,7 +81,7 @@ export function EcosystemDiagram({ className = "" }: { className?: string }) {
         </text>
 
         {NODES.map((n) => (
-          <g key={`${n.label}-node`}>
+          <g key={`${n.label.en}-node`}>
             <circle
               cx={n.x}
               cy={n.y}
@@ -90,7 +92,7 @@ export function EcosystemDiagram({ className = "" }: { className?: string }) {
               strokeDasharray={n.future ? "4 5" : undefined}
             />
             <text x={n.x} y={n.y + 1} textAnchor="middle" fill="var(--ink)" fontSize={15} fontWeight={600}>
-              {n.label}
+              {n.label[lang]}
             </text>
             <text
               x={n.x}
@@ -101,7 +103,7 @@ export function EcosystemDiagram({ className = "" }: { className?: string }) {
               fontFamily="var(--font-mono)"
               letterSpacing="0.06em"
             >
-              {n.sub.toUpperCase()}
+              {n.sub[lang].toLocaleUpperCase(lang)}
             </text>
           </g>
         ))}

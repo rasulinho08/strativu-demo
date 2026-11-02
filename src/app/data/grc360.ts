@@ -148,3 +148,50 @@ export const grcStatus = [
     v: "Email digests and Jira integration, custom weights for the risk matrix, incident escalation rules. Early access opens in Q1 2027.",
   },
 ];
+
+/**
+ * Azərbaycanca mətnlər (/az/products/grc360 və /az/products/grc360/early-access).
+ * Modul və ekran adları məhsulun interfeysindəki kimi ingiliscə qalır; təsvirlər tərcümə olunub.
+ */
+export const grcAz = {
+  release: { label: "Erkən giriş", detail: "2027-ci ilin I rübündə açılır" },
+  modules: {
+    "Command Center":
+      "Gecikmiş, bugünkü və gələcək tapşırıqlar, aktiv, biznes və üçüncü tərəf risklərinin istilik xəritələri və uyğunluq vəziyyəti bir ekranda.",
+    "Governance Hub": "Strateji məqsədlər, problemlər və siyasətlərin nəzarət tədbirləri ilə əhatəsi.",
+    "Organization Hub": "İstifadəçilər, departamentlər və qruplar; hər modul və hər əməliyyat üzrə icazələr.",
+    "Third Parties": "Təchizatçı reyestri və xidmət müqavilələri, müddəti bitməzdən əvvəl xəbərdarlıqla.",
+    "Asset Management": "Aktiv reyestri, məlumat axınları və GDPR sualları.",
+    "Control Center":
+      "Nəzarət tədbirləri, onların auditi və texniki xidməti, siyasət və standartlar, istisnalar və fasiləsizlik planları.",
+    "Risk Management": "5×5 ehtimal × təsir qiymətləndirməsi, öz risk iştahı həddləriniz, müalicə planları və dövri baxış.",
+    "Compliance Hub": "Framework paketləri və onların tələbləri, uyğunluq analizi, öhdəliklər və xarici audit tapıntıları.",
+    "Operations Center": "Tapşırıq və xərcləri ilə təhlükəsizlik layihələri, mərhələlərlə idarə olunan təhlükəsizlik insidentləri.",
+    "Trust Center":
+      "Müştəriləriniz üçün ictimai təhlükəsizlik səhifəsi: tətbiq etdiyiniz təcrübələr, məlumatların necə emal olunduğu və sertifikasiya yol xəritəniz.",
+    "Integrations & Automation": "LDAP, OAuth və SAML ilə vahid giriş (SSO), CSV idxal və ixrac, REST API və bildirişlər.",
+    Settings: "Autentifikasiya, sistem vəziyyəti, yeniləmələr, sistem jurnalı və sessiyalar.",
+  } as Record<string, string>,
+  figures: ["modul", "ekran", "dil: Azərbaycan və ingilis", "işlətmə yolu: bulud və ya on-premise"],
+  status: [
+    {
+      k: "Hazırdır",
+      v: "On iki modulun hamısı işlək backend-də; server tərəfli səhifələmə; CSV idxal və ixrac; rollar və icazələr; LDAP və SSO; Trust Center; bildirişlər; sessiya təhlükəsizliyi.",
+    },
+    { k: "Davam edir", v: "OpenAPI müqaviləsinin tam sinxronlaşdırılması, CI/CD və fasiləsizlik planları üçün auditlər." },
+    {
+      k: "Planlaşdırılıb",
+      v: "E-poçt xülasələri və Jira inteqrasiyası, risk matrisi üçün fərdi çəkilər, insident eskalasiya qaydaları. Erkən giriş 2027-ci ilin I rübündə açılır.",
+    },
+  ],
+  screenAlt: {
+    "command-center": "GRC360 Command Center: gecikmiş, bugünkü və gələcək tapşırıqlar, altında aktiv risklərinin istilik xəritəsi.",
+    "asset-risks": "GRC360 aktiv riskləri reyestri: baxışlar, risk üzrə məsul şəxslər və növbəti baxış tarixləri.",
+    controls: "GRC360 nəzarət tədbirləri siyahısı.",
+    packages:
+      "GRC360 uyğunluq paketləri: Fərdi məlumatlar haqqında qanun, PCI DSS, GDPR, NIST CSF 2.0, SOC 2 Type II, ISO/IEC 27001:2022.",
+    "audit-findings": "GRC360 xarici audit tapıntıları, məsul şəxslər və son tarixlərlə.",
+    "trust-center": "GRC360-ın ictimai Trust Center səhifəsi.",
+    policies: "GRC360 siyasət və standartları, versiyalar və baxış tarixləri ilə.",
+  } as Record<string, string>,
+};

@@ -1,5 +1,6 @@
 import { Linkedin, Mail, MapPin } from "lucide-react";
 import { site } from "../../data/site";
+import { useLang } from "../../i18n";
 
 /**
  * Contact page only: the Strativu mark at the centre, three slow orbits carrying the ways to reach us
@@ -8,14 +9,15 @@ import { site } from "../../data/site";
  * Reduced motion: a still picture. Decorative (aria-hidden); the same channels are listed as text on the page.
  */
 const ORBITS = [
-  { r: 30, dur: 38, dir: 1, start: -60, Icon: Mail, label: "Email" },
-  { r: 40, dur: 52, dir: -1, start: 40, Icon: Linkedin, label: "LinkedIn" },
-  { r: 49, dur: 66, dir: 1, start: 160, Icon: MapPin, label: "Baku" },
+  { r: 30, dur: 38, dir: 1, start: -60, Icon: Mail, label: "Email", az: "E-poçt" },
+  { r: 40, dur: 52, dir: -1, start: 40, Icon: Linkedin, label: "LinkedIn", az: "LinkedIn" },
+  { r: 49, dur: 66, dir: 1, start: 160, Icon: MapPin, label: "Baku", az: "Bakı" },
 ];
 
 export function ContactSignal({ className = "" }: { className?: string }) {
+  const lang = useLang();
   return (
-    <div aria-hidden className={`cs-root relative aspect-square w-full ${className}`}>
+    <div aria-hidden className={`cs-root relative aspect-square w-full [overflow-x:clip] ${className}`}>
       {/* soft light behind the mark */}
       <div className="cs-glow absolute inset-[18%] rounded-full" />
       {/* signal rings, staggered */}
@@ -32,7 +34,7 @@ export function ContactSignal({ className = "" }: { className?: string }) {
             <span className="cs-node absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2">
               <span className="cs-badge flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-1.5 font-mono text-[11px] text-ink-2 shadow-[var(--e2)]">
                 <o.Icon className="h-3.5 w-3.5 text-brand" strokeWidth={1.75} />
-                {o.label}
+                {lang === "az" ? o.az : o.label}
               </span>
             </span>
           </div>

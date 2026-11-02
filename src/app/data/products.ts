@@ -34,6 +34,8 @@ export type Product = {
   featured?: boolean;
   image?: { src: string; alt: string; width: number; height: number };
   facts?: string[];
+  /** Azərbaycanca mətnlər (/az səhifələri). Olmayan sahə ingiliscə qalır. */
+  az?: { name?: string; status?: string; statusNote?: string; summary?: string; linkLabel?: string; facts?: string[]; imageAlt?: string };
 };
 
 export const products: Product[] = [
@@ -54,6 +56,13 @@ export const products: Product[] = [
       height: 1250,
     },
     facts: ["12 modules", "Azerbaijani and English", "Cloud or on-premise"],
+    az: {
+      status: "Erkən giriş",
+      statusNote: "2027-ci ilin I rübündə açılır",
+      summary: "İdarəetmə, risk və uyğunluq bir platformada.",
+      facts: ["12 modul", "Azərbaycan və ingilis dilində", "Bulud və ya on-premise"],
+      imageAlt: "GRC360 Command Center: gecikmiş, bugünkü və gələcək tapşırıqlar, altında aktiv risklərinin istilik xəritəsi.",
+    },
   },
   {
     name: "Cipher",
@@ -63,6 +72,10 @@ export const products: Product[] = [
     to: "/products/cipher",
     mark: { src: "/projects/cipher/cipher-mark.svg", width: 40, height: 40 },
     color: "#5A5AF0",
+    az: {
+      status: "Tezliklə",
+      summary: "İş yerində AI-dan istifadə edin, məlumatınızı içəridə saxlayın: təşkilatlar üçün AI-a təhlükəsiz və idarə olunan giriş.",
+    },
   },
 ];
 
@@ -73,10 +86,27 @@ export const moreToCome: Product = {
   summary: "We're always exploring the next problem, in any market.",
   to: "/contact?topic=Other",
   linkLabel: "Suggest a problem",
+  az: { name: "Daha çoxu yolda", summary: "Hər bazarda növbəti problemi axtarırıq.", linkLabel: "Problem təklif edin" },
 };
 
+/** Məhsulun mətnləri seçilmiş dildə (az sahəsi olmayanlar ingiliscə qalır). */
+export function localizeProduct(p: Product, lang: "en" | "az"): Product {
+  if (lang !== "az" || !p.az) return p;
+  const a = p.az;
+  return {
+    ...p,
+    name: a.name ?? p.name,
+    status: a.status ?? p.status,
+    statusNote: a.statusNote ?? p.statusNote,
+    summary: a.summary ?? p.summary,
+    linkLabel: a.linkLabel ?? p.linkLabel,
+    facts: a.facts ?? p.facts,
+    image: p.image && a.imageAlt ? { ...p.image, alt: a.imageAlt } : p.image,
+  };
+}
+
 /** Kartın linki: daxili (`to`, eyni tab) və ya xarici (`href`, yeni tab, ↗). */
-export function productLink(p: Product): { label: string; to?: string; href?: string } {
-  if (p.href) return { label: p.linkLabel ?? `Visit ${p.name}`, href: p.href };
-  return { label: p.linkLabel ?? "Learn more", to: p.to };
+export function productLink(p: Product, lang: "en" | "az" = "en"): { label: string; to?: string; href?: string } {
+  if (p.href) return { label: p.linkLabel ?? (lang === "az" ? `${p.name} saytı` : `Visit ${p.name}`), href: p.href };
+  return { label: p.linkLabel ?? (lang === "az" ? "Ətraflı" : "Learn more"), to: p.to };
 }

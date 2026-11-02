@@ -5,11 +5,12 @@
  *    (öz title, description ≤160 simvol, canonical, og:*, twitter:*), sitemap.xml və JSON-LD.
  * Yeni səhifə əlavə edəndə: App.tsx-də route + burada STATIC_META-da bir sətir.
  * Description-larda yalnız təsdiqlənmiş faktlar.
- * URL-lər dilsizdir (/products, /about …): Azərbaycan dili sonra /az/... prefiksi ilə əlavə oluna bilər.
+ * İngiliscə URL-lər prefikssizdir (/products …); Azərbaycan dili /az/... altındadır (AZ_META, i18n/paths.ts → AZ_PATHS).
  */
 import { site } from "./site";
 import { frameworks, statusLabel, type Framework } from "./coverage";
 import { GRC, frameworkPath } from "./grc360";
+import { insights, insightPath } from "./insights";
 
 export type PageMeta = {
   /** null → ana səhifə formatı ("Strativu · <manifest>"). */
@@ -98,6 +99,53 @@ export const STATIC_META: Record<string, PageMeta> = {
       "How Strativu handles data before it is certified: architecture, hosting, subprocessors, certifications and the vulnerability disclosure policy.",
   },
   ...Object.fromEntries(Object.values(legalDocs).map((d) => [d.path, { title: d.title, description: d.description }])),
+  "/insights": {
+    title: "Insights",
+    description: "Practical notes on risk, compliance and security from the Strativu team: what to change and when, and where to start.",
+  },
+  ...Object.fromEntries(insights.filter((a) => a.en).map((a) => [insightPath(a.slug, "en"), { title: a.en!.title, description: a.en!.description }])),
+
+  /* ── Azərbaycanca səhifələr (/az) ── */
+  "/az": {
+    title: "Strativu · Texnologiya alətdir. Məqsəd dəyərdir.",
+    description:
+      "Strativu hər biri öz bazarında real problemi həll edən məhsullar ekosistemidir. Fərqli bazarlar, fərqli problemlər, dəyər yaratmağın bir yolu.",
+  },
+  "/az/products": {
+    title: "Məhsullar",
+    description: "Hər Strativu məhsulu real problemdən başlayır. İdarəetmə, risk və uyğunluq üçün GRC360; iş yerində AI-ın təhlükəsiz istifadəsi üçün Cipher tezliklə.",
+  },
+  "/az/products/cipher": {
+    title: "Cipher by Strativu: işdə AI, məlumat içəridə",
+    description: "Cipher by Strativu, tezliklə: şirkətiniz ilə AI arasında həssas məlumatı içəridə saxlayan və öz AI-nızı hücumlardan qoruyan təhlükəsizlik qatı.",
+  },
+  "/az/products/grc360": {
+    title: "GRC360 by Strativu: idarəetmə, risk və uyğunluq",
+    description:
+      "GRC360 by Strativu riskləri, aktivləri, təchizatçıları, nəzarət tədbirlərini və auditləri Azərbaycan və ingilis dilində bir platformada birləşdirir.",
+  },
+  "/az/products/grc360/early-access": {
+    title: "GRC360 erkən giriş",
+    description: "GRC360 by Strativu erkən girişi risk və uyğunluq işi aparan banklar, dövlət qurumları və böyüyən şirkətlər üçün 2027-ci ilin I rübündə açılır.",
+  },
+  "/az/about": {
+    title: "Haqqımızda",
+    description: "Strativu niyə var: texnologiya yalnız dəyər yaradanda önəmlidir. Missiyamız, vizyonumuz və işlədiyimiz prinsiplər.",
+  },
+  "/az/contact": {
+    title: "Əlaqə",
+    description: "Məhsul sualı, tərəfdaşlıq ideyası və ya həll edilməsini istədiyiniz problem? Strativu-ya yazın, doğru şəxs sizə cavab verəcək.",
+  },
+  "/az/contact/thank-you": {
+    title: "Mesaj göndərildi",
+    description: "Təşəkkürlər. Mesajınızı aldıq və tezliklə cavab verəcəyik.",
+    noindex: true,
+  },
+  "/az/insights": {
+    title: "Bilik bazası",
+    description: "Strativu komandasından risk, uyğunluq və təhlükəsizlik barədə praktik yazılar: nəyi nə vaxt dəyişmək, haradan başlamaq.",
+  },
+  ...Object.fromEntries(insights.filter((a) => a.az).map((a) => [insightPath(a.slug, "az"), { title: a.az!.title, description: a.az!.description }])),
 };
 
 export const NOT_FOUND_META: PageMeta = { title: "Page not found", description: "The page you asked for does not exist.", noindex: true };

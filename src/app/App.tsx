@@ -16,6 +16,7 @@ const company = () => import("./pages/Company");
 const contact = () => import("./pages/Contact");
 const legal = () => import("./pages/Legal");
 const cipher = () => import("./pages/Cipher");
+const insightsPage = () => import("./pages/Insights");
 const Products = lazy(() => productsPage().then((m) => ({ default: m.Products })));
 const Grc360 = lazy(() => grc360().then((m) => ({ default: m.Grc360 })));
 const Architecture = lazy(() => grc360().then((m) => ({ default: m.Architecture })));
@@ -31,6 +32,8 @@ const Privacy = lazy(() => legal().then((m) => ({ default: m.Privacy })));
 const Terms = lazy(() => legal().then((m) => ({ default: m.Terms })));
 const Cookies = lazy(() => legal().then((m) => ({ default: m.Cookies })));
 const Cipher = lazy(() => cipher().then((m) => ({ default: m.Cipher })));
+const InsightsIndex = lazy(() => insightsPage().then((m) => ({ default: m.InsightsIndex })));
+const InsightArticle = lazy(() => insightsPage().then((m) => ({ default: m.InsightArticle })));
 
 /** /coverage/:slug → /products/grc360/frameworks/:slug (client-side twin of the vercel.json redirect). */
 function LegacyFramework() {
@@ -55,6 +58,8 @@ export default function App() {
           <Route path="/products/grc360/changelog" element={<Changelog />} />
           <Route path="/products/grc360/early-access" element={<EarlyAccess />} />
           <Route path="/products/cipher" element={<Cipher />} />
+          <Route path="/insights" element={<InsightsIndex />} />
+          <Route path="/insights/:slug" element={<InsightArticle />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/contact/thank-you" element={<ContactThanks />} />
@@ -78,6 +83,17 @@ export default function App() {
           <Route path="/legal/privacy" element={<Navigate to="/privacy" replace />} />
           <Route path="/legal/terms" element={<Navigate to="/terms" replace />} />
           <Route path="/legal/dpa" element={<Navigate to="/terms" replace />} />
+          {/* Azərbaycanca (i18n/paths.ts → AZ_PATHS): eyni səhifələr, dil yoldan oxunur */}
+          <Route path="/az" element={<Home />} />
+          <Route path="/az/products" element={<Products />} />
+          <Route path="/az/products/cipher" element={<Cipher />} />
+          <Route path="/az/products/grc360" element={<Grc360 />} />
+          <Route path="/az/products/grc360/early-access" element={<EarlyAccess />} />
+          <Route path="/az/about" element={<About />} />
+          <Route path="/az/contact" element={<Contact />} />
+          <Route path="/az/contact/thank-you" element={<ContactThanks />} />
+          <Route path="/az/insights" element={<InsightsIndex />} />
+          <Route path="/az/insights/:slug" element={<InsightArticle />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         </Suspense>

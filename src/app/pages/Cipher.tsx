@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { Btn, Eyebrow, PageHeader, Section } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
+import { useLang, useLocalize, type Lang } from "../i18n";
 
 /**
  * /products/cipher — "Coming soon" page for Cipher by Strativu (AI security; the AI Proxy card on /products links here).
@@ -13,31 +14,43 @@ const INDIGO = "#5A5AF0";
 /** Indigo as text: darker in light mode, lighter in dark mode, so it keeps ≥4.5:1 contrast (WCAG 1.4.3). */
 const INDIGO_TEXT = "text-[#4747D4] dark:text-[#9AA0F7]";
 
-const POINTS = [
+const POINTS: { n: string; title: Record<Lang, string>; body: Record<Lang, string>; tags?: Record<Lang, string[]> }[] = [
   {
     n: "01",
-    title: "Sensitive data stays in",
-    body: "Personal data, secrets and source code are caught on the employee's device, before a prompt is sent to an AI tool.",
-    tags: ["Mask", "Redact", "Coach", "Block"],
+    title: { en: "Sensitive data stays in", az: "Həssas məlumat içəridə qalır" },
+    body: {
+      en: "Personal data, secrets and source code are caught on the employee's device, before a prompt is sent to an AI tool.",
+      az: "Şəxsi məlumatlar, gizli açarlar və mənbə kodu sorğu AI alətinə göndərilməzdən əvvəl, işçinin öz cihazında tutulur.",
+    },
+    tags: { en: ["Mask", "Redact", "Coach", "Block"], az: ["Maskala", "Redaktə et", "Xəbərdar et", "Blokla"] },
   },
   {
     n: "02",
-    title: "Your own AI, protected",
-    body: "Prompt injection, jailbreaks and system-prompt theft are stopped at the gateway in front of your AI. One line to connect: base_url.",
+    title: { en: "Your own AI, protected", az: "Öz AI-nız qorunur" },
+    body: {
+      en: "Prompt injection, jailbreaks and system-prompt theft are stopped at the gateway in front of your AI. One line to connect: base_url.",
+      az: "Prompt injection, jailbreak və sistem promptunun oğurlanması AI-nızın qarşısındakı şlüzdə dayandırılır. Qoşulmaq üçün bir sətir: base_url.",
+    },
   },
   {
     n: "03",
-    title: "Your rules, your servers",
-    body: "Policies by role, team, AI provider and data type. In the cloud, on-premise or air-gapped.",
+    title: { en: "Your rules, your servers", az: "Sizin qaydalar, sizin serverlər" },
+    body: {
+      en: "Policies by role, team, AI provider and data type. In the cloud, on-premise or air-gapped.",
+      az: "Rol, komanda, AI provayderi və məlumat növü üzrə siyasətlər. Buludda, on-premise və ya internetdən tam təcrid olunmuş (air-gapped).",
+    },
   },
 ];
 
 function CipherBar() {
+  const lang = useLang();
+  const L = useLocalize();
   return (
     <nav aria-label="Cipher" className="border-b border-line pb-4">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[14px]">
-        <Link to="/products" className="-my-2 py-2 text-ink-3 transition-colors hover:text-ink">
-          <span aria-hidden>← </span>Products
+        <Link to={L("/products")} className="-my-2 py-2 text-ink-3 transition-colors hover:text-ink">
+          <span aria-hidden>← </span>
+          {lang === "az" ? "Məhsullar" : "Products"}
         </Link>
         <span aria-hidden className="text-ink-4">
           /
@@ -53,15 +66,20 @@ function CipherBar() {
 
 /** Your people → Cipher → AI tools: where it sits, in one line. */
 function Flow() {
+  const az = useLang() === "az";
   const node = "rounded-[var(--r-md)] border border-line bg-surface px-4 py-3 text-center font-mono text-[12.5px] text-ink-2 whitespace-nowrap";
   // Phones: a vertical chain (no horizontal scrolling); from sm: one row.
   const line = "self-center h-6 w-px border-l border-dashed sm:h-px sm:w-auto sm:min-w-6 sm:flex-1 sm:border-l-0 sm:border-t";
   return (
     <figure
-      aria-label="Cipher sits between your people and the AI tools they use, and in front of your own AI."
+      aria-label={
+        az
+          ? "Cipher işçiləriniz ilə istifadə etdikləri AI alətləri arasında və öz AI-nızın qarşısında dayanır."
+          : "Cipher sits between your people and the AI tools they use, and in front of your own AI."
+      }
       className="flex flex-col items-stretch sm:flex-row sm:items-center"
     >
-      <span className={node}>Your people</span>
+      <span className={node}>{az ? "İşçiləriniz" : "Your people"}</span>
       <span aria-hidden className={line} style={{ borderColor: INDIGO }} />
       <span
         className={`rounded-[var(--r-md)] border px-4 py-3 text-center font-mono text-[12.5px] font-semibold whitespace-nowrap ${INDIGO_TEXT}`}
@@ -70,12 +88,14 @@ function Flow() {
         Cipher
       </span>
       <span aria-hidden className={line} style={{ borderColor: INDIGO }} />
-      <span className={node}>AI tools · your AI</span>
+      <span className={node}>{az ? "AI alətləri · sizin AI" : "AI tools · your AI"}</span>
     </figure>
   );
 }
 
 export function Cipher() {
+  const lang = useLang();
+  const az = lang === "az";
   return (
     <>
       <PageHeader
@@ -83,19 +103,24 @@ export function Cipher() {
         eyebrow={
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: INDIGO }} />
-            Coming soon
+            {az ? "Tezliklə" : "Coming soon"}
           </span>
         }
         title={
           <>
-            Use AI at work. <span className={INDIGO_TEXT}>Keep your data in.</span>
+            {az ? "İşdə AI-dan istifadə edin." : "Use AI at work."}{" "}
+            <span className={INDIGO_TEXT}>{az ? "Məlumatınız içəridə qalsın." : "Keep your data in."}</span>
           </>
         }
-        lead="Cipher is a security layer between your company and AI. It checks what goes out to AI tools, and what comes in to your own AI, before it does harm."
+        lead={
+          az
+            ? "Cipher şirkətiniz ilə AI arasında təhlükəsizlik qatıdır. AI alətlərinə nəyin çıxdığını və öz AI-nıza nəyin gəldiyini zərər verməzdən əvvəl yoxlayır."
+            : "Cipher is a security layer between your company and AI. It checks what goes out to AI tools, and what comes in to your own AI, before it does harm."
+        }
       >
         <div className="flex flex-wrap items-center gap-x-7 gap-y-4">
           <Btn to="/contact?topic=Product%20inquiry" size="lg">
-            Tell me when it’s ready
+            {az ? "Hazır olanda xəbər verin" : "Tell me when it’s ready"}
           </Btn>
         </div>
       </PageHeader>
@@ -112,11 +137,11 @@ export function Cipher() {
                 <span className={`font-mono text-[12px] ${INDIGO_TEXT}`}>
                   {p.n}
                 </span>
-                <h2 className="t-h3 mt-5 text-ink">{p.title}</h2>
-                <p className="mt-3 text-[16px] leading-[1.6] text-ink-2">{p.body}</p>
+                <h2 className="t-h3 mt-5 text-ink">{p.title[lang]}</h2>
+                <p className="mt-3 text-[16px] leading-[1.6] text-ink-2">{p.body[lang]}</p>
                 {p.tags && (
                   <ul className="mt-5 flex flex-wrap gap-2">
-                    {p.tags.map((t) => (
+                    {p.tags[lang].map((t) => (
                       <li key={t} className="rounded-full border border-line px-3 py-1 font-mono text-[12px] text-ink-2">
                         {t}
                       </li>
@@ -132,14 +157,15 @@ export function Cipher() {
       <Section className="pt-0 md:pt-0">
           <Reveal>
             <div className="border-t border-line pt-10">
-              <Eyebrow>The next product in the Strativu ecosystem</Eyebrow>
+              <Eyebrow>{az ? "Strativu ekosisteminin növbəti məhsulu" : "The next product in the Strativu ecosystem"}</Eyebrow>
               <p className="mt-4 max-w-[56ch] text-[17px] leading-[1.65] text-ink-2">
-                Cipher is being designed now, for banks, public bodies and companies whose people already use AI. Want to know first, or
-                have a use case we should hear? Write to us.
+                {az
+                  ? "Cipher hazırda işçiləri artıq AI-dan istifadə edən banklar, dövlət qurumları və şirkətlər üçün dizayn olunur. İlk xəbər tutmaq istəyirsiniz, ya da eşitməli olduğumuz bir ehtiyacınız var? Bizə yazın."
+                  : "Cipher is being designed now, for banks, public bodies and companies whose people already use AI. Want to know first, or have a use case we should hear? Write to us."}
               </p>
               <div className="mt-8">
                 <Btn to="/contact?topic=Product%20inquiry" variant="secondary">
-                  Contact us
+                  {az ? "Bizimlə əlaqə" : "Contact us"}
                 </Btn>
               </div>
             </div>
