@@ -10,7 +10,6 @@
 import { site } from "./site";
 import { frameworks, statusLabel, type Framework } from "./coverage";
 import { GRC, frameworkPath } from "./grc360";
-import { insights, insightPath } from "./insights";
 
 export type PageMeta = {
   /** null → ana səhifə formatı ("Strativu · <manifest>"). */
@@ -99,11 +98,6 @@ export const STATIC_META: Record<string, PageMeta> = {
       "How Strativu handles data before it is certified: architecture, hosting, subprocessors, certifications and the vulnerability disclosure policy.",
   },
   ...Object.fromEntries(Object.values(legalDocs).map((d) => [d.path, { title: d.title, description: d.description }])),
-  "/insights": {
-    title: "Insights",
-    description: "Practical notes on risk, compliance and security from the Strativu team: what to change and when, and where to start.",
-  },
-  ...Object.fromEntries(insights.filter((a) => a.en).map((a) => [insightPath(a.slug, "en"), { title: a.en!.title, description: a.en!.description }])),
 
   /* ── Azərbaycanca səhifələr (/az) ── */
   "/az": {
@@ -141,11 +135,6 @@ export const STATIC_META: Record<string, PageMeta> = {
     description: "Təşəkkürlər. Mesajınızı aldıq və tezliklə cavab verəcəyik.",
     noindex: true,
   },
-  "/az/insights": {
-    title: "Bilik bazası",
-    description: "Strativu komandasından risk, uyğunluq və təhlükəsizlik barədə praktik yazılar: nəyi nə vaxt dəyişmək, haradan başlamaq.",
-  },
-  ...Object.fromEntries(insights.filter((a) => a.az).map((a) => [insightPath(a.slug, "az"), { title: a.az!.title, description: a.az!.description }])),
 };
 
 export const NOT_FOUND_META: PageMeta = { title: "Page not found", description: "The page you asked for does not exist.", noindex: true };

@@ -7,7 +7,6 @@ import crypto from "node:crypto";
 import { NOT_FOUND_META, ROUTES, SITEMAP_ROUTES, STATIC_META, fullTitle, metaFor } from "./src/app/data/meta";
 import { site } from "./src/app/data/site";
 import { GRC } from "./src/app/data/grc360";
-import { insights, insightPath } from "./src/app/data/insights";
 import { alternates, basePath, langOf } from "./src/app/i18n/paths";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -37,26 +36,6 @@ function jsonLd(route: string): object[] {
         name: site.name,
         url: `${site.domain}/`,
         inLanguage: "en",
-        publisher: { "@id": org["@id"] },
-      },
-    ];
-  }
-  const article = insights.find((a) => insightPath(a.slug, "en") === route || insightPath(a.slug, "az") === route);
-  if (article) {
-    const lang = langOf(route);
-    const t = article[lang]!;
-    return [
-      {
-        "@context": "https://schema.org",
-        "@type": "Article",
-        headline: t.title,
-        description: t.description,
-        datePublished: article.date,
-        inLanguage: lang,
-        url: `${site.domain}${route}`,
-        mainEntityOfPage: `${site.domain}${route}`,
-        image: `${site.domain}${site.ogImage}`,
-        author: { "@id": org["@id"] },
         publisher: { "@id": org["@id"] },
       },
     ];
@@ -105,7 +84,6 @@ const PAGE_FOR_ROUTE: [RegExp, string][] = [
   [/^\/(about|trust)$/, "src/app/pages/Company.tsx"],
   [/^\/contact(\/|$)/, "src/app/pages/Contact.tsx"],
   [/^\/(privacy|terms|cookies)$/, "src/app/pages/Legal.tsx"],
-  [/^\/insights(\/|$)/, "src/app/pages/Insights.tsx"],
 ];
 
 function strativuSite(): Plugin {

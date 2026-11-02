@@ -18,7 +18,6 @@ import { LangSwitch, basePath, langOf, localize, type Lang } from "../../i18n";
 const NAV = [
   { label: { en: "Home", az: "Ana səhifə" }, to: "/", match: "/" },
   { label: { en: "Products", az: "Məhsullar" }, to: "/products", match: "/products" },
-  { label: { en: "Insights", az: "Bilik bazası" }, to: "/insights", match: "/insights" },
   { label: { en: "About Us", az: "Haqqımızda" }, to: "/about", match: "/about" },
   { label: { en: "Contact", az: "Əlaqə" }, to: "/contact", match: "/contact" },
 ];

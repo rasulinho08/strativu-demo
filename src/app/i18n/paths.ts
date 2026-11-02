@@ -1,5 +1,3 @@
-import { insights } from "../data/insights";
-
 /**
  * Two languages: English (default, no prefix) and Azerbaijani (/az/...). Plain functions (no JSX), so the build
  * (vite.config.ts) can use them too.
@@ -19,11 +17,7 @@ export const AZ_PATHS = new Set<string>([
   "/about",
   "/contact",
   "/contact/thank-you",
-  "/insights",
-  ...insights.filter((a) => a.en && a.az).map((a) => `/insights/${a.slug}`),
 ]);
-/** /az paths with no English twin (articles written only in Azerbaijani). */
-export const AZ_ONLY = new Set<string>(insights.filter((a) => a.az && !a.en).map((a) => `/az/insights/${a.slug}`));
 
 export const langOf = (pathname: string): Lang => (pathname === "/az" || pathname.startsWith("/az/") ? "az" : "en");
 /** "/az/products" → "/products"; "/az" → "/". */
@@ -41,8 +35,7 @@ export function localize(to: string, lang: Lang): string {
 export function counterpart(pathname: string, target: Lang): string {
   const base = basePath(pathname);
   if (target === "az") return AZ_PATHS.has(base) ? azPath(base) : "/az";
-  if (langOf(pathname) === "en") return pathname;
-  return AZ_ONLY.has(pathname) ? "/" : base;
+  return langOf(pathname) === "en" ? pathname : base;
 }
 
 /** hreflang pair for a page: { en, az } paths when both exist, else null. */
