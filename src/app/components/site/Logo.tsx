@@ -18,19 +18,40 @@ export function Wordmark({ className = "" }: { className?: string }) {
   );
 }
 
-export function Logo({ className = "", to = "/" }: { className?: string; to?: string }) {
+/**
+ * `animate` (header only): once per page load the mark drops in with a turn, then the wordmark wipes in from the left.
+ * The full PNG is drawn twice, clipped to the mark and to the wordmark, so both parts move separately without a new
+ * asset (theme.css → .logo-anim-*). Reduced motion: shown at once.
+ */
+export function Logo({ className = "", to = "/", animate = false }: { className?: string; to?: string; animate?: boolean }) {
   const h = site.logo.height;
+  const mark = animate ? "logo-anim-mark" : "";
+  const word = animate ? "logo-anim-word" : "";
   return (
-    <Link to={to} aria-label={`${site.name} home`} className={`inline-flex items-center gap-2 ${className}`}>
-      <img
-        src={site.logo.src}
-        alt={site.name}
-        height={h}
-        width={Math.round(h * 4.19)}
-        style={{ height: h, width: "auto" }}
-        className="dark:hidden"
-        decoding="async"
-      />
+    <Link to={to} aria-label={`${site.name} home`} className={`group inline-flex items-center gap-2 ${className}`}>
+      <span className="relative dark:hidden">
+        <img
+          src={site.logo.src}
+          alt={site.name}
+          height={h}
+          width={Math.round(h * 4.19)}
+          style={{ height: h, width: "auto" }}
+          className={`block ${animate ? "logo-clip-word" : ""} ${word}`}
+          decoding="async"
+        />
+        {animate && (
+          <img
+            src={site.logo.src}
+            alt=""
+            aria-hidden
+            height={h}
+            width={Math.round(h * 4.19)}
+            style={{ height: h, width: "auto" }}
+            className={`logo-clip-mark absolute inset-0 block ${mark}`}
+            decoding="async"
+          />
+        )}
+      </span>
       {site.logo.darkSrc ? (
         <img
           src={site.logo.darkSrc}
@@ -49,9 +70,10 @@ export function Logo({ className = "", to = "/" }: { className?: string; to?: st
             height={h}
             width={Math.round((h * 207) / 144)}
             style={{ height: h, width: "auto" }}
+            className={mark}
             decoding="async"
           />
-          <Wordmark />
+          <Wordmark className={word} />
         </span>
       )}
     </Link>

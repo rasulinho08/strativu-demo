@@ -186,7 +186,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               scrolled ? "opacity-100" : "opacity-0"
             }`}
           />
-          <Logo />
+          <Logo animate />
 
           {/* md–lg: in the flow between logo and toggle; from lg: centred on the bar. */}
           <nav

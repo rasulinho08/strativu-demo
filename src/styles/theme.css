@@ -491,3 +491,78 @@ html[data-logo3d="off"] .stage-pad { padding-top: 7rem; min-height: 0; }
   .logo-fallback { display: block; }
   .stage-pad { padding-top: 7rem; min-height: 0; }
 }
+
+/* ── Contact page signal (ContactSignal.tsx): orbits, pulses and a floating mark. Transform/opacity only. ── */
+.cs-glow {
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--brand) 22%, transparent), transparent 70%);
+  animation: cs-breathe 6s ease-in-out infinite;
+}
+.cs-pulse {
+  opacity: 0;
+  animation: cs-pulse 4.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+.cs-ring {
+  transform: rotate(var(--cs-start));
+  animation: cs-orbit var(--cs-dur) linear infinite;
+}
+.cs-ring > .cs-node > .cs-badge {
+  display: inline-flex;
+  transform: rotate(calc(-1 * var(--cs-start)));
+  animation: cs-counter var(--cs-dur) linear infinite;
+}
+.cs-mark {
+  animation: cs-float 7s ease-in-out infinite;
+}
+@keyframes cs-orbit {
+  from { transform: rotate(var(--cs-start)); }
+  to { transform: rotate(calc(var(--cs-start) + 360deg * var(--cs-dir))); }
+}
+@keyframes cs-counter {
+  from { transform: rotate(calc(-1 * var(--cs-start))); }
+  to { transform: rotate(calc(-1 * var(--cs-start) - 360deg * var(--cs-dir))); }
+}
+@keyframes cs-pulse {
+  0% { opacity: 0; transform: scale(0.85); }
+  15% { opacity: 0.9; }
+  100% { opacity: 0; transform: scale(2.6); }
+}
+@keyframes cs-breathe {
+  0%, 100% { opacity: 0.75; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+@keyframes cs-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cs-glow, .cs-pulse, .cs-ring, .cs-ring > .cs-node > .cs-badge, .cs-mark { animation: none; }
+  .cs-pulse { opacity: 0.35; transform: scale(1.4); }
+}
+
+/* ── Header logo intro (Logo animate): the mark drops in with a turn, then the wordmark wipes in. Once per load. ── */
+/* logo-full.png: the mark is the left third, the wordmark the rest */
+.logo-clip-mark { clip-path: inset(0 66% 0 0); }
+.logo-clip-word { clip-path: inset(0 0 0 33%); }
+.logo-anim-mark {
+  transform-origin: 50% 60%;
+  animation: logo-mark-in 0.95s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+}
+.logo-anim-word { animation: logo-word-in 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.55s both; }
+img.logo-anim-word.logo-clip-word { animation-name: logo-word-in-clipped; }
+.group:hover .logo-anim-mark { transform: rotate(-8deg) scale(1.06); transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes logo-mark-in {
+  0% { opacity: 0; transform: translateY(-10px) scale(0.4) rotate(-120deg); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes logo-word-in {
+  0% { opacity: 0; clip-path: inset(0 100% 0 0); transform: translateX(-6px); }
+  100% { opacity: 1; clip-path: inset(0 0 0 0); transform: none; }
+}
+@keyframes logo-word-in-clipped {
+  0% { opacity: 0; clip-path: inset(0 100% 0 33%); transform: translateX(-6px); }
+  100% { opacity: 1; clip-path: inset(0 0 0 33%); transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-anim-mark, .logo-anim-word { animation: none; }
+}

@@ -1,12 +1,14 @@
-import { Container, Duo, Lane, PageHeader, Section, TextLink } from "../components/site/primitives";
+import { Container, Duo, Eyebrow, Lane, Section, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
 import { ContactForm } from "../components/site/ContactForm";
+import { ContactSignal } from "../components/site/ContactSignal";
 import { site } from "../data/site";
 
 /**
  * /contact (Website Blueprint v2 → 06 Contact): intro, the form, direct channels.
  * /contact/thank-you: shown after a successful send (noindex).
- * The form section carries `data-logo-hide`, so the 3D logo fades out while the form is on screen.
+ * Header: title and lead on the left, the contact-only animation (ContactSignal) with the Strativu mark on the right.
+ * Header and form carry `data-logo-hide`: on this page the 3D logo steps aside and the mark in the animation is the logo.
  */
 export function Contact() {
   const channels = [
@@ -28,11 +30,23 @@ export function Contact() {
   ];
   return (
     <>
-      <PageHeader
-        eyebrow="Contact"
-        title="Let's create value together."
-        lead="A product question, a partnership idea or a problem you'd like solved? Send us a message and the right person will get back to you."
-      />
+      <header className="relative pb-10 pt-32 md:pb-14 md:pt-40" data-logo-hide>
+        <Container>
+          <div className="grid grid-cols-1 items-center gap-x-12 gap-y-10 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-x-20">
+            <Reveal>
+              <Eyebrow>Contact</Eyebrow>
+              <h1 className="t-h1 text-ink">Let's create value together.</h1>
+              <p className="t-lead mt-7 max-w-[46ch]">
+                A product question, a partnership idea or a problem you'd like solved? Send us a message and the right person will get
+                back to you.
+              </p>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <ContactSignal className="mx-auto max-w-[300px] md:max-w-[440px]" />
+            </Reveal>
+          </div>
+        </Container>
+      </header>
       <Section className="pt-0 md:pt-0" logoHide>
         <Duo
           sticky
