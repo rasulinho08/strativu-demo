@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
+import { basePath } from "../../i18n/paths";
 
 /**
  * 3D Strativu mark — tam ekran, sabit fon səhnəsi (azcon.gov.az-dakı `#scene` kimi).
@@ -286,8 +287,9 @@ export function LogoScene() {
   const keyRef = useRef<HTMLDivElement>(null);
   const floorRef = useRef<HTMLDivElement>(null);
   const { pathname } = useLocation();
-  const modeRef = useRef<"home" | "page">(pathname === "/" ? "home" : "page");
-  modeRef.current = pathname === "/" ? "home" : "page";
+  const isHome = basePath(pathname) === "/";
+  const modeRef = useRef<"home" | "page">(isHome ? "home" : "page");
+  modeRef.current = isHome ? "home" : "page";
   /** Dayanmış render dövrünü yenidən başladır (səhifə dəyişəndə də). */
   const wakeRef = useRef<() => void>(() => {});
   useEffect(() => wakeRef.current(), [pathname]);
@@ -295,9 +297,9 @@ export function LogoScene() {
     Telefonda (<1024px) daxili səhifələrdə loqo onsuz da görünmür (CHOREO.page → op≈0), ona görə three.js və model
     yüklənmir; ana səhifəyə keçəndə bir dəfə qurulur. Masaüstündə və ana səhifədə dərhal qurulur.
   */
-  const [armed, setArmed] = useState(() => pathname === "/" || !window.matchMedia("(max-width: 1023px)").matches);
+  const [armed, setArmed] = useState(() => isHome || !window.matchMedia("(max-width: 1023px)").matches);
   useEffect(() => {
-    if (!armed && pathname === "/") setArmed(true);
+    if (!armed && isHome) setArmed(true);
   }, [armed, pathname]);
 
   useEffect(() => {
