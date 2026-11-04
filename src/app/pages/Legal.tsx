@@ -97,10 +97,10 @@ const LEGAL_BODY: Record<LegalDoc, ReactNode> = {
       <h2>Cookies</h2>
       <p>
         strativu.com sets <strong>no cookies</strong>. We run no analytics, no advertising and no tracking pixels, so there is nothing to
-        accept or reject and the site does not show a cookie banner.
+        accept or reject. The site shows a short notice saying this once; it asks for no consent because none is needed.
       </p>
       <h2>What the site stores in your browser</h2>
-      <p>Two small entries in your browser&rsquo;s own storage, both needed for the site to work as you expect. Neither is sent to us.</p>
+      <p>Three small entries in your browser&rsquo;s own storage, both needed for the site to work as you expect. Neither is sent to us.</p>
       <ul>
         <li>
           <strong>theme</strong> (local storage): your light or dark mode choice, kept until you clear your browser data.
@@ -108,6 +108,9 @@ const LEGAL_BODY: Record<LegalDoc, ReactNode> = {
         <li>
           <strong>strativu:reloaded</strong> (session storage): lets the site reload a page once after we publish an update; removed when you
           close the tab.
+        </li>
+        <li>
+          <strong>strativu:cookie-notice</strong> (local storage): remembers that you closed the cookie notice, so it is not shown again.
         </li>
       </ul>
       <h2>Third parties</h2>

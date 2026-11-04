@@ -6,6 +6,7 @@ import { Logo } from "../site/Logo";
 import { Container } from "../site/primitives";
 import { LogoScene } from "../site/LogoScene";
 import { ErrorBoundary } from "../site/ErrorBoundary";
+import { CookieNotice } from "../site/CookieNotice";
 import { useRouteMeta } from "../site/Seo";
 import { ThemeToggle } from "../theme-toggle";
 import { site } from "../../data/site";
@@ -374,6 +375,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </footer>
+      <CookieNotice />
     </div>
   );
 }
