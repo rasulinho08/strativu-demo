@@ -4,10 +4,10 @@ import { Reveal } from "../components/site/Reveal";
 import { useLang, useLocalize, type Lang } from "../i18n";
 
 /**
- * /products/cipher — "Coming soon" page for Cipher by Strativu (AI security; the AI Proxy card on /products links here).
+ * /products/ai-proxy — "Coming soon" page for AI Proxy by Strativu (AI security; the AI Proxy card on /products links here).
  * Source: Strativuco/cipher (README, doc/plan/04-marketinq-plan.md). The product is in the design and architecture stage,
  * so this page says what it will do, with no dates and no claims of finished features (no "100%", no certifications).
- * Cipher's own colour (indigo, design/tokens/tokens.json → brand.500) appears only on this page and its card.
+ * AI Proxy's own colour (indigo, design/tokens/tokens.json → brand.500) appears only on this page and its card.
  */
 
 const INDIGO = "#5A5AF0";
@@ -42,11 +42,11 @@ const POINTS: { n: string; title: Record<Lang, string>; body: Record<Lang, strin
   },
 ];
 
-function CipherBar() {
+function AiProxyBar() {
   const lang = useLang();
   const L = useLocalize();
   return (
-    <nav aria-label="Cipher" className="border-b border-line pb-4">
+    <nav aria-label="AI Proxy" className="border-b border-line pb-4">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[14px]">
         <Link to={L("/products")} className="-my-2 py-2 text-ink-3 transition-colors hover:text-ink">
           <span aria-hidden>← </span>
@@ -56,15 +56,15 @@ function CipherBar() {
           /
         </span>
         <span className="inline-flex items-center gap-2 font-medium text-ink">
-          <img src="/projects/cipher/cipher-mark.svg" width={20} height={20} alt="" className="h-5 w-5" />
-          Cipher <span className="font-normal text-ink-3">by Strativu</span>
+          <img src="/projects/ai-proxy/mark.svg" width={20} height={20} alt="" className="h-5 w-5" />
+          AI Proxy <span className="font-normal text-ink-3">by Strativu</span>
         </span>
       </div>
     </nav>
   );
 }
 
-/** Your people → Cipher → AI tools: where it sits, in one line. */
+/** Your people → AI Proxy → AI tools: where it sits, in one line. */
 function Flow() {
   const az = useLang() === "az";
   const node = "rounded-[var(--r-md)] border border-line bg-surface px-4 py-3 text-center font-mono text-[12.5px] text-ink-2 whitespace-nowrap";
@@ -74,8 +74,8 @@ function Flow() {
     <figure
       aria-label={
         az
-          ? "Cipher işçiləriniz ilə istifadə etdikləri AI alətləri arasında və öz AI-nızın qarşısında dayanır."
-          : "Cipher sits between your people and the AI tools they use, and in front of your own AI."
+          ? "AI Proxy işçiləriniz ilə istifadə etdikləri AI alətləri arasında və öz AI-nızın qarşısında dayanır."
+          : "AI Proxy sits between your people and the AI tools they use, and in front of your own AI."
       }
       className="flex flex-col items-stretch sm:flex-row sm:items-center"
     >
@@ -85,7 +85,7 @@ function Flow() {
         className={`rounded-[var(--r-md)] border px-4 py-3 text-center font-mono text-[12.5px] font-semibold whitespace-nowrap ${INDIGO_TEXT}`}
         style={{ borderColor: `color-mix(in srgb, ${INDIGO} 45%, transparent)`, background: `color-mix(in srgb, ${INDIGO} 10%, var(--surface))` }}
       >
-        Cipher
+        AI Proxy
       </span>
       <span aria-hidden className={line} style={{ borderColor: INDIGO }} />
       <span className={node}>{az ? "AI alətləri · sizin AI" : "AI tools · your AI"}</span>
@@ -93,13 +93,13 @@ function Flow() {
   );
 }
 
-export function Cipher() {
+export function AiProxy() {
   const lang = useLang();
   const az = lang === "az";
   return (
     <>
       <PageHeader
-        top={<CipherBar />}
+        top={<AiProxyBar />}
         eyebrow={
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ background: INDIGO }} />
@@ -114,8 +114,8 @@ export function Cipher() {
         }
         lead={
           az
-            ? "Cipher şirkətiniz ilə AI arasında təhlükəsizlik qatıdır. AI alətlərinə nəyin çıxdığını və öz AI-nıza nəyin gəldiyini zərər verməzdən əvvəl yoxlayır."
-            : "Cipher is a security layer between your company and AI. It checks what goes out to AI tools, and what comes in to your own AI, before it does harm."
+            ? "AI Proxy şirkətiniz ilə AI arasında təhlükəsizlik qatıdır. AI alətlərinə nəyin çıxdığını və öz AI-nıza nəyin gəldiyini zərər verməzdən əvvəl yoxlayır."
+            : "AI Proxy is a security layer between your company and AI. It checks what goes out to AI tools, and what comes in to your own AI, before it does harm."
         }
       >
         <div className="flex flex-wrap items-center gap-x-7 gap-y-4">
@@ -160,8 +160,8 @@ export function Cipher() {
               <Eyebrow>{az ? "Strativu ekosisteminin növbəti məhsulu" : "The next product in the Strativu ecosystem"}</Eyebrow>
               <p className="mt-4 max-w-[56ch] text-[17px] leading-[1.65] text-ink-2">
                 {az
-                  ? "Cipher hazırda işçiləri artıq AI-dan istifadə edən banklar, dövlət qurumları və şirkətlər üçün dizayn olunur. İlk xəbər tutmaq istəyirsiniz, ya da eşitməli olduğumuz bir ehtiyacınız var? Bizə yazın."
-                  : "Cipher is being designed now, for banks, public bodies and companies whose people already use AI. Want to know first, or have a use case we should hear? Write to us."}
+                  ? "AI Proxy hazırda işçiləri artıq AI-dan istifadə edən banklar, dövlət qurumları və şirkətlər üçün dizayn olunur. İlk xəbər tutmaq istəyirsiniz, ya da eşitməli olduğumuz bir ehtiyacınız var? Bizə yazın."
+                  : "AI Proxy is being designed now, for banks, public bodies and companies whose people already use AI. Want to know first, or have a use case we should hear? Write to us."}
               </p>
               <div className="mt-8">
                 <Btn to="/contact?topic=Product%20inquiry" variant="secondary">

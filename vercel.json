@@ -74,6 +74,16 @@
       "source": "/legal/dpa",
       "destination": "/terms",
       "permanent": true
+    },
+    {
+      "source": "/products/cipher",
+      "destination": "/products/ai-proxy",
+      "permanent": true
+    },
+    {
+      "source": "/az/products/cipher",
+      "destination": "/az/products/ai-proxy",
+      "permanent": true
     }
   ],
   "headers": [

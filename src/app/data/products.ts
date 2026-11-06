@@ -65,12 +65,12 @@ export const products: Product[] = [
     },
   },
   {
-    name: "Cipher",
+    name: "AI Proxy",
     status: "Coming soon",
     summary: "Use AI at work, keep your data in: secure and controlled access to AI for organisations.",
-    // "Coming soon" səhifəsi (src/app/pages/Cipher.tsx). Mənbə: Strativuco/cipher.
-    to: "/products/cipher",
-    mark: { src: "/projects/cipher/cipher-mark.svg", width: 40, height: 40 },
+    // "Coming soon" səhifəsi (src/app/pages/AiProxy.tsx). Mənbə: Strativuco/cipher.
+    to: "/products/ai-proxy",
+    mark: { src: "/projects/ai-proxy/mark.svg", width: 40, height: 40 },
     color: "#5A5AF0",
     az: {
       status: "Tezliklə",

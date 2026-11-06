@@ -11,7 +11,7 @@ export type Pair<T = unknown> = { en: T; az: T };
 export const AZ_PATHS = new Set<string>([
   "/",
   "/products",
-  "/products/cipher",
+  "/products/ai-proxy",
   "/products/grc360",
   "/products/grc360/early-access",
   "/about",

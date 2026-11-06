@@ -49,7 +49,7 @@ export const STATIC_META: Record<string, PageMeta> = {
   "/products": {
     title: "Products",
     description:
-      "Every Strativu product starts with a real problem. GRC360 for governance, risk and compliance; Cipher, for safe use of AI at work, is coming soon.",
+      "Every Strativu product starts with a real problem. GRC360 for governance, risk and compliance; AI Proxy, for safe use of AI at work, is coming soon.",
   },
   "/about": {
     title: "About Us",
@@ -66,10 +66,10 @@ export const STATIC_META: Record<string, PageMeta> = {
     description: "Thanks. We've received your message and will reply soon.",
     noindex: true,
   },
-  "/products/cipher": {
-    title: "Cipher by Strativu: use AI at work, keep your data in",
+  "/products/ai-proxy": {
+    title: "AI Proxy by Strativu: use AI at work, keep your data in",
     description:
-      "Cipher by Strativu, coming soon: a security layer between your company and AI that keeps sensitive data in and protects your own AI from prompt attacks.",
+      "AI Proxy by Strativu, coming soon: a security layer between your company and AI that keeps sensitive data in and protects your own AI from prompt attacks.",
   },
   [GRC.base]: {
     title: "GRC360 by Strativu: governance, risk and compliance",
@@ -107,11 +107,11 @@ export const STATIC_META: Record<string, PageMeta> = {
   },
   "/az/products": {
     title: "Məhsullar",
-    description: "Hər Strativu məhsulu real problemdən başlayır. İdarəetmə, risk və uyğunluq üçün GRC360; iş yerində AI-ın təhlükəsiz istifadəsi üçün Cipher tezliklə.",
+    description: "Hər Strativu məhsulu real problemdən başlayır. İdarəetmə, risk və uyğunluq üçün GRC360; iş yerində AI-ın təhlükəsiz istifadəsi üçün AI Proxy tezliklə.",
   },
-  "/az/products/cipher": {
-    title: "Cipher by Strativu: işdə AI, məlumat içəridə",
-    description: "Cipher by Strativu, tezliklə: şirkətiniz ilə AI arasında həssas məlumatı içəridə saxlayan və öz AI-nızı hücumlardan qoruyan təhlükəsizlik qatı.",
+  "/az/products/ai-proxy": {
+    title: "AI Proxy by Strativu: işdə AI, məlumat içəridə",
+    description: "AI Proxy by Strativu, tezliklə: şirkətiniz ilə AI arasında həssas məlumatı içəridə saxlayan və öz AI-nızı hücumlardan qoruyan təhlükəsizlik qatı.",
   },
   "/az/products/grc360": {
     title: "GRC360 by Strativu: idarəetmə, risk və uyğunluq",
