@@ -39,7 +39,7 @@ const LEGAL_BODY: Record<LegalDoc, ReactNode> = {
       <h2>Who processes it for us</h2>
       <ul>
         <li><strong>Vercel</strong>: hosts the site and runs the form endpoint; receives technical data.</li>
-        <li><strong>Resend</strong>: delivers form messages to our mailbox by email.</li>
+        <li><strong>Brevo</strong>: delivers form messages to our mailbox by email.</li>
         <li><strong>Zoho</strong>: our company mailbox, where form messages and emails to {site.company.email} are received.</li>
         <li><strong>Formspree</strong>: backup form delivery, used only if the primary delivery fails.</li>
         <li>

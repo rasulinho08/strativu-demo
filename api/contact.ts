@@ -1,13 +1,15 @@
 /**
  * Vercel serverless function: POST /api/contact
  *
- * Saytın formlarını (Contact, GRC360 early access) Resend vasitəsilə korporativ poçta göndərir.
- * Açar heç vaxt brauzerə getmir. Vercel → Project → Settings → Environment Variables:
- *   RESEND_API_KEY  → Resend API açarı (məcburi)
+ * Saytın formlarını (Contact, GRC360 early access) korporativ poçta göndərir. Açar heç vaxt brauzerə getmir.
+ * Göndərmə xidməti: Brevo (əsas). Keçid dövründə BREVO_API_KEY yoxdursa, köhnə Resend açarı ilə göndərir.
+ * Vercel → Project → Settings → Environment Variables:
+ *   BREVO_API_KEY   → Brevo API açarı (SMTP & API → API Keys; MCP açarı yox, adi API açarı)
+ *   RESEND_API_KEY  → (köhnə) yalnız BREVO_API_KEY yoxdursa istifadə olunur; Brevo işləyəndən sonra silin
  *   CONTACT_TO      → mesajların gələcəyi ünvan (yoxdursa: contact@strativu.com; vergüllə bir neçə ünvan olar)
- *   CONTACT_FROM    → göndərən; Resend-də təsdiqlənmiş domendə olmalıdır
+ *   CONTACT_FROM    → göndərən, "Ad <email>" formatında; Brevo-da təsdiqlənmiş domendə olmalıdır
  *                     (yoxdursa: "Strativu Website <noreply@strativu.com>")
- * Açar yoxdursa 503 + code "NOT_CONFIGURED" qaytarır → sayt formu köhnə yolla (Formspree) göndərir.
+ * Heç bir açar yoxdursa 503 + code "NOT_CONFIGURED" qaytarır → sayt formu köhnə yolla (Formspree) göndərir.
  */
 declare const process: { env: Record<string, string | undefined> };
 
@@ -51,6 +53,11 @@ const clean = (v: unknown) =>
     .trim()
     .slice(0, MAX);
 const oneLine = (v: string) => v.replace(/\s+/g, " ").slice(0, 200);
+/** "Strativu Website <noreply@strativu.com>" → { name, email }; ad yoxdursa yalnız email. */
+function parseAddress(v: string) {
+  const m = v.match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
+  return m ? { ...(m[1] ? { name: m[1].replace(/^"|"$/g, "") } : {}), email: m[2].trim() } : { email: v.trim() };
+}
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 export default async function handler(req: Req, res: Res) {
@@ -67,8 +74,9 @@ export default async function handler(req: Req, res: Res) {
   if (!originAllowed(header("origin"))) return res.status(403).json({ error: "Forbidden" });
   if (!header("content-type").toLowerCase().startsWith("application/json")) return res.status(415).json({ error: "Unsupported content type" });
 
-  const key = process.env.RESEND_API_KEY;
-  if (!key) return res.status(503).json({ code: "NOT_CONFIGURED", error: "Email sending is not configured" });
+  const brevoKey = process.env.BREVO_API_KEY;
+  const resendKey = process.env.RESEND_API_KEY;
+  if (!brevoKey && !resendKey) return res.status(503).json({ code: "NOT_CONFIGURED", error: "Email sending is not configured" });
 
   let body: Record<string, unknown> = {};
   try {
@@ -114,20 +122,34 @@ export default async function handler(req: Req, res: Res) {
   const from = process.env.CONTACT_FROM || "Strativu Website <noreply@strativu.com>";
 
   try {
-    const r = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to, reply_to: f.email, subject, text, html }),
-    });
+    const r = brevoKey
+      ? await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: { "api-key": brevoKey, "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            sender: parseAddress(from),
+            to: to.map((email) => ({ email })),
+            replyTo: { email: f.email, ...(f.name ? { name: oneLine(f.name) } : {}) },
+            subject,
+            textContent: text,
+            htmlContent: html,
+          }),
+        })
+      : await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ from, to, reply_to: f.email, subject, text, html }),
+        });
+    const provider = brevoKey ? "brevo" : "resend";
     if (!r.ok) {
       // Səbəb Vercel loglarında görünür (açar loga yazılmır); ziyarətçiyə ümumi xəta.
       const detail = await r.text().catch(() => "");
-      console.error("resend_failed", r.status, detail.slice(0, 500));
+      console.error(`${provider}_failed`, r.status, detail.slice(0, 500));
       return res.status(502).json({ error: "Could not send the message" });
     }
     return res.status(200).json({ ok: true });
   } catch (e) {
-    console.error("resend_unreachable", String(e).slice(0, 200));
+    console.error("email_unreachable", String(e).slice(0, 200));
     return res.status(502).json({ error: "Could not send the message" });
   }
 }

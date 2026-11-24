@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 
 /**
  * Form sending for the site's forms.
- *  1. POST /api/contact (Vercel function → Resend → the corporate mailbox; api/contact.ts).
+ *  1. POST /api/contact (Vercel function → Brevo → the corporate mailbox; api/contact.ts).
  *  2. If that does not send (not configured, blocked, missing, server error — anything but 200 or 422), the same data goes to Formspree
  *     (https://formspree.io/f/<id>), so a message is never lost.
  */
