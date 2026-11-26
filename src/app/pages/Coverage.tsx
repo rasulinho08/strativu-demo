@@ -13,7 +13,7 @@ const STATUS_NOTE: Record<FrameworkStatus, string> = {
   package:
     "Works as a compliance package in the current build. You add the requirements in the product or import them from CSV; a ready-made catalogue is not included yet.",
   "in-progress": "A ready-made package is being prepared.",
-  planned: "On the roadmap. Early-access teams help set the order.",
+  planned: "On the roadmap. Our customers help set the order.",
 };
 
 export function Coverage() {
@@ -69,7 +69,7 @@ export function FrameworkPage() {
               <p className="max-w-[46ch] text-[17px] leading-[1.65] text-ink-2">{f.summary}</p>
               <p className="mt-8 max-w-[46ch] text-[15px] leading-[1.6] text-ink-3">{STATUS_NOTE[f.status]}</p>
               <div className="mt-6">
-                <Btn to={GRC.earlyAccess}>Request early access</Btn>
+                <Btn to={GRC.earlyAccess}>Book a demo</Btn>
               </div>
             </Reveal>
           }

@@ -170,7 +170,7 @@ export function EarlyAccessForm() {
       )}
       <div className="flex flex-col gap-4 pt-3 sm:items-start">
         <Btn type="submit" size="lg" disabled={state.submitting}>
-          {state.submitting ? (az ? "Göndərilir…" : "Sending…") : az ? "Erkən giriş istəyin" : "Request early access"}
+          {state.submitting ? (az ? "Göndərilir…" : "Sending…") : az ? "Demo sifariş edin" : "Book a demo"}
         </Btn>
         <p className="text-[13px] leading-[1.6] text-ink-3">
           {az ? "Poçt siyahısı yoxdur. Bu məlumatları yalnız sizə cavab vermək üçün istifadə edirik." : "No mailing list. We use these details only to reply to you."}{" "}

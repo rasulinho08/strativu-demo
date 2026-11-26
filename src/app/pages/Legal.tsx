@@ -24,7 +24,7 @@ const LEGAL_BODY: Record<LegalDoc, ReactNode> = {
       <h2>What we collect</h2>
       <p>
         <strong>What you send us.</strong> Contact form: full name, email, company (optional), topic, message and your consent. GRC360
-        early-access form: name, work email, company, role, frameworks and message.
+        demo request form: name, work email, company, role, frameworks and message.
       </p>
       <p>
         <strong>Technical data.</strong> When you open the site, our hosting provider receives your IP address, browser type and the
@@ -64,7 +64,7 @@ const LEGAL_BODY: Record<LegalDoc, ReactNode> = {
     <>
       <h2>Scope</h2>
       <p>
-        These terms govern use of this website. Use of a Strativu product (for example GRC360 during early access) is governed by a
+        These terms govern use of this website. Use of a Strativu product (for example GRC360) is governed by a
         separate agreement for that product.
       </p>
       <p>

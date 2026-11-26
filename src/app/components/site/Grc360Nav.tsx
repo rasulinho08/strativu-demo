@@ -7,7 +7,7 @@ const PAGES = [
   { label: "Frameworks", az: "Framework-lər (EN)", to: GRC.frameworks, end: false },
   { label: "Architecture", az: "Arxitektura (EN)", to: GRC.architecture, end: true },
   { label: "Changelog", az: "Dəyişikliklər (EN)", to: GRC.changelog, end: true },
-  { label: "Early access", az: "Erkən giriş", to: GRC.earlyAccess, end: true },
+  { label: "Book a demo", az: "Demo", to: GRC.earlyAccess, end: true },
 ];
 
 /**

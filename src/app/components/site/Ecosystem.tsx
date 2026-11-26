@@ -3,7 +3,7 @@ import { useLang } from "../../i18n";
 
 /**
  * "What Strativu is" — a monochrome line illustration of the ecosystem: Strativu at the centre, thin lines to the
- * products (GRC360, AI Proxy) and to the next one (dashed: not built yet). No product UI, no colours.
+ * products (GRC360, HackOS, UniAz, AI Proxy) and to the next one (dashed: not built yet). No product UI, no colours.
  * Motion: the lines draw in once when the figure scrolls into view, then a small dot travels slowly along each line.
  * With reduced motion it is a still drawing.
  */
@@ -11,13 +11,15 @@ import { useLang } from "../../i18n";
 type Node = { x: number; y: number; label: { en: string; az: string }; sub: { en: string; az: string }; future?: boolean };
 
 const C = { x: 240, y: 210 };
-const ORBIT = 168;
+const ORBIT = 158;
 /** Nodes sit on the orbit; angle in degrees (0 = right, negative = up). */
 const at = (deg: number) => ({ x: C.x + ORBIT * Math.cos((deg * Math.PI) / 180), y: C.y + ORBIT * Math.sin((deg * Math.PI) / 180) });
 const NODES: Node[] = [
-  { ...at(-42), label: { en: "GRC360", az: "GRC360" }, sub: { en: "Early access", az: "Erkən giriş" } },
-  { ...at(34), label: { en: "AI Proxy", az: "AI Proxy" }, sub: { en: "Coming soon", az: "Tezliklə" } },
-  { ...at(196), label: { en: "Next", az: "Növbəti" }, sub: { en: "Any market", az: "Hər bazar" }, future: true },
+  { ...at(-90), label: { en: "GRC360", az: "GRC360" }, sub: { en: "Available", az: "Mövcuddur" } },
+  { ...at(-18), label: { en: "HackOS", az: "HackOS" }, sub: { en: "Live", az: "Canlı" } },
+  { ...at(54), label: { en: "UniAz", az: "UniAz" }, sub: { en: "Live", az: "Canlı" } },
+  { ...at(126), label: { en: "AI Proxy", az: "AI Proxy" }, sub: { en: "Coming soon", az: "Tezliklə" } },
+  { ...at(198), label: { en: "Next", az: "Növbəti" }, sub: { en: "Any market", az: "Hər bazar" }, future: true },
 ];
 const R_CENTRE = 60;
 const R_NODE = 50;
@@ -44,7 +46,7 @@ export function EcosystemDiagram({ className = "" }: { className?: string }) {
         className="block h-auto w-full overflow-visible"
       >
         <title id="ecosystem-title">
-          {lang === "az" ? "Strativu ekosistemi: mərkəzdə Strativu, ona GRC360, AI Proxy və növbəti məhsul bağlıdır." : "The Strativu ecosystem: Strativu at the centre, connected to GRC360, AI Proxy and the next product."}
+          {lang === "az" ? "Strativu ekosistemi: mərkəzdə Strativu, ona GRC360, HackOS, UniAz, AI Proxy və növbəti məhsul bağlıdır." : "The Strativu ecosystem: Strativu at the centre, connected to GRC360, HackOS, UniAz, AI Proxy and the next product."}
         </title>
         {/* faint orbit */}
         <circle cx={C.x} cy={C.y} r={ORBIT} fill="none" stroke="var(--line)" strokeWidth={1} strokeDasharray="2 6" />

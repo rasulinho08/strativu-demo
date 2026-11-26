@@ -1,7 +1,7 @@
 /**
  * Vercel serverless function: POST /api/contact
  *
- * Saytın formlarını (Contact, GRC360 early access) korporativ poçta göndərir. Açar heç vaxt brauzerə getmir.
+ * Saytın formlarını (Contact, GRC360 demo) korporativ poçta göndərir. Açar heç vaxt brauzerə getmir.
  * Göndərmə xidməti: Brevo (əsas). Keçid dövründə BREVO_API_KEY yoxdursa, köhnə Resend açarı ilə göndərir.
  * Vercel → Project → Settings → Environment Variables:
  *   BREVO_API_KEY   → Brevo API açarı (SMTP & API → API Keys; MCP açarı yox, adi API açarı)
@@ -102,7 +102,7 @@ export default async function handler(req: Req, res: Res) {
   if (f.form !== "early-access" && !f.message) errors.push({ field: "message", message: "Please write a message." });
   if (errors.length) return res.status(422).json({ errors });
 
-  const subject = oneLine(clean(body._subject)) || (f.form === "early-access" ? "GRC360 early access request" : "Website message");
+  const subject = oneLine(clean(body._subject)) || (f.form === "early-access" ? "GRC360 demo request" : "Website message");
   const rows = Object.keys(LABELS).filter((k) => f[k]);
   const text = rows.map((k) => `${LABELS[k]}: ${f[k]}`).join("\n\n");
   const html =

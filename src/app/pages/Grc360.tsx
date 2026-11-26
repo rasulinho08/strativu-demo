@@ -16,6 +16,7 @@ import {
   grcStack,
   grcFilm,
   grcRelease,
+  GRC_SITE,
   grcStatus,
   screenSrcSet,
 } from "../data/grc360";
@@ -365,18 +366,18 @@ export function Grc360() {
       <PageHeader
         top={<Grc360Nav />}
         eyebrow={`${rel.label} · ${rel.detail}`}
-        title={az ? "İdarəetmə, risk və uyğunluq. Hamısı bir yerdə." : "Governance, risk and compliance. All of it, in one place."}
+        title={az ? "Risk, uyğunluq və audit. Bir platformada." : "Risk, compliance and audit. In one platform."}
         lead={
           az
-            ? "GRC360 by Strativu: Azərbaycan və ingilis dilində on iki bir-birinə bağlı modul. Bizim buludda və ya öz serverlərinizdə işlədin, lazım olsa internetdən tam təcrid olunmuş halda."
-            : "GRC360 by Strativu: twelve connected modules in Azerbaijani and English. Run it in our cloud or on your own servers, air-gapped if you need to."
+            ? "GRC360 by Strativu risk reyestrlərini, nəzarətləri, siyasətləri, auditləri və tənzimləyici öhdəlikləri on iki bağlı modulda, Azərbaycan və ingilis dilində bir yerə yığır. Öz serverlərinizdə və ya ölkədaxili məlumat mərkəzində işləyir; hostinq versiyası da var."
+            : "GRC360 by Strativu brings risk registers, controls, policies, audits and regulatory obligations into twelve connected modules, in Azerbaijani and English. It runs on your own servers or in an in-country data centre; a hosted version is also available."
         }
       >
         <div className="flex flex-wrap items-center gap-x-7 gap-y-4">
           <Btn to={GRC.earlyAccess} size="lg">
-            {az ? "Erkən giriş istəyin" : "Request early access"}
+            {az ? "Demo sifariş edin" : "Book a demo"}
           </Btn>
-          <TextLink to={`${GRC.base}#film`}>{az ? "Filmə baxın" : "Watch the film"}</TextLink>
+          <TextLink href={az ? GRC_SITE.az : GRC_SITE.en}>{az ? "GRC360 saytı" : "GRC360 website"}</TextLink>
         </div>
       </PageHeader>
 
@@ -475,7 +476,7 @@ export function Grc360() {
               <h2 className="t-h2 text-ink">{az ? "Açıq şəkildə qurulur." : "Built in the open."}</h2>
               <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
                 <Btn to={GRC.earlyAccess} size="lg">
-                  {az ? "Erkən giriş istəyin" : "Request early access"}
+                  {az ? "Demo sifariş edin" : "Book a demo"}
                 </Btn>
                 <TextLink to={GRC.changelog}>{az ? "Dəyişiklik jurnalı (EN)" : "Build log"}</TextLink>
               </div>
@@ -493,7 +494,7 @@ const ARCH: { h: string; p: ReactNode[] }[] = [
   {
     h: "Deployment",
     p: [
-      "Multi-tenant SaaS, or on-premise and air-gapped for organisations that keep data in their own data centre.",
+      "On your own servers or in an in-country data centre, air-gapped if needed; a hosted, multi-tenant version is also available.",
       `The on-premise build is a Docker Compose stack: ${grcStack.join(", ")}.`,
     ],
   },
@@ -580,12 +581,12 @@ export function EarlyAccess() {
     <>
       <PageHeader
         top={<Grc360Nav />}
-        eyebrow={az ? `Erkən giriş · ${grcAz.release.detail}` : `Early access · ${grcRelease.detail}`}
-        title={az ? "Məhsulu buraxılışdan əvvəl birlikdə formalaşdırın." : "Shape the product before it ships."}
+        eyebrow="GRC360 · Demo"
+        title={az ? "GRC360-ı öz proseslərinizlə görün." : "See GRC360 with your own processes."}
         lead={
           az
-            ? "GRC360 erkən girişi Azərbaycanda və regionda risk və uyğunluq işi aparan az sayda komanda üçün açıqdır."
-            : "GRC360 early access is open to a small number of teams that run risk and compliance work in Azerbaijan and the region."
+            ? "Təşkilatınız barədə qısa yazın. Demonu risk və uyğunluq prosesinizə uyğun quraq, sonra növbəti addımları birlikdə razılaşdıraq."
+            : "Tell us a little about your organisation. We set up the demo around your risk and compliance process, then agree the next steps with you."
         }
       />
       <Section className="pt-0 md:pt-0" logoHide>
@@ -599,49 +600,48 @@ export function EarlyAccess() {
                   title: az ? "Kimlər üçündür" : "Who it is for",
                   body: az ? (
                     <>
-                      Bank və maliyyə qurumlarında, dövlət qurumlarında və böyüyən şirkətlərdə ISO 27001, PCI DSS, Fərdi məlumatlar
-                      haqqında qanun və ya{" "}
+                      Banklar və maliyyə, dövlət qurumları, telekom və enerji şirkətləri və holdinqlər: ISO 27001, PCI DSS, Fərdi
+                      məlumatlar haqqında qanun, tənzimləyici tələbləri və ya{" "}
                       <Link to={GRC.frameworks} className={INLINE_LINK}>
                         siyahımızdakı
                       </Link>{" "}
-                      başqa framework-ə hazırlaşan təhlükəsizlik, risk və uyğunluq rəhbərləri. Qarşıdan gələn audit və ya tənzimləyici
-                      yoxlaması önəmlidir, komandanın ölçüsü yox.
+                      başqa framework üzrə işləyən təhlükəsizlik, risk və uyğunluq komandaları.
                     </>
                   ) : (
                     <>
-                      Security, risk and compliance leads at banks and financial institutions, public bodies and growing companies
-                      preparing for ISO 27001, PCI DSS, Azerbaijan’s Personal Data Law or another framework on our{" "}
+                      Security, risk and compliance teams at banks, government, telecom and energy companies and holding groups,
+                      working to ISO 27001, PCI DSS, Azerbaijan’s Personal Data Law, regulator requirements or another framework on our{" "}
                       <Link to={GRC.frameworks} className={INLINE_LINK}>
                         frameworks list
                       </Link>
-                      . An upcoming audit or regulator review matters; team size does not.
+                      .
                     </>
                   ),
                 },
                 {
-                  title: az ? "Nə əldə edirsiniz" : "What you get",
+                  title: az ? "Demodan istifadəyə qədər" : "From demo to go-live",
                   body: az
-                    ? "2027-ci ilin I rübündən: inkişaf versiyasında öz iş mühitiniz, mühəndislərimizlə birbaşa əlaqə və sizə lazım olan framework-lərə üstünlük. Erkən giriş müddətində ödəniş yoxdur."
-                    : "From Q1 2027: your own workspace on the development version, direct contact with our engineers, and priority for the frameworks you need. No cost during early access.",
+                    ? "Demo: platformanı proseslərinizə uyğun ssenari ilə göstəririk və tələbləri birlikdə razılaşdırırıq. Quraşdırma və köçürmə: GRC360-ı serverlərinizdə qururuq, mövcud reyestrlərinizi Excel və CSV şablonları ilə köçürürük. Təlim və dəstək: komandanızı öyrədirik, sonra Azərbaycan və ingilis dilində dəstək veririk."
+                    : "Demo: we show the platform with a scenario built around your processes and agree the requirements with you. Installation and migration: we install GRC360 on your servers and move your existing registers in with Excel and CSV templates. Training and support: we train your team, then support you in Azerbaijani and English.",
                 },
                 {
-                  title: az ? "Nə xahiş edirik" : "What we ask",
+                  title: az ? "Qiymət" : "Pricing",
                   body: az
-                    ? "Ayda bir 45 dəqiqəlik görüş, nəyin işləmədiyi barədə səmimi rəy və öyrəndiklərimizdən (heç vaxt məlumatlarınızdan yox) məhsulu formalaşdırmaq üçün istifadəyə icazə."
-                    : "One 45-minute call a month, honest feedback on what breaks, and permission to use what we learn (never your data) to shape the product.",
+                    ? "Quraşdırma növündən və təşkilatınızın ölçüsündən asılıdır. Təklifi demodan sonra hazırlayırıq."
+                    : "It depends on the type of installation and the size of your organisation. We prepare a quote after the demo.",
                 },
                 {
                   title: az ? "Sonra nə olur" : "What happens next",
                   body: az
-                    ? "Sorğulara hər həftə baxırıq. Komandamızdan bir nəfər beş iş günü ərzində cavab verir, hələ uyğun deyilsə, səbəbini deyirik."
-                    : "We review requests weekly. A person from our team replies within five working days, and if it is not a fit yet, we say why.",
+                    ? "Komandamızdan bir nəfər beş iş günü ərzində cavab verir və demonun vaxtını sizinlə razılaşdırır."
+                    : "A person from our team replies within five working days and agrees a time for the demo with you.",
                 },
               ]}
             />
           }
         >
           <Reveal>
-            <Eyebrow>{az ? "Giriş istəyin" : "Request access"}</Eyebrow>
+            <Eyebrow>{az ? "Demo sifarişi" : "Book a demo"}</Eyebrow>
           </Reveal>
           <Reveal delay={0.06} className="mt-8">
             <EarlyAccessForm />

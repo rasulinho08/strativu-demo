@@ -41,9 +41,9 @@ export type Product = {
 export const products: Product[] = [
   {
     name: "GRC360",
-    status: "Early access",
-    statusNote: "Opens Q1 2027",
-    summary: "Governance, risk and compliance in one platform.",
+    status: "Available",
+    statusNote: "Demo on request",
+    summary: "Risk, compliance and audit in one platform, on your own servers.",
     // GRC360-ın öz saytı hazır olanda: bu sətri `href: "https://…"` ilə əvəz edin (kart linki yeni tabda, ↗ ilə açılacaq).
     to: "/products/grc360",
     mark: { src: "/projects/grc360/grc360-mark-40.webp", width: 40, height: 40 },
@@ -55,13 +55,43 @@ export const products: Product[] = [
       width: 2000,
       height: 1250,
     },
-    facts: ["12 modules", "Azerbaijani and English", "Cloud or on-premise"],
+    facts: ["12 modules", "Azerbaijani and English", "On your servers or hosted"],
     az: {
-      status: "Erkən giriş",
-      statusNote: "2027-ci ilin I rübündə açılır",
-      summary: "İdarəetmə, risk və uyğunluq bir platformada.",
-      facts: ["12 modul", "Azərbaycan və ingilis dilində", "Bulud və ya on-premise"],
+      status: "Mövcuddur",
+      statusNote: "Demo sorğu ilə",
+      summary: "Risk, uyğunluq və audit bir platformada, öz serverlərinizdə.",
+      facts: ["12 modul", "Azərbaycan və ingilis dilində", "Öz serverinizdə və ya hostinqdə"],
       imageAlt: "GRC360 Command Center: gecikmiş, bugünkü və gələcək tapşırıqlar, altında aktiv risklərinin istilik xəritəsi.",
+    },
+  },
+  {
+    // Öz saytı var (yeni tabda açılır). Rəqəm hack-os.app-dakı canlı sayğacdandır (26.11.2026); yeniləyəndə tarixi də dəyişin.
+    name: "HackOS",
+    status: "Live",
+    statusNote: "213 participants so far · Nov 2026",
+    summary: "Hackathon management: registration, teams, judging, results and certificates in one system.",
+    href: "https://www.hack-os.app",
+    mark: { src: "/projects/hackos/mark.svg", width: 40, height: 40 },
+    color: "#EA3635",
+    az: {
+      status: "Canlı",
+      statusNote: "İndiyə qədər 213 iştirakçı · noyabr 2026",
+      summary: "Hakaton idarəetməsi: qeydiyyat, komandalar, münsiflik, nəticələr və sertifikatlar bir sistemdə.",
+    },
+  },
+  {
+    // Öz saytı var. İstifadəçi sayı açıq deyil: rəqəm yalnız Strativu təsdiqləyəndən sonra yazılır.
+    name: "UniAz",
+    status: "Live",
+    statusNote: "Free for school-leavers and students",
+    summary: "Work out your exam score, compare passing scores and choose a university programme in Azerbaijan.",
+    href: "https://uniaz.info",
+    mark: { src: "/projects/uniaz/mark-80.webp", width: 40, height: 40 },
+    color: "#2F5BD8",
+    az: {
+      status: "Canlı",
+      statusNote: "Abituriyent və tələbələr üçün ödənişsiz",
+      summary: "DİM balını hesabla, keçid ballarını müqayisə et və sənə uyğun ixtisası seç.",
     },
   },
   {

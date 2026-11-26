@@ -4,10 +4,15 @@
  * (əsas naviqasiyada deyil; Products səhifəsindəki kartdan açılır).
  * Mənbə: Strativuco/GRC_Frontend_Code (main) və GRC_Backend_Code (develop), 2026-10-04 —
  * "GRC360: sayt üçün materiallar" sənədi. Yalnız kodda yoxlanılmış rəqəmlər yazın.
+ * Mesaj, status və təhlükəsizlik iddiaları GRC360 landing səhifəsi ilə uyğunlaşdırılıb (GRC_SITE, 2026-11-26):
+ * MFA, OIDC/SAML SSO, RLS ilə təşkilat ayrılığı, təsdiq tarixçəsinin dəyişdirilə bilməyən zənciri, ClamAV, hostinq versiyası.
  *
  * Yazmayın (hələ doğru deyil): "X kontrol xəritələnib", "N framework hazır gəlir",
- * AWS/GitHub kollektorları, hash-zəncirli jurnal, Jira inteqrasiyası, AI funksiyaları.
+ * AWS/GitHub kollektorları, Jira inteqrasiyası, AI funksiyaları.
  */
+
+/** GRC360-ın öz saytı (landing). Daimi domen qoşulanda yalnız bu iki sətri dəyişin. */
+export const GRC_SITE = { en: "https://landinggrc1.vercel.app/en/", az: "https://landinggrc1.vercel.app/" };
 
 /** GRC360 səhifələrinin ünvanları (bir yerdə; App.tsx, linklər və meta.ts bunu istifadə edir). */
 export const GRC = {
@@ -20,7 +25,7 @@ export const GRC = {
 export const frameworkPath = (slug: string) => `${GRC.frameworks}/${slug}`;
 
 /** Status sətri (GRC360 səhifələrində). products.ts-dəki GRC360 kartı ilə uyğun saxlayın. */
-export const grcRelease = { label: "Early access", detail: "Opens Q1 2027" };
+export const grcRelease = { label: "Available", detail: "Demo on request" };
 
 /** 40 saniyəlik məhsul filmi (GRC360 səhifəsində). */
 export const grcFilm = {
@@ -83,23 +88,15 @@ export const grcFigures: { value: number; suffix?: string; label: string }[] = [
   { value: grcModules.length, label: "modules" },
   { value: 31, label: "screens" },
   { value: 2, label: "languages, Azerbaijani and English" },
-  { value: 2, label: "ways to run it: cloud or on-premise" },
+  { value: 2, label: "ways to run it: your servers or hosted" },
 ];
 
-/** "Who it's for" — üç sətir. CBAR / Decision 411 iddiası yoxdur (hüquqşünas yoxlamadan yazılmır). */
+/** "Who it's for" — GRC360 landing səhifəsindəki dörd sektor. CBAR / Decision 411 iddiası yoxdur (hüquqşünas yoxlamadan yazılmır). */
 export const grcAudience = [
-  {
-    title: "Banks and financial institutions",
-    body: "On-premise in your data centre, permissions per module and per action, a system log for auditors, and PCI DSS as a compliance package you build or import from CSV.",
-  },
-  {
-    title: "Public bodies and critical infrastructure",
-    body: "An air-gapped install with Docker Compose, sign-in through LDAP or Active Directory, and an interface fully in Azerbaijani.",
-  },
-  {
-    title: "Growing companies",
-    body: "A tenant in our cloud, and CSV import of the registers you keep in spreadsheets today.",
-  },
+  { title: "Banks and finance", body: "Track regulators' requirements as obligations, approve risk exceptions by committee and show auditors the full history." },
+  { title: "Government", body: "Data stays on the agency's own servers, with an interface in Azerbaijani." },
+  { title: "Telecom and energy", body: "Manage critical assets, vendors and business continuity plans in one system." },
+  { title: "Holding groups", body: "Each subsidiary works as its own organisation: data never mixes, and oversight happens in one place." },
 ];
 
 /** Demo build-də yüklənmiş paket nümunələri (screenshot 04). Kataloq hazır gəlmir: paketlər yaradılır və ya CSV ilə import olunur. */
@@ -137,7 +134,7 @@ export const GRC_SCREEN_SIZE = { width: 2000, height: 1250 };
 export const grcStatus = [
   {
     k: "Ready",
-    v: "All twelve modules on the live back end; server-side paging; CSV import and export; roles and permissions; LDAP and SSO; Trust Center; notifications; session security.",
+    v: "All twelve modules on the live back end; server-side paging; CSV import and export; roles and permissions; LDAP, and SSO over OIDC and SAML; MFA (TOTP); organisations kept apart by row-level security; a tamper-evident approval history; optional ClamAV file scanning; Trust Center; notifications.",
   },
   {
     k: "In progress",
@@ -145,7 +142,7 @@ export const grcStatus = [
   },
   {
     k: "Planned",
-    v: "Email digests and Jira integration, custom weights for the risk matrix, incident escalation rules. Early access opens in Q1 2027.",
+    v: "Email digests and Jira integration, custom weights for the risk matrix, incident escalation rules.",
   },
 ];
 
@@ -154,7 +151,7 @@ export const grcStatus = [
  * Modul və ekran adları məhsulun interfeysindəki kimi ingiliscə qalır; təsvirlər tərcümə olunub.
  */
 export const grcAz = {
-  release: { label: "Erkən giriş", detail: "2027-ci ilin I rübündə açılır" },
+  release: { label: "Mövcuddur", detail: "Demo sorğu ilə" },
   modules: {
     "Command Center":
       "Gecikmiş, bugünkü və gələcək tapşırıqlar, aktiv, biznes və üçüncü tərəf risklərinin istilik xəritələri və uyğunluq vəziyyəti bir ekranda.",
@@ -172,16 +169,16 @@ export const grcAz = {
     "Integrations & Automation": "LDAP, OAuth və SAML ilə vahid giriş (SSO), CSV idxal və ixrac, REST API və bildirişlər.",
     Settings: "Autentifikasiya, sistem vəziyyəti, yeniləmələr, sistem jurnalı və sessiyalar.",
   } as Record<string, string>,
-  figures: ["modul", "ekran", "dil: Azərbaycan və ingilis", "işlətmə yolu: bulud və ya on-premise"],
+  figures: ["modul", "ekran", "dil: Azərbaycan və ingilis", "işlətmə yolu: öz serveriniz və ya hostinq"],
   status: [
     {
       k: "Hazırdır",
-      v: "On iki modulun hamısı işlək backend-də; server tərəfli səhifələmə; CSV idxal və ixrac; rollar və icazələr; LDAP və SSO; Trust Center; bildirişlər; sessiya təhlükəsizliyi.",
+      v: "On iki modulun hamısı işlək backend-də; server tərəfli səhifələmə; CSV idxal və ixrac; rollar və icazələr; LDAP, OIDC və SAML ilə SSO; MFA (TOTP); təşkilatlar sətir səviyyəsində (RLS) ayrılır; dəyişdirilə bilməyən təsdiq tarixçəsi; istəyə görə ClamAV ilə fayl yoxlaması; Trust Center; bildirişlər.",
     },
     { k: "Davam edir", v: "OpenAPI müqaviləsinin tam sinxronlaşdırılması, CI/CD və fasiləsizlik planları üçün auditlər." },
     {
       k: "Planlaşdırılıb",
-      v: "E-poçt xülasələri və Jira inteqrasiyası, risk matrisi üçün fərdi çəkilər, insident eskalasiya qaydaları. Erkən giriş 2027-ci ilin I rübündə açılır.",
+      v: "E-poçt xülasələri və Jira inteqrasiyası, risk matrisi üçün fərdi çəkilər, insident eskalasiya qaydaları.",
     },
   ],
   screenAlt: {

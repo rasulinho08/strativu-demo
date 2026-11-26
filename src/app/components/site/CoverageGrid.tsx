@@ -8,7 +8,7 @@ const ORDER: FrameworkStatus[] = ["package", "in-progress", "planned"];
 const NOTE: Record<FrameworkStatus, string> = {
   package: "Work as compliance packages today. You add the requirements or import them from CSV.",
   "in-progress": "A ready-made package is being prepared.",
-  planned: "On the roadmap. Early-access teams help set the order.",
+  planned: "On the roadmap. Our customers help set the order.",
 };
 
 /**

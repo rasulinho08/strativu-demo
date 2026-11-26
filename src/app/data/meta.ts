@@ -49,7 +49,7 @@ export const STATIC_META: Record<string, PageMeta> = {
   "/products": {
     title: "Products",
     description:
-      "Every Strativu product starts with a real problem. GRC360 for governance, risk and compliance; AI Proxy, for safe use of AI at work, is coming soon.",
+      "Every Strativu product starts with a real problem: GRC360 for risk and compliance, HackOS for hackathons, UniAz for school-leavers, and AI Proxy, coming soon.",
   },
   "/about": {
     title: "About Us",
@@ -74,7 +74,7 @@ export const STATIC_META: Record<string, PageMeta> = {
   [GRC.base]: {
     title: "GRC360 by Strativu: governance, risk and compliance",
     description:
-      "GRC360 by Strativu brings risks, assets, vendors, controls, audits and incidents into one platform, in Azerbaijani and English. Early access opens Q1 2027.",
+      "GRC360 by Strativu: risks, controls, policies, audits and obligations in one platform, in Azerbaijani and English, on your own servers. Book a demo.",
   },
   [GRC.architecture]: {
     title: "GRC360 architecture",
@@ -88,9 +88,9 @@ export const STATIC_META: Record<string, PageMeta> = {
   },
   [GRC.changelog]: { title: "GRC360 changelog", description: "Public build log for GRC360 by Strativu: what shipped, with real dates." },
   [GRC.earlyAccess]: {
-    title: "GRC360 early access",
+    title: "Book a GRC360 demo",
     description:
-      "Early access to GRC360 by Strativu opens Q1 2027, for banks, public bodies and growing companies that run risk and compliance work.",
+      "Book a demo of GRC360 by Strativu. We set it up around your risk and compliance process and prepare a quote after the demo.",
   },
   "/trust": {
     title: "Security",
@@ -107,7 +107,7 @@ export const STATIC_META: Record<string, PageMeta> = {
   },
   "/az/products": {
     title: "Məhsullar",
-    description: "Hər Strativu məhsulu real problemdən başlayır. İdarəetmə, risk və uyğunluq üçün GRC360; iş yerində AI-ın təhlükəsiz istifadəsi üçün AI Proxy tezliklə.",
+    description: "Hər Strativu məhsulu real problemdən başlayır: risk və uyğunluq üçün GRC360, hakatonlar üçün HackOS, abituriyentlər üçün UniAz və tezliklə AI Proxy.",
   },
   "/az/products/ai-proxy": {
     title: "AI Proxy by Strativu: işdə AI, məlumat içəridə",
@@ -119,8 +119,8 @@ export const STATIC_META: Record<string, PageMeta> = {
       "GRC360 by Strativu riskləri, aktivləri, təchizatçıları, nəzarət tədbirlərini və auditləri Azərbaycan və ingilis dilində bir platformada birləşdirir.",
   },
   "/az/products/grc360/early-access": {
-    title: "GRC360 erkən giriş",
-    description: "GRC360 by Strativu erkən girişi risk və uyğunluq işi aparan banklar, dövlət qurumları və böyüyən şirkətlər üçün 2027-ci ilin I rübündə açılır.",
+    title: "GRC360 demo sifarişi",
+    description: "GRC360 by Strativu demosunu sifariş edin: demonu təşkilatınızın risk və uyğunluq prosesinə uyğun qururuq, qiyməti demodan sonra təklif edirik.",
   },
   "/az/about": {
     title: "Haqqımızda",
@@ -145,7 +145,7 @@ function frameworkMeta(f: Framework): PageMeta {
   const status =
     f.status === "package"
       ? "Works as a compliance package in GRC360 by Strativu: you build it or import it from CSV."
-      : `${statusLabel[f.status]} for GRC360 by Strativu; early-access teams help set the order.`;
+      : `${statusLabel[f.status]} for GRC360 by Strativu; customers help set the order.`;
   return { title: `${f.id} in GRC360`, description: `${label}. ${status}` };
 }
 
