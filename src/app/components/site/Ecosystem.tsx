@@ -15,7 +15,7 @@ const ORBIT = 158;
 /** Nodes sit on the orbit; angle in degrees (0 = right, negative = up). */
 const at = (deg: number) => ({ x: C.x + ORBIT * Math.cos((deg * Math.PI) / 180), y: C.y + ORBIT * Math.sin((deg * Math.PI) / 180) });
 const NODES: Node[] = [
-  { ...at(-90), label: { en: "GRC360", az: "GRC360" }, sub: { en: "Available", az: "Mövcuddur" } },
+  { ...at(-90), label: { en: "GRC360", az: "GRC360" }, sub: { en: "Early access", az: "Erkən giriş" } },
   { ...at(-18), label: { en: "HackOS", az: "HackOS" }, sub: { en: "Live", az: "Canlı" } },
   { ...at(54), label: { en: "UniAz", az: "UniAz" }, sub: { en: "Live", az: "Canlı" } },
   { ...at(126), label: { en: "AI Proxy", az: "AI Proxy" }, sub: { en: "Coming soon", az: "Tezliklə" } },

@@ -12,6 +12,8 @@ export const AZ_PATHS = new Set<string>([
   "/",
   "/products",
   "/products/ai-proxy",
+  "/products/hackos",
+  "/products/uniaz",
   "/products/grc360",
   "/products/grc360/early-access",
   "/about",

@@ -41,8 +41,8 @@ export type Product = {
 export const products: Product[] = [
   {
     name: "GRC360",
-    status: "Available",
-    statusNote: "Demo on request",
+    status: "Early access",
+    statusNote: "Opens January 2027",
     summary: "Risk, compliance and audit in one platform, on your own servers.",
     // GRC360-ın öz saytı hazır olanda: bu sətri `href: "https://…"` ilə əvəz edin (kart linki yeni tabda, ↗ ilə açılacaq).
     to: "/products/grc360",
@@ -57,20 +57,20 @@ export const products: Product[] = [
     },
     facts: ["12 modules", "Azerbaijani and English", "On your servers or hosted"],
     az: {
-      status: "Mövcuddur",
-      statusNote: "Demo sorğu ilə",
+      status: "Erkən giriş",
+      statusNote: "2027-ci ilin yanvarında açılır",
       summary: "Risk, uyğunluq və audit bir platformada, öz serverlərinizdə.",
       facts: ["12 modul", "Azərbaycan və ingilis dilində", "Öz serverinizdə və ya hostinqdə"],
       imageAlt: "GRC360 Command Center: gecikmiş, bugünkü və gələcək tapşırıqlar, altında aktiv risklərinin istilik xəritəsi.",
     },
   },
   {
-    // Öz saytı var (yeni tabda açılır). Rəqəm hack-os.app-dakı canlı sayğacdandır (26.11.2026); yeniləyəndə tarixi də dəyişin.
+    // Qısa səhifə: /products/hackos (data/productPages.ts), oradan öz saytına. Rəqəm hack-os.app-dakı canlı sayğacdandır (26.11.2026).
     name: "HackOS",
     status: "Live",
     statusNote: "213 participants so far · Nov 2026",
     summary: "Hackathon management: registration, teams, judging, results and certificates in one system.",
-    href: "https://www.hack-os.app",
+    to: "/products/hackos",
     mark: { src: "/projects/hackos/mark.svg", width: 40, height: 40 },
     color: "#EA3635",
     az: {
@@ -80,17 +80,17 @@ export const products: Product[] = [
     },
   },
   {
-    // Öz saytı var. İstifadəçi sayı açıq deyil: rəqəm yalnız Strativu təsdiqləyəndən sonra yazılır.
+    // Qısa səhifə: /products/uniaz (data/productPages.ts). İstifadəçi sayı Strativu tərəfindən təsdiqlənib (26.11.2026).
     name: "UniAz",
     status: "Live",
-    statusNote: "Free for school-leavers and students",
+    statusNote: "78,817 users · free for students",
     summary: "Work out your exam score, compare passing scores and choose a university programme in Azerbaijan.",
-    href: "https://uniaz.info",
+    to: "/products/uniaz",
     mark: { src: "/projects/uniaz/mark-80.webp", width: 40, height: 40 },
     color: "#2F5BD8",
     az: {
       status: "Canlı",
-      statusNote: "Abituriyent və tələbələr üçün ödənişsiz",
+      statusNote: "78 817 istifadəçi · tələbələr üçün ödənişsiz",
       summary: "DİM balını hesabla, keçid ballarını müqayisə et və sənə uyğun ixtisası seç.",
     },
   },

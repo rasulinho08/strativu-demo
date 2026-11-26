@@ -8,8 +8,7 @@
  * İngiliscə URL-lər prefikssizdir (/products …); Azərbaycan dili /az/... altındadır (AZ_META, i18n/paths.ts → AZ_PATHS).
  */
 import { site } from "./site";
-import { frameworks, statusLabel, type Framework } from "./coverage";
-import { GRC, frameworkPath } from "./grc360";
+import { GRC } from "./grc360";
 
 export type PageMeta = {
   /** null → ana səhifə formatı ("Strativu · <manifest>"). */
@@ -71,26 +70,23 @@ export const STATIC_META: Record<string, PageMeta> = {
     description:
       "AI Proxy by Strativu, coming soon: a security layer between your company and AI that keeps sensitive data in and protects your own AI from prompt attacks.",
   },
+  "/products/hackos": {
+    title: "HackOS by Strativu: hackathon management platform",
+    description: "HackOS by Strativu runs registration, teams, mentors, judging, results and certificates for a hackathon in one system.",
+  },
+  "/products/uniaz": {
+    title: "UniAz by Strativu: exam scores and university choice",
+    description: "UniAz by Strativu: a free platform for school-leavers and students in Azerbaijan. Work out your DİM score, compare passing scores, choose a programme.",
+  },
   [GRC.base]: {
     title: "GRC360 by Strativu: governance, risk and compliance",
     description:
-      "GRC360 by Strativu: risks, controls, policies, audits and obligations in one platform, in Azerbaijani and English, on your own servers. Book a demo.",
+      "GRC360 by Strativu: risks, controls, policies, audits and obligations in one platform, on your own servers. Opens January 2027: request early access or a demo.",
   },
-  [GRC.architecture]: {
-    title: "GRC360 architecture",
-    description:
-      "How GRC360 by Strativu is built: deployment, tenant isolation, sign-in, permissions, system log and API, for the engineer doing the vendor review.",
-  },
-  [GRC.frameworks]: {
-    title: "GRC360 frameworks",
-    description:
-      "Frameworks and regulations GRC360 by Strativu works with, and the status of each: works as a compliance package today, or planned.",
-  },
-  [GRC.changelog]: { title: "GRC360 changelog", description: "Public build log for GRC360 by Strativu: what shipped, with real dates." },
   [GRC.earlyAccess]: {
-    title: "Book a GRC360 demo",
+    title: "GRC360 early access and demo",
     description:
-      "Book a demo of GRC360 by Strativu. We set it up around your risk and compliance process and prepare a quote after the demo.",
+      "GRC360 by Strativu opens in January 2027. Request early access or book a demo built around your risk and compliance process.",
   },
   "/trust": {
     title: "Security",
@@ -113,14 +109,22 @@ export const STATIC_META: Record<string, PageMeta> = {
     title: "AI Proxy by Strativu: işdə AI, məlumat içəridə",
     description: "AI Proxy by Strativu, tezliklə: şirkətiniz ilə AI arasında həssas məlumatı içəridə saxlayan və öz AI-nızı hücumlardan qoruyan təhlükəsizlik qatı.",
   },
+  "/az/products/hackos": {
+    title: "HackOS by Strativu: hakaton idarəetmə platforması",
+    description: "HackOS by Strativu hakatonun qeydiyyatını, komandalarını, mentorlarını, münsifliyini, nəticələrini və sertifikatlarını bir sistemdə idarə edir.",
+  },
+  "/az/products/uniaz": {
+    title: "UniAz by Strativu: imtahan balı və universitet seçimi",
+    description: "UniAz by Strativu: abituriyent və tələbələr üçün ödənişsiz platforma. DİM balını hesabla, keçid ballarını müqayisə et, ixtisas seç.",
+  },
   "/az/products/grc360": {
     title: "GRC360 by Strativu: idarəetmə, risk və uyğunluq",
     description:
-      "GRC360 by Strativu riskləri, aktivləri, təchizatçıları, nəzarət tədbirlərini və auditləri Azərbaycan və ingilis dilində bir platformada birləşdirir.",
+      "GRC360 by Strativu: risklər, nəzarətlər, siyasətlər və auditlər bir platformada, öz serverlərinizdə. 2027-ci ilin yanvarında açılır.",
   },
   "/az/products/grc360/early-access": {
-    title: "GRC360 demo sifarişi",
-    description: "GRC360 by Strativu demosunu sifariş edin: demonu təşkilatınızın risk və uyğunluq prosesinə uyğun qururuq, qiyməti demodan sonra təklif edirik.",
+    title: "GRC360 erkən giriş və demo",
+    description: "GRC360 by Strativu 2027-ci ilin yanvarında açılır. Erkən girişə yazılın və ya risk və uyğunluq prosesinizə uyğun demo sifariş edin.",
   },
   "/az/about": {
     title: "Haqqımızda",
@@ -139,28 +143,10 @@ export const STATIC_META: Record<string, PageMeta> = {
 
 export const NOT_FOUND_META: PageMeta = { title: "Page not found", description: "The page you asked for does not exist.", noindex: true };
 
-function frameworkMeta(f: Framework): PageMeta {
-  const short = f.id.split(" (")[0];
-  const label = f.name === short ? short : `${f.name} (${short})`;
-  const status =
-    f.status === "package"
-      ? "Works as a compliance package in GRC360 by Strativu: you build it or import it from CSV."
-      : `${statusLabel[f.status]} for GRC360 by Strativu; customers help set the order.`;
-  return { title: `${f.id} in GRC360`, description: `${label}. ${status}` };
-}
-
-const FRAMEWORK_RE = new RegExp(`^${GRC.frameworks}/([^/]+)$`);
-
 /** Pathname → meta. Naməlum yol → null (səhifə 404 göstərir). */
 export function metaFor(pathname: string): PageMeta | null {
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
-  if (STATIC_META[path]) return STATIC_META[path];
-  const fw = path.match(FRAMEWORK_RE);
-  if (fw) {
-    const f = frameworks.find((x) => x.slug === fw[1]);
-    return f ? frameworkMeta(f) : null;
-  }
-  return null;
+  return STATIC_META[path] ?? null;
 }
 
 /**
@@ -173,7 +159,7 @@ export function fullTitle(meta: PageMeta): string {
 }
 
 /** Statik başlığı yaradılan bütün route-lar (noindex olanlar da). */
-export const ROUTES: string[] = [...Object.keys(STATIC_META), ...frameworks.map((f) => frameworkPath(f.slug))];
+export const ROUTES: string[] = Object.keys(STATIC_META);
 
 /** Sitemap: yalnız indekslənən route-lar. */
 export const SITEMAP_ROUTES: string[] = ROUTES.filter((r) => !metaFor(r)?.noindex);

@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Link } from "react-router";
+import { useEffect, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import { Check } from "lucide-react";
 import { useFormspree } from "../../lib/formspree";
 import { Btn } from "./primitives";
@@ -12,9 +12,20 @@ const Optional = ({ az }: { az: boolean }) => <span className="font-normal text-
 type FieldName = "name" | "email" | "company" | "role" | "frameworks" | "message";
 const FIELDS: FieldName[] = ["name", "email", "company", "role", "frameworks", "message"];
 
-/** GRC360 early-access request (/products/grc360/early-access). Posts to Formspree with form=early-access. */
+type Kind = "early-access" | "demo";
+
+/**
+ * GRC360 early access or demo request (/products/grc360/early-access). `?type=demo` preselects the demo.
+ * Sends form=early-access, topic ("Early access" / "Demo") and a matching subject.
+ */
 export function EarlyAccessForm() {
   const az = useLang() === "az";
+  const [params] = useSearchParams();
+  const [kind, setKind] = useState<Kind>(params.get("type") === "demo" ? "demo" : "early-access");
+  useEffect(() => {
+    const t = params.get("type");
+    if (t === "demo" || t === "early-access") setKind(t);
+  }, [params]);
   const [state, handleSubmit] = useFormspree(site.formspreeId);
   const doneRef = useRef<HTMLParagraphElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -67,6 +78,24 @@ export function EarlyAccessForm() {
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-9">
       <input type="hidden" name="form" value="early-access" />
+      <input type="hidden" name="topic" value={kind === "demo" ? "Demo" : "Early access"} />
+      <input type="hidden" name="_subject" value={kind === "demo" ? "GRC360 demo request" : "GRC360 early access request"} />
+      <fieldset>
+        <legend className={labelCls}>{az ? "Nə istəyirsiniz" : "What would you like"}</legend>
+        <div className="mt-3 inline-flex rounded-full border border-line p-1">
+          {(["early-access", "demo"] as const).map((k) => (
+            <label
+              key={k}
+              className={`cursor-pointer rounded-full px-4 py-2 text-[14.5px] transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand ${
+                kind === k ? "bg-brand text-on-brand" : "text-ink-2 hover:text-ink"
+              }`}
+            >
+              <input type="radio" name="kind" value={k} checked={kind === k} onChange={() => setKind(k)} className="sr-only" />
+              {k === "demo" ? (az ? "Demo" : "A demo") : az ? "Erkən giriş" : "Early access"}
+            </label>
+          ))}
+        </div>
+      </fieldset>
       {/* Spam honeypot: hidden from people, filled in by bots; Formspree drops submissions that fill it. */}
       <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
       <div className="grid grid-cols-1 gap-x-10 gap-y-9 sm:grid-cols-2">
@@ -170,7 +199,7 @@ export function EarlyAccessForm() {
       )}
       <div className="flex flex-col gap-4 pt-3 sm:items-start">
         <Btn type="submit" size="lg" disabled={state.submitting}>
-          {state.submitting ? (az ? "Göndərilir…" : "Sending…") : az ? "Demo sifariş edin" : "Book a demo"}
+          {state.submitting ? (az ? "Göndərilir…" : "Sending…") : kind === "demo" ? (az ? "Demo sifariş edin" : "Book a demo") : az ? "Erkən giriş istəyin" : "Request early access"}
         </Btn>
         <p className="text-[13px] leading-[1.6] text-ink-3">
           {az ? "Poçt siyahısı yoxdur. Bu məlumatları yalnız sizə cavab vermək üçün istifadə edirik." : "No mailing list. We use these details only to reply to you."}{" "}

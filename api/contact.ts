@@ -102,7 +102,7 @@ export default async function handler(req: Req, res: Res) {
   if (f.form !== "early-access" && !f.message) errors.push({ field: "message", message: "Please write a message." });
   if (errors.length) return res.status(422).json({ errors });
 
-  const subject = oneLine(clean(body._subject)) || (f.form === "early-access" ? "GRC360 demo request" : "Website message");
+  const subject = oneLine(clean(body._subject)) || (f.form === "early-access" ? "GRC360 early access or demo request" : "Website message");
   const rows = Object.keys(LABELS).filter((k) => f[k]);
   const text = rows.map((k) => `${LABELS[k]}: ${f[k]}`).join("\n\n");
   const html =

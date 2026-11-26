@@ -1,37 +1,18 @@
-import { useEffect, useRef, useState, type FocusEvent, type PointerEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FocusEvent, type PointerEvent } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
-import { Link } from "react-router";
 import { Btn, Container, Duo, Eyebrow, PageHeader, Rows, Section, TextLink } from "../components/site/primitives";
 import { Reveal } from "../components/site/Reveal";
 import { Grc360Nav } from "../components/site/Grc360Nav";
-import { ChangelogList } from "../components/site/ChangelogList";
 import { EarlyAccessForm } from "../components/site/EarlyAccessForm";
-import {
-  GRC,
-  GRC_SCREEN_SIZE,
-  SCREEN_SIZES,
-  grcFigures,
-  grcModules,
-  grcScreens,
-  grcStack,
-  grcFilm,
-  grcRelease,
-  GRC_SITE,
-  grcStatus,
-  screenSrcSet,
-} from "../data/grc360";
+import { ProductClosing, ProductFigures, ProductPoints } from "../components/site/ProductOverview";
+import { GRC, GRC_SCREEN_SIZE, GRC_SITE, SCREEN_SIZES, grcAz, grcFigures, grcFilm, grcRelease, grcScreens, screenSrcSet } from "../data/grc360";
 import { Film, FilmScenes } from "../components/site/Film";
-import { ControlMap, DeployPanel, RiskLinks, Split, SystemLog } from "../components/site/Visuals";
 import { useLang } from "../i18n";
-import { grcAz } from "../data/grc360";
 
 /**
- * GRC360 by Strativu — the interim product site under /products/grc360 (until GRC360 has its own site):
- * overview, architecture, changelog and early access (frameworks: Coverage.tsx).
- * Not in the main nav; every page carries the GRC360 product bar (Grc360Nav) with the way back to Products.
- * Two-sided layouts (Duo / Split): heading or text on the left, list or illustrative panel on the right.
- * The 3D logo stays a faint background on these pages (LogoScene → CHOREO.page).
- * Lists are hairline Rows; no cards.
+ * GRC360 by Strativu on strativu.com: a short overview (/products/grc360) and the early access / demo form
+ * (/products/grc360/early-access). Modules, security, frameworks and setup in full live on the GRC360 website (GRC_SITE);
+ * the early access and demo forms are on both sites.
  */
 
 const BODY = "mt-5 max-w-[52ch] text-[17px] leading-[1.65] text-ink-2";
@@ -80,208 +61,6 @@ function useAutoAdvance<T extends HTMLElement>(count: number, ms: number) {
   return { ref, idx, select, bind, reduce };
 }
 
-/* ── Module explorer: compact grid of names (left), selected module in a panel (right).
-   Advances on its own while on screen until the visitor interacts (see useAutoAdvance). ── */
-function ModuleExplorer() {
-  const az = useLang() === "az";
-  const { ref, idx, select, bind, reduce } = useAutoAdvance<HTMLDivElement>(grcModules.length, 3200);
-  const m = grcModules[idx];
-
-  return (
-    <div ref={ref} {...bind}>
-      <Split
-        sticky
-        visual={
-          <figure className="overflow-hidden rounded-[var(--r-xl)] border border-line bg-[color-mix(in_srgb,var(--surface)_97%,transparent)] shadow-[var(--e2)]">
-            <div className="flex items-center justify-between border-b border-line-soft px-6 py-3.5">
-              <span className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink-3">
-                {az ? "Modul" : "Module"} {String(idx + 1).padStart(2, "0")} / {grcModules.length}
-              </span>
-              {/* irəliləyiş: hansı modulda olduğunu göstərir */}
-              <span className="hidden gap-1 sm:flex" aria-hidden>
-                {grcModules.map((_, k) => (
-                  <span key={k} className={`h-1 w-3 rounded-full transition-colors ${k === idx ? "bg-brand" : "bg-line"}`} />
-                ))}
-              </span>
-            </div>
-            <div className="min-h-[300px] p-6 md:p-8">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={m.name}
-                  initial={reduce ? false : { opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <h3 className="t-h2 text-ink">{m.name}</h3>
-                  <p className="mt-4 text-[17px] leading-[1.6] text-ink-2">{az ? (grcAz.modules[m.name] ?? m.does) : m.does}</p>
-                  {m.screens.length > 0 && (
-                    <>
-                      <p className="mt-8 font-mono text-[11.5px] uppercase tracking-[0.12em] text-ink-3">{az ? "Ekranlar" : "Screens"}</p>
-                      <ul className="mt-3 flex flex-wrap gap-2">
-                        {m.screens.map((sc) => (
-                          <li key={sc} className="rounded-full border border-line px-3 py-1 text-[13px] text-ink-2">
-                            {sc}
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </figure>
-        }
-      >
-        <ul className="grid grid-cols-2 gap-x-6 border-t border-line">
-          {grcModules.map((mod, i) => {
-            const on = i === idx;
-            return (
-              <li key={mod.name} className="border-b border-line">
-                <button
-                  type="button"
-                  onClick={() => select(i)}
-                  aria-pressed={on}
-                  className="group flex w-full items-baseline gap-3 py-4 text-left"
-                >
-                  <span className={`font-mono text-[12px] transition-colors ${on ? "text-brand" : "text-ink-3"}`}>
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span
-                    className={`text-[15.5px] font-medium leading-[1.3] transition-colors ${
-                      on ? "text-ink" : "text-ink-2 group-hover:text-ink"
-                    }`}
-                  >
-                    {mod.name}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </Split>
-    </div>
-  );
-}
-
-/* ── Why GRC360: four points on the left (the open one shows its text), its illustration on the right.
-   Advances on its own while on screen until the visitor interacts (see useAutoAdvance). ── */
-const WHY = [
-  {
-    key: "links",
-    title: "Everything is linked",
-    body: "A risk is tied to the controls, policies, assets and requirements that treat it, scored 5×5 against your own risk appetite. No links kept by hand.",
-    az: {
-      title: "Hər şey bir-birinə bağlıdır",
-      body: "Risk onu müalicə edən nəzarət tədbirlərinə, siyasətlərə, aktivlərə və tələblərə birbaşa bağlıdır, öz risk iştahınıza görə 5×5 qiymətləndirilir. Əl ilə saxlanılan əlaqə yoxdur.",
-    },
-    visual: <RiskLinks />,
-  },
-  {
-    key: "frameworks",
-    title: "Any framework, as a package",
-    body: "Build a package in the product or import it from CSV. Compliance Analysis shows the gaps per requirement.",
-    az: {
-      title: "İstənilən framework, paket kimi",
-      body: "Paketi məhsulda qurun və ya CSV-dən idxal edin. Compliance Analysis hər tələb üzrə boşluqları göstərir.",
-      link: "İşlədiyimiz framework-lər (EN)",
-    },
-    visual: <ControlMap />,
-    link: { to: GRC.frameworks, label: "Frameworks we work with" },
-  },
-  {
-    key: "access",
-    title: "Your directory, a system log",
-    body: "Sign in with LDAP, Active Directory, OAuth or SAML. Permissions per module and action, checked on the server, and every change in a per-tenant log.",
-    az: {
-      title: "Sizin kataloq, sistem jurnalı",
-      body: "LDAP, Active Directory, OAuth və ya SAML ilə giriş. Hər modul və əməliyyat üzrə icazələr serverdə yoxlanılır, hər dəyişiklik müştəriyə aid jurnala yazılır.",
-    },
-    visual: <SystemLog />,
-  },
-  {
-    key: "deploy",
-    title: "Our cloud or your servers",
-    body: "On-premise and air-gapped for banks and public bodies, or a tenant in our cloud. In Azerbaijani and English, with the Personal Data Law (998-IIIQ) as a package.",
-    az: {
-      title: "Bizim bulud və ya sizin serverlər",
-      body: "Banklar və dövlət qurumları üçün on-premise və internetdən təcrid olunmuş quraşdırma, ya da bizim buludda ayrıca mühit. Azərbaycan və ingilis dilində, Fərdi məlumatlar haqqında qanun (998-IIIQ) paket kimi.",
-    },
-    visual: <DeployPanel stack={grcStack} />,
-  },
-];
-
-function WhyTabs() {
-  const az = useLang() === "az";
-  const { ref, idx, select, bind, reduce } = useAutoAdvance<HTMLDivElement>(WHY.length, 6000);
-  const w = WHY[idx];
-  return (
-    <div ref={ref} {...bind}>
-      <Split
-        sticky
-        visual={
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={w.key}
-              initial={reduce ? false : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {w.visual}
-            </motion.div>
-          </AnimatePresence>
-        }
-      >
-        <ul className="border-t border-line">
-          {WHY.map((item, i) => {
-            const on = i === idx;
-            return (
-              <li key={item.key} className="relative border-b border-line">
-                {on && <motion.span layoutId="why-bar" aria-hidden className="absolute -top-px left-0 h-[2px] w-full bg-brand" />}
-                <button
-                  type="button"
-                  onClick={() => select(i)}
-                  aria-expanded={on}
-                  className="group flex w-full items-baseline gap-4 py-5 text-left"
-                >
-                  <span className={`font-mono text-[12px] transition-colors ${on ? "text-brand" : "text-ink-3"}`}>
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className={`t-h3 transition-colors ${on ? "text-ink" : "text-ink-2 group-hover:text-ink"}`}>{az ? item.az.title : item.title}</span>
-                </button>
-                <AnimatePresence initial={false}>
-                  {on && (
-                    <motion.div
-                      initial={reduce ? false : { height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                      className="overflow-hidden"
-                    >
-                      <div className="pb-6 pl-9">
-                        <p className="max-w-[48ch] text-[16px] leading-[1.6] text-ink-2">{az ? item.az.body : item.body}</p>
-                        {item.link && (
-                          <div className="mt-4">
-                            <TextLink to={item.link.to}>{az ? (item.az.link ?? item.link.label) : item.link.label}</TextLink>
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </li>
-            );
-          })}
-        </ul>
-      </Split>
-    </div>
-  );
-}
-
-/* ── Screens from the product: tabs on top, the selected screen below.
-   Advances on its own until the visitor interacts (see useAutoAdvance).
-   Responsive WebP (srcset); only the next screen is fetched, after the current one has loaded and the page is idle. ── */
 function ScreenGallery() {
   const az = useLang() === "az";
   const { ref, idx, select, bind, reduce } = useAutoAdvance<HTMLElement>(grcScreens.length, 4200);
@@ -358,9 +137,54 @@ function ScreenGallery() {
   );
 }
 
+/** Four points from the GRC360 landing page; the modules, security and setup in full live on the GRC360 website. */
+const POINTS = [
+  {
+    title: { en: "One risk register", az: "Bir risk reyestri" },
+    body: {
+      en: "Asset, business and third-party risks with an owner, controls, a treatment plan and your own risk matrix.",
+      az: "Aktiv, biznes və üçüncü tərəf riskləri: sahibi, nəzarətləri, müalicə planı və təşkilatın öz risk matrisi ilə.",
+    },
+  },
+  {
+    title: { en: "Approvals with a history", az: "Tarixçəsi olan təsdiqlər" },
+    body: {
+      en: "Exceptions approved step by step: who, when and with what comment, with reminders before the deadline.",
+      az: "İstisnalar addım-addım təsdiqlənir: kim, nə vaxt, hansı şərhlə; vaxt bitməzdən əvvəl xatırlatma.",
+    },
+  },
+  {
+    title: { en: "Compliance as packages", az: "Paket kimi uyğunluq" },
+    body: {
+      en: "ISO 27001, PCI DSS, NIST CSF, GDPR, the Personal Data Law, regulator requirements or your own policies, assessed requirement by requirement.",
+      az: "ISO 27001, PCI DSS, NIST CSF, GDPR, Fərdi məlumatlar haqqında qanun, tənzimləyici tələbləri və ya daxili siyasətlər, tələb-tələb qiymətləndirilir.",
+    },
+  },
+  {
+    title: { en: "Your data stays with you", az: "Məlumat sizdə qalır" },
+    body: {
+      en: "On your own servers or in an in-country data centre, with MFA, SSO and every action logged.",
+      az: "Öz serverlərinizdə və ya ölkədaxili məlumat mərkəzində; MFA, SSO və hər əməliyyatın jurnalı ilə.",
+    },
+  },
+];
+
 export function Grc360() {
-  const az = useLang() === "az";
+  const lang = useLang();
+  const az = lang === "az";
   const rel = az ? grcAz.release : grcRelease;
+  const site = az ? GRC_SITE.az : GRC_SITE.en;
+  const t = (p: { en: string; az: string }) => p[lang];
+  const ctas = (
+    <>
+      <Btn to={`${GRC.earlyAccess}?type=early-access`} size="lg">
+        {az ? "Erkən giriş istəyin" : "Request early access"}
+      </Btn>
+      <Btn to={`${GRC.earlyAccess}?type=demo`} size="lg" variant="secondary">
+        {az ? "Demo sifariş edin" : "Book a demo"}
+      </Btn>
+    </>
+  );
   return (
     <>
       <PageHeader
@@ -369,15 +193,13 @@ export function Grc360() {
         title={az ? "Risk, uyğunluq və audit. Bir platformada." : "Risk, compliance and audit. In one platform."}
         lead={
           az
-            ? "GRC360 by Strativu risk reyestrlərini, nəzarətləri, siyasətləri, auditləri və tənzimləyici öhdəlikləri on iki bağlı modulda, Azərbaycan və ingilis dilində bir yerə yığır. Öz serverlərinizdə və ya ölkədaxili məlumat mərkəzində işləyir; hostinq versiyası da var."
-            : "GRC360 by Strativu brings risk registers, controls, policies, audits and regulatory obligations into twelve connected modules, in Azerbaijani and English. It runs on your own servers or in an in-country data centre; a hosted version is also available."
+            ? "GRC360 by Strativu risk reyestrlərini, nəzarətləri, siyasətləri, auditləri və tənzimləyici öhdəlikləri Azərbaycan və ingilis dilində bir yerə yığır. Öz serverlərinizdə və ya ölkədaxili məlumat mərkəzində işləyir; hostinq versiyası da var."
+            : "GRC360 by Strativu brings risk registers, controls, policies, audits and regulatory obligations into one place, in Azerbaijani and English. It runs on your own servers or in an in-country data centre; a hosted version is also available."
         }
       >
-        <div className="flex flex-wrap items-center gap-x-7 gap-y-4">
-          <Btn to={GRC.earlyAccess} size="lg">
-            {az ? "Demo sifariş edin" : "Book a demo"}
-          </Btn>
-          <TextLink href={az ? GRC_SITE.az : GRC_SITE.en}>{az ? "GRC360 saytı" : "GRC360 website"}</TextLink>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-4">{ctas}</div>
+        <div className="mt-6">
+          <TextLink href={site}>{az ? "GRC360 saytı: modullar, təhlükəsizlik, quraşdırma" : "GRC360 website: modules, security, setup"}</TextLink>
         </div>
       </PageHeader>
 
@@ -412,181 +234,46 @@ export function Grc360() {
         </div>
       </Section>
 
-      {/* Figures — only numbers verified in the product */}
-      <Section className="pt-0 md:pt-0">
-        <div>
-          <dl className="grid grid-cols-2 gap-x-8 gap-y-10 border-t border-line pt-10 lg:grid-cols-4">
-            {grcFigures.map((f, i) => (
-              <Reveal key={f.label} delay={i * 0.06}>
-                <dt className="sr-only">{az ? grcAz.figures.at(i) : f.label}</dt>
-                <dd>
-                  <span className="block text-[clamp(44px,5vw,72px)] font-semibold leading-none tracking-[-0.04em] text-ink">
-                    {f.value}
-                    {f.suffix}
-                  </span>
-                  <span aria-hidden className="mt-3 block font-mono text-[12px] uppercase leading-[1.5] tracking-[0.12em] text-ink-3">
-                    {az ? grcAz.figures.at(i)?.toLocaleUpperCase("az") : f.label}
-                  </span>
-                </dd>
-              </Reveal>
-            ))}
-          </dl>
-        </div>
-      </Section>
-
-      {/* Modules */}
-      <Section id="modules" className="pt-0 md:pt-0">
-        <Duo
-          head={
-            <Reveal>
-              <Eyebrow>{az ? "Modullar" : "Modules"}</Eyebrow>
-              <h2 className="t-h2 text-ink">{az ? "On iki modul. Altında bir model." : "Twelve modules. One model underneath."}</h2>
-            </Reveal>
-          }
-        >
-          <Reveal>
-            <p className={BODY_R}>
-              {az
-                ? "Hər modul eyni qeydləri oxuyur və yazır. Ona görə risk, təsir etdiyi aktiv, onu müalicə edən nəzarət tədbiri və onu yoxlayan audit tapıntısı bir-birinə bağlı qalır. Cəmi otuz bir ekran."
-                : "Every module reads and writes the same records, so a risk, the asset it affects, the control that treats it and the audit finding that tests it stay linked. Thirty-one screens in all."}
-            </p>
-          </Reveal>
-        </Duo>
-        <Reveal className="mt-12">
-          <ModuleExplorer />
-        </Reveal>
-      </Section>
-
-      {/* Why GRC360: four points as tabs, each with its own illustration */}
-      <Section id="why" className="pt-0 md:pt-0">
-        <Reveal>
-          <Eyebrow>{az ? "Niyə GRC360" : "Why GRC360"}</Eyebrow>
-          <h2 className="t-h2 max-w-[20ch] text-ink">{az ? "Auditorlara hesabat verən komandalar üçün." : "Built for teams that answer to auditors."}</h2>
-        </Reveal>
-        <Reveal className="mt-12">
-          <WhyTabs />
-        </Reveal>
-      </Section>
-
-      <Section id="status" className="pt-0 md:pt-0">
-        <Duo
-          head={
-            <Reveal>
-              <Eyebrow>{az ? "Hazırkı vəziyyət" : "Where it stands"}</Eyebrow>
-              <h2 className="t-h2 text-ink">{az ? "Açıq şəkildə qurulur." : "Built in the open."}</h2>
-              <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
-                <Btn to={GRC.earlyAccess} size="lg">
-                  {az ? "Demo sifariş edin" : "Book a demo"}
-                </Btn>
-                <TextLink to={GRC.changelog}>{az ? "Dəyişiklik jurnalı (EN)" : "Build log"}</TextLink>
-              </div>
-            </Reveal>
-          }
-        >
-          <Rows headingLevel={3} items={(az ? grcAz.status : grcStatus).map((st) => ({ title: st.k, body: st.v }))} />
-        </Duo>
-      </Section>
-    </>
-  );
-}
-
-const ARCH: { h: string; p: ReactNode[] }[] = [
-  {
-    h: "Deployment",
-    p: [
-      "On your own servers or in an in-country data centre, air-gapped if needed; a hosted, multi-tenant version is also available.",
-      `The on-premise build is a Docker Compose stack: ${grcStack.join(", ")}.`,
-    ],
-  },
-  {
-    h: "Tenant isolation",
-    p: ["Every record is scoped to a tenant at the query level, and cross-tenant access is covered by regression tests. One customer’s data is never returned to another."],
-  },
-  {
-    h: "Sign-in and sessions",
-    p: [
-      "Email and password, LDAP or Active Directory, OAuth and SAML single sign-on. Passwords are stored as BCrypt hashes; connector secrets such as LDAP service-account passwords are stored encrypted and never returned by the API.",
-      "Access tokens are short-lived and the refresh token lives in an HttpOnly cookie that scripts cannot read. Idle sessions are warned and then ended, and a user can end all of their sessions at once.",
-    ],
-  },
-  {
-    h: "Permissions",
-    p: ["Permissions are granted per module and per action (view, create, edit, delete) through roles, users, departments and groups. Every API endpoint checks them on the server; hiding a button is never the only barrier."],
-  },
-  {
-    h: "System log",
-    p: ["Creates, updates, deletes, sign-ins and permission changes are written to a per-tenant system log with the acting user and a timestamp."],
-  },
-  {
-    h: "API",
-    p: ["The web application is a client of a REST API with more than 600 endpoints. CSV import and export work on every register. A full OpenAPI contract is in progress."],
-  },
-];
-
-/** Section id = heading lowercased, spaces to "-" (kept stable for #anchor links). */
-const slug = (h: string) => h.toLowerCase().replace(/\s+/g, "-");
-
-export function Architecture() {
-  return (
-    <>
-      <PageHeader
-        top={<Grc360Nav />}
-        eyebrow="Architecture"
-        title="How GRC360 is built."
-        lead="Written for the engineer doing the vendor review. Until we have a SOC 2 report, this is what we can show."
+      <ProductPoints
+        eyebrow={az ? "Nə edir" : "What it does"}
+        title={az ? "GRC360 bir baxışda." : "GRC360 at a glance."}
+        items={POINTS.map((p) => ({ title: t(p.title), body: t(p.body) }))}
       />
 
-      <div className="pb-24 pt-4 md:pb-36 md:pt-8">
-        <Container>
-          <div className="border-b border-line">
-            {ARCH.map((a, i) => (
-              <section key={a.h} id={slug(a.h)} className="scroll-mt-24 border-t border-line py-10 md:py-12">
-                <Reveal className="grid grid-cols-[48px_1fr] gap-x-4 gap-y-4 md:grid-cols-[64px_1fr] lg:grid-cols-[64px_minmax(0,4fr)_minmax(0,7fr)] lg:gap-x-12">
-                  <span className="pt-1.5 font-mono text-[13px] text-ink-3">{String(i + 1).padStart(2, "0")}</span>
-                  <h2 className="t-h3 text-ink">{a.h}</h2>
-                  <div className="col-start-2 min-w-0 lg:col-start-3">
-                    {a.p.map((t, j) => (
-                      <p key={j} className={`${j ? "mt-4" : ""} max-w-[60ch] text-[16.5px] leading-[1.7] text-ink-2`}>
-                        {t}
-                      </p>
-                    ))}
-                  </div>
-                </Reveal>
-              </section>
-            ))}
-          </div>
-          <Reveal className="mt-10">
-            <TextLink to="/trust">Certifications we are pursuing</TextLink>
-          </Reveal>
-        </Container>
-      </div>
-    </>
-  );
-}
+      <ProductFigures
+        lang={lang}
+        items={grcFigures.map((f, i) => ({ value: `${f.value}${f.suffix ?? ""}`, label: az ? (grcAz.figures.at(i) ?? f.label) : f.label }))}
+      />
 
-export function Changelog() {
-  return (
-    <>
-      <PageHeader top={<Grc360Nav />} eyebrow="Changelog" title="Public build log." lead="What changed in GRC360 and why, with real dates." />
-      <Section className="pt-0 md:pt-0">
-        <ChangelogList />
-      </Section>
+      <ProductClosing
+        title={az ? "GRC360 2027-ci ilin yanvarında açılır." : "GRC360 opens in January 2027."}
+        body={
+          az
+            ? "Erkən girişə yazılın və ya demonu sifariş edin. Modullar, təhlükəsizlik və quraşdırma barədə hər şey GRC360 saytındadır."
+            : "Request early access or book a demo. Everything about the modules, security and setup is on the GRC360 website."
+        }
+      >
+        {ctas}
+        <TextLink href={site}>{az ? "GRC360 saytı" : "GRC360 website"}</TextLink>
+      </ProductClosing>
     </>
   );
 }
 
 export function EarlyAccess() {
   const az = useLang() === "az";
+  const rel = az ? grcAz.release : grcRelease;
+  const site = az ? GRC_SITE.az : GRC_SITE.en;
   return (
     <>
       <PageHeader
         top={<Grc360Nav />}
-        eyebrow="GRC360 · Demo"
-        title={az ? "GRC360-ı öz proseslərinizlə görün." : "See GRC360 with your own processes."}
+        eyebrow={`${rel.label} · ${rel.detail}`}
+        title={az ? "Erkən giriş və ya demo." : "Early access or a demo."}
         lead={
           az
-            ? "Təşkilatınız barədə qısa yazın. Demonu risk və uyğunluq prosesinizə uyğun quraq, sonra növbəti addımları birlikdə razılaşdıraq."
-            : "Tell us a little about your organisation. We set up the demo around your risk and compliance process, then agree the next steps with you."
+            ? "GRC360 2027-ci ilin yanvarında açılır. Erkən girişə yazılın və ya demonu sifariş edin: formda birini seçin."
+            : "GRC360 opens in January 2027. Request early access or book a demo: choose one in the form."
         }
       />
       <Section className="pt-0 md:pt-0" logoHide>
@@ -597,51 +284,43 @@ export function EarlyAccess() {
               headingLevel={2}
               items={[
                 {
+                  title: az ? "Erkən giriş" : "Early access",
+                  body: az
+                    ? "Yanvardan: öz iş mühitiniz, mühəndislərimizlə birbaşa əlaqə və sizə lazım olan framework-lərə üstünlük. Erkən giriş müddətində ödəniş yoxdur."
+                    : "From January: your own workspace, direct contact with our engineers and priority for the frameworks you need. No cost during early access.",
+                },
+                {
+                  title: az ? "Demo" : "Demo",
+                  body: az
+                    ? "Platformanı proseslərinizə uyğun ssenari ilə göstəririk. Qiymət quraşdırma növündən və təşkilatın ölçüsündən asılıdır; təklifi demodan sonra hazırlayırıq."
+                    : "We show the platform with a scenario built around your processes. Pricing depends on the type of installation and the size of your organisation; we prepare a quote after the demo.",
+                },
+                {
                   title: az ? "Kimlər üçündür" : "Who it is for",
-                  body: az ? (
-                    <>
-                      Banklar və maliyyə, dövlət qurumları, telekom və enerji şirkətləri və holdinqlər: ISO 27001, PCI DSS, Fərdi
-                      məlumatlar haqqında qanun, tənzimləyici tələbləri və ya{" "}
-                      <Link to={GRC.frameworks} className={INLINE_LINK}>
-                        siyahımızdakı
-                      </Link>{" "}
-                      başqa framework üzrə işləyən təhlükəsizlik, risk və uyğunluq komandaları.
-                    </>
-                  ) : (
-                    <>
-                      Security, risk and compliance teams at banks, government, telecom and energy companies and holding groups,
-                      working to ISO 27001, PCI DSS, Azerbaijan’s Personal Data Law, regulator requirements or another framework on our{" "}
-                      <Link to={GRC.frameworks} className={INLINE_LINK}>
-                        frameworks list
-                      </Link>
-                      .
-                    </>
-                  ),
-                },
-                {
-                  title: az ? "Demodan istifadəyə qədər" : "From demo to go-live",
                   body: az
-                    ? "Demo: platformanı proseslərinizə uyğun ssenari ilə göstəririk və tələbləri birlikdə razılaşdırırıq. Quraşdırma və köçürmə: GRC360-ı serverlərinizdə qururuq, mövcud reyestrlərinizi Excel və CSV şablonları ilə köçürürük. Təlim və dəstək: komandanızı öyrədirik, sonra Azərbaycan və ingilis dilində dəstək veririk."
-                    : "Demo: we show the platform with a scenario built around your processes and agree the requirements with you. Installation and migration: we install GRC360 on your servers and move your existing registers in with Excel and CSV templates. Training and support: we train your team, then support you in Azerbaijani and English.",
-                },
-                {
-                  title: az ? "Qiymət" : "Pricing",
-                  body: az
-                    ? "Quraşdırma növündən və təşkilatınızın ölçüsündən asılıdır. Təklifi demodan sonra hazırlayırıq."
-                    : "It depends on the type of installation and the size of your organisation. We prepare a quote after the demo.",
+                    ? "Banklar və maliyyə, dövlət qurumları, telekom və enerji şirkətləri və holdinqlərdə təhlükəsizlik, risk və uyğunluq komandaları."
+                    : "Security, risk and compliance teams at banks, government, telecom and energy companies and holding groups.",
                 },
                 {
                   title: az ? "Sonra nə olur" : "What happens next",
-                  body: az
-                    ? "Komandamızdan bir nəfər beş iş günü ərzində cavab verir və demonun vaxtını sizinlə razılaşdırır."
-                    : "A person from our team replies within five working days and agrees a time for the demo with you.",
+                  body: (
+                    <>
+                      {az
+                        ? "Komandamızdan bir nəfər beş iş günü ərzində cavab verir. Eyni formlar "
+                        : "A person from our team replies within five working days. The same forms are also on the "}
+                      <a href={site} target="_blank" rel="noreferrer" className={INLINE_LINK}>
+                        {az ? "GRC360 saytında" : "GRC360 website"}
+                      </a>
+                      {az ? " da var." : "."}
+                    </>
+                  ),
                 },
               ]}
             />
           }
         >
           <Reveal>
-            <Eyebrow>{az ? "Demo sifarişi" : "Book a demo"}</Eyebrow>
+            <Eyebrow>{az ? "Sorğu" : "Your request"}</Eyebrow>
           </Reveal>
           <Reveal delay={0.06} className="mt-8">
             <EarlyAccessForm />

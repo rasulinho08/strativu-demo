@@ -11,18 +11,14 @@ import { NotFound } from "./pages/NotFound";
  */
 const productsPage = () => import("./pages/Products");
 const grc360 = () => import("./pages/Grc360");
-const coverage = () => import("./pages/Coverage");
 const company = () => import("./pages/Company");
 const contact = () => import("./pages/Contact");
 const legal = () => import("./pages/Legal");
 const aiProxy = () => import("./pages/AiProxy");
+const productSite = () => import("./pages/ProductSite");
 const Products = lazy(() => productsPage().then((m) => ({ default: m.Products })));
 const Grc360 = lazy(() => grc360().then((m) => ({ default: m.Grc360 })));
-const Architecture = lazy(() => grc360().then((m) => ({ default: m.Architecture })));
-const Changelog = lazy(() => grc360().then((m) => ({ default: m.Changelog })));
 const EarlyAccess = lazy(() => grc360().then((m) => ({ default: m.EarlyAccess })));
-const Coverage = lazy(() => coverage().then((m) => ({ default: m.Coverage })));
-const FrameworkPage = lazy(() => coverage().then((m) => ({ default: m.FrameworkPage })));
 const About = lazy(() => company().then((m) => ({ default: m.About })));
 const Trust = lazy(() => company().then((m) => ({ default: m.Trust })));
 const Contact = lazy(() => contact().then((m) => ({ default: m.Contact })));
@@ -31,12 +27,8 @@ const Privacy = lazy(() => legal().then((m) => ({ default: m.Privacy })));
 const Terms = lazy(() => legal().then((m) => ({ default: m.Terms })));
 const Cookies = lazy(() => legal().then((m) => ({ default: m.Cookies })));
 const AiProxy = lazy(() => aiProxy().then((m) => ({ default: m.AiProxy })));
-
-/** /coverage/:slug → /products/grc360/frameworks/:slug (client-side twin of the vercel.json redirect). */
-function LegacyFramework() {
-  const { slug } = useParams();
-  return <Navigate to={`/products/grc360/frameworks/${slug ?? ""}`} replace />;
-}
+const HackOS = lazy(() => productSite().then((m) => ({ default: m.HackOS })));
+const UniAz = lazy(() => productSite().then((m) => ({ default: m.UniAz })));
 
 export default function App() {
   return (
@@ -49,12 +41,14 @@ export default function App() {
           <Route path="/products" element={<Products />} />
           {/* GRC360 by Strativu — interim product site (not in the main nav); paths also in data/grc360.ts → GRC */}
           <Route path="/products/grc360" element={<Grc360 />} />
-          <Route path="/products/grc360/architecture" element={<Architecture />} />
-          <Route path="/products/grc360/frameworks" element={<Coverage />} />
-          <Route path="/products/grc360/frameworks/:slug" element={<FrameworkPage />} />
-          <Route path="/products/grc360/changelog" element={<Changelog />} />
           <Route path="/products/grc360/early-access" element={<EarlyAccess />} />
           <Route path="/products/ai-proxy" element={<AiProxy />} />
+          <Route path="/products/hackos" element={<HackOS />} />
+          <Route path="/products/uniaz" element={<UniAz />} />
+          {/* GRC360 details moved to the GRC360 website; old pages land on the overview. */}
+          <Route path="/products/grc360/architecture" element={<Navigate to="/products/grc360" replace />} />
+          <Route path="/products/grc360/frameworks/*" element={<Navigate to="/products/grc360" replace />} />
+          <Route path="/products/grc360/changelog" element={<Navigate to="/products/grc360" replace />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/contact/thank-you" element={<ContactThanks />} />
@@ -68,10 +62,9 @@ export default function App() {
           <Route path="/company/contact" element={<Navigate to="/contact" replace />} />
           <Route path="/platform" element={<Navigate to="/products" replace />} />
           <Route path="/platform/grc" element={<Navigate to="/products/grc360" replace />} />
-          <Route path="/platform/architecture" element={<Navigate to="/products/grc360/architecture" replace />} />
-          <Route path="/coverage" element={<Navigate to="/products/grc360/frameworks" replace />} />
-          <Route path="/coverage/:slug" element={<LegacyFramework />} />
-          <Route path="/changelog" element={<Navigate to="/products/grc360/changelog" replace />} />
+          <Route path="/platform/architecture" element={<Navigate to="/products/grc360" replace />} />
+          <Route path="/coverage/*" element={<Navigate to="/products/grc360" replace />} />
+          <Route path="/changelog" element={<Navigate to="/products/grc360" replace />} />
           <Route path="/early-access" element={<Navigate to="/products/grc360/early-access" replace />} />
           <Route path="/pricing" element={<Navigate to="/products/grc360/early-access" replace />} />
           <Route path="/work" element={<Navigate to="/products" replace />} />
@@ -82,6 +75,8 @@ export default function App() {
           <Route path="/az" element={<Home />} />
           <Route path="/az/products" element={<Products />} />
           <Route path="/az/products/ai-proxy" element={<AiProxy />} />
+          <Route path="/az/products/hackos" element={<HackOS />} />
+          <Route path="/az/products/uniaz" element={<UniAz />} />
           <Route path="/az/products/grc360" element={<Grc360 />} />
           <Route path="/az/products/grc360/early-access" element={<EarlyAccess />} />
           <Route path="/az/about" element={<About />} />

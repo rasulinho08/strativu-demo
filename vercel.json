@@ -27,22 +27,22 @@
     },
     {
       "source": "/platform/architecture",
-      "destination": "/products/grc360/architecture",
+      "destination": "/products/grc360",
       "permanent": true
     },
     {
       "source": "/coverage",
-      "destination": "/products/grc360/frameworks",
+      "destination": "/products/grc360",
       "permanent": true
     },
     {
       "source": "/coverage/:slug",
-      "destination": "/products/grc360/frameworks/:slug",
+      "destination": "/products/grc360",
       "permanent": true
     },
     {
       "source": "/changelog",
-      "destination": "/products/grc360/changelog",
+      "destination": "/products/grc360",
       "permanent": true
     },
     {
@@ -83,6 +83,26 @@
     {
       "source": "/az/products/cipher",
       "destination": "/az/products/ai-proxy",
+      "permanent": true
+    },
+    {
+      "source": "/products/grc360/architecture",
+      "destination": "/products/grc360",
+      "permanent": true
+    },
+    {
+      "source": "/products/grc360/frameworks",
+      "destination": "/products/grc360",
+      "permanent": true
+    },
+    {
+      "source": "/products/grc360/frameworks/:slug",
+      "destination": "/products/grc360",
+      "permanent": true
+    },
+    {
+      "source": "/products/grc360/changelog",
+      "destination": "/products/grc360",
       "permanent": true
     }
   ],

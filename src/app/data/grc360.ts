@@ -17,15 +17,11 @@ export const GRC_SITE = { en: "https://landinggrc1.vercel.app/en/", az: "https:/
 /** GRC360 səhifələrinin ünvanları (bir yerdə; App.tsx, linklər və meta.ts bunu istifadə edir). */
 export const GRC = {
   base: "/products/grc360",
-  architecture: "/products/grc360/architecture",
-  frameworks: "/products/grc360/frameworks",
-  changelog: "/products/grc360/changelog",
   earlyAccess: "/products/grc360/early-access",
 } as const;
-export const frameworkPath = (slug: string) => `${GRC.frameworks}/${slug}`;
 
 /** Status sətri (GRC360 səhifələrində). products.ts-dəki GRC360 kartı ilə uyğun saxlayın. */
-export const grcRelease = { label: "Available", detail: "Demo on request" };
+export const grcRelease = { label: "Early access", detail: "Opens January 2027" };
 
 /** 40 saniyəlik məhsul filmi (GRC360 səhifəsində). */
 export const grcFilm = {
@@ -151,7 +147,7 @@ export const grcStatus = [
  * Modul və ekran adları məhsulun interfeysindəki kimi ingiliscə qalır; təsvirlər tərcümə olunub.
  */
 export const grcAz = {
-  release: { label: "Mövcuddur", detail: "Demo sorğu ilə" },
+  release: { label: "Erkən giriş", detail: "2027-ci ilin yanvarında açılır" },
   modules: {
     "Command Center":
       "Gecikmiş, bugünkü və gələcək tapşırıqlar, aktiv, biznes və üçüncü tərəf risklərinin istilik xəritələri və uyğunluq vəziyyəti bir ekranda.",

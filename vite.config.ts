@@ -77,10 +77,10 @@ function setMeta(html: string, attr: "name" | "property", key: string, value: st
  */
 /** Which page file serves which route (for <link rel="modulepreload"> on the route's static HTML). */
 const PAGE_FOR_ROUTE: [RegExp, string][] = [
-  [/^\/products\/grc360\/frameworks(\/|$)/, "src/app/pages/Coverage.tsx"],
   [/^\/products\/grc360(\/|$)/, "src/app/pages/Grc360.tsx"],
   [/^\/products$/, "src/app/pages/Products.tsx"],
   [/^\/products\/ai-proxy$/, "src/app/pages/AiProxy.tsx"],
+  [/^\/products\/(hackos|uniaz)$/, "src/app/pages/ProductSite.tsx"],
   [/^\/(about|trust)$/, "src/app/pages/Company.tsx"],
   [/^\/contact(\/|$)/, "src/app/pages/Contact.tsx"],
   [/^\/(privacy|terms|cookies)$/, "src/app/pages/Legal.tsx"],

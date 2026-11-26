@@ -3,7 +3,7 @@ import { Duo, Eyebrow, PageHeader, Rows, Section, TextLink } from "../components
 import { Reveal } from "../components/site/Reveal";
 import { InstagramFeed } from "../components/site/InstagramFeed";
 import { site } from "../data/site";
-import { GRC } from "../data/grc360";
+import { GRC_SITE } from "../data/grc360";
 import { Split, SystemLog } from "../components/site/Visuals";
 import { useT } from "../i18n";
 
@@ -187,9 +187,9 @@ export function Trust() {
                 body: (
                   <>
                     Tenant isolation at the query level, covered by regression tests; permissions per module and action, checked on the server; and a per-tenant system log.{" "}
-                    <Link to={GRC.architecture} className={INLINE_LINK}>
-                      Architecture notes
-                    </Link>
+                    <a href={`${GRC_SITE.en}#security`} target="_blank" rel="noreferrer" className={INLINE_LINK}>
+                      Security on the GRC360 website
+                    </a>
                   </>
                 ),
               },
